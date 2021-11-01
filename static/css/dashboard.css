@@ -1,0 +1,70 @@
+body {
+  background-color: #ffffff;
+}
+
+.dashboard {
+  background-color: #f3f2f1;
+  box-shadow: 2px -1px 18px -1px rgb(0 0 0 / 75%);
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+* {
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+  color: #05410f;
+}
+
+.header {
+  box-shadow: 2px 2px 18px 0px rgb(0 0 0 / 75%);
+  background-color: #ffffff;
+}
+
+.thumbnail {
+  padding: 0 0 15px 0;
+  border: none;
+  border-radius: 0;
+}
+.thumbnail p {
+  margin-top: 15px;
+  color: #555;
+}
+
+.list-group-item a {
+  text-decoration: none;
+  color: #000;
+  font-weight: 600;
+}
+
+.btn-circle.btn-xl {
+  width: 70px;
+  height: 70px;
+  padding: 10px 16px;
+  border-radius: 35px;
+  font-size: 24px;
+  line-height: 1.33;
+}
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  padding: 6px 0px;
+  border-radius: 15px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.42857;
+  outline: 0 !important;
+  margin-top: 0px;
+}
+
+#tbl_activities td {
+  padding: 2px !important;
+}
+
+.activity-panel {
+  background-color: #ffffff;
+  border-top: 1px solid #dcdcdc;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}

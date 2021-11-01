@@ -1,0 +1,27 @@
+__pycache__/
+
+# Unit test
+.pytest_cache/
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Environments
+.env.local
+.venv
+env/
+
+
+# VS Code stuff
+.vscode/
+
+
+# Migrations
+migrations/*
+
+# media
+app/media/*
+
+

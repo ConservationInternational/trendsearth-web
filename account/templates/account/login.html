@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
+<div class="login">
+    <div class="d-flex vh-100">
+        <div class="d-flex w-100 justify-content-center align-self-center">
+            <div id="container">
+                <div id="content" class="colM">
+                    <div id="content-main">
+                        <div class="row">
+                            <div class="col-md-7 border-r">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <img src="{% static 'images/trends_earth_logo_square_32x32.png' %}"
+                                            width="32px">
+                                    </div>
+                                    <div class="col-md-8"
+                                        style="font-weight: 700; font-size: 25px; letter-spacing: 2px;">
+                                        <p style="line-height: 50%;">
+                                            WELCOME
+                                            TO</p>
+                                        <p style="color: #dc3545; line-height: 50%;">TRENDS.EARTH</p>
+                                    </div>
+                                </div>
+                                <hr style="background-color:#dc3545; margin-bottom: 20px;">
+                                {% if messages %}
+                                <ul class="messages">
+                                    {% for message in messages %}
+                                    <p{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</p>
+                                        {% endfor %}
+                                </ul>
+                                {% endif %}
+                                <form method="post" id="login-form">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-md-11 mb-3">
+                                            <label for="id_email" class="form-label">Email Address</label>
+                                            <span class="required">*</span>
+                                            <input type="email" class="form-control" name="email" id="id_email"
+                                                placeholder="Your Email" required="true" autofocus=""
+                                                autocapitalize="none" autocomplete="email">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-11 mb-3">
+                                            <label for="id_password" class="form-label">Password</label>
+                                            <span class="required">*</span>
+                                            <input type="password" class="form-control" name="password" id="id_password"
+                                                placeholder="Your password" required="true"
+                                                autocomplete="current-password">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        {% if request.GET.next %}
+                                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-11 mb-3">
+                                            <button type="submit" class="btn btn-danger">SIGN IN</button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div class="row text-center">
+                                    <span>Forgot your password? <a href="/reset-password"
+                                            style="color: #dc3545; font-weight: 600;">Reset Password</a></span>
+                                </div>
+
+
+                            </div>
+                            <div class="col-md-5" style="background-color: #000; color: #fff;">
+                                <div class="row">
+                                    <div class="col-md-12 text-center">
+                                        <img src="{% static 'images/trends_earth_logo_square_32x32.png' %}"
+                                            width="32px">
+
+                                        <p
+                                            style="line-height: 50%; font-weight: 700; font-size: 25px; letter-spacing: 2px; margin-top: 30px;">
+                                            TRENDS.EARTH</p>
+                                    </div>
+                                </div>
+                                <div class="group">
+                                    <div class="item line"></div>
+                                    <div class="item text">Don't have an account yet?</div>
+                                    <div class="item line"></div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <a class="btn btn-danger" href="/register" role="button">Sign Up</a>
+                                </div>
+                                <br />
+                                <div class="row">
+                                    <div class="col-md-12" style="text-align: center; margin-top: 70px;">
+                                        &copy; {% now 'Y' %} Conservation International &nbsp;&nbsp; | &nbsp;&nbsp;
+                                        Trends.Earth
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br class="clear">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
