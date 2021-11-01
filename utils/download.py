@@ -2,8 +2,8 @@
 """
 /***************************************************************************
  LDMP - A QGIS plugin
- This plugin supports monitoring and reporting of land degradation to the UNCCD 
- and in support of the SDG Land Degradation Neutrality (LDN) target.
+ This plugin supports monitoring and reporting of land degradation to the
+ UNCCD and in support of the SDG Land Degradation Neutrality (LDN) target.
                               -------------------
         begin                : 2017-05-23
         git sha              : $Format:%H$
