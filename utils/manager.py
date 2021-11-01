@@ -28,7 +28,7 @@ from .logger import log
 
 def slugify(value, allow_unicode=False):
     """
-    Taken from 
+    Taken from
     https://github.com/django/django/blob/master/django/utils/text.py
     Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
     dashes to single dashes. Remove characters that aren't alphanumerics,
@@ -95,32 +95,38 @@ class JobManager(object):
     @property
     def running_jobs_dir(self) -> Path:
         return Path(
-            conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / "running-jobs"
+            conf.settings_manager
+                .get_value(conf.Setting.BASE_DIR)) / "running-jobs"
 
     @property
     def finished_jobs_dir(self) -> Path:
         return Path(
-            conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / "finished-jobs"
+            conf.settings_manager
+                .get_value(conf.Setting.BASE_DIR)) / "finished-jobs"
 
     @property
     def failed_jobs_dir(self) -> Path:
         return Path(
-            conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / "failed-jobs"
+            conf.settings_manager
+            .get_value(conf.Setting.BASE_DIR)) / "failed-jobs"
 
     @property
     def deleted_jobs_dir(self) -> Path:
         return Path(
-            conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / "deleted-jobs"
+            conf.settings_manager
+            .get_value(conf.Setting.BASE_DIR)) / "deleted-jobs"
 
     @property
     def datasets_dir(self) -> Path:
         return Path(
-            conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / "datasets"
+            conf.settings_manager
+            .get_value(conf.Setting.BASE_DIR)) / "datasets"
 
     @property
     def exports_dir(self) -> Path:
         return Path(
-            conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / \
+            conf.settings_manager
+            .get_value(conf.Setting.BASE_DIR)) / \
             "exported"
 
     @classmethod
@@ -144,12 +150,13 @@ class JobManager(object):
         self._known_downloaded_jobs = {}
 
     def refresh_local_state(self):
-        """Update dataset manager's in-memory cache by scanning the local filesystem
+        """Update dataset manager's in-memory cache by scanning
+        the local filesystem
 
         This function should be called periodically in order to ensure eventual
         consistency of the in-memory cache with the actual filesystem state.
-        The filesystem is the source of truth for existing job metadata files and
-        available results.
+        The filesystem is the source of truth for existing job metadata files
+        and available results.
         """
 
         self._known_running_jobs = {
@@ -188,15 +195,17 @@ class JobManager(object):
 
         Checking for remote updates entails:
 
-        - Scanning the `running-jobs` local directory, looking for job metadata files
-        - Scanning the remote server in order to retrieve a list of all remote job
-           metadata files
+        - Scanning the `running-jobs` local directory, looking for job
+         metadata files
+        - Scanning the remote server in order to retrieve a list of all remote
+         job  metadata files
         - Comparing each remote job with the local job
-        - If a job is both on the local jobs list and on the remote jobs list, we
-          proceed to update its local job metadata file
+        - If a job is both on the local jobs list and on the remote jobs list,
+            we proceed to update its local job metadata file
 
-       - If a job is only on the local list, then something went wrong with its remote
-         processing. We can notify the user and then we remove the job metadata file
+       - If a job is only on the local list, then something went wrong with
+         its remote processing. We can notify the user and then we remove
+          the job metadata file
          from the `running-jobs` directory immediately. This job is effectively
          discarded. The user will need to retry execution, if needed
 
@@ -204,16 +213,19 @@ class JobManager(object):
          results be deleted in the past. We look for the job's id on the
          `deleted-datasets` directory.
 
-         - If we find that the results of this job were deleted on purpose, then we
-           ignore the remote job.
+         - If we find that the results of this job were deleted on purpose,
+          then we ignore the remote job.
 
-         - If we cannot find the job on the `deleted-datasets` directory, then we
-           assume this is a new job that was created by some other means (another
+         - If we cannot find the job on the `deleted-datasets` directory,
+            then we assume this is a new job that was created by some
+             other means (another
            client other than QGIS) and we store it locally in either the
-           `running-jobs` dir or the `finished-jobs` dir, depending on the job's status
+           `running-jobs` dir or the `finished-jobs` dir, depending on
+            the job's status
 
-       - If the job is complete we can now download the results. However, we may have
-         to do that on demand, so it is not done immediately. Instead, we move the
+       - If the job is complete we can now download the results. However,
+        we may have to do that on demand, so it is not done immediately.
+         Instead, we move the
          job metadata file to the `finished-jobs` directory on disk
 
         """
@@ -234,10 +246,12 @@ class JobManager(object):
             self.refreshed_from_remote.emit()
 
     def delete_job(self, job: Job):
-        """Delete a job metadata file and any associated datasets from the local disk
+        """Delete a job metadata file and any associated datasets from the
+         local disk
 
-        The job metadata file is moved to the `deleted-jobs` dir. This shall prevent
-        subsequent downloads when refreshing the local state from the remote server.
+        The job metadata file is moved to the `deleted-jobs` dir.
+        This shall prevent subsequent downloads when refreshing the local
+         state from the remote server.
 
         """
 
@@ -246,7 +260,8 @@ class JobManager(object):
                 _delete_job_datasets(job)
             except PermissionError:
                 log(
-                    f"Permissions error on path skipping deletion of {job.id}...")
+                    f"""Permissions error on path
+                        skipping deletion of {job.id}...""")
                 # TODO: add back in old code used for removing visible layers
                 # prior to deletion
                 return
@@ -266,7 +281,8 @@ class JobManager(object):
         Creation of new jobs entails:
         1. submitting a process for remote execution
         2. waiting server response with a job metadata file
-        3. storing returned job metadata file on disk, on the `running-jobs` directory
+        3. storing returned job metadata file on disk, on the
+            `running-jobs` directory
 
         """
 
@@ -275,7 +291,7 @@ class JobManager(object):
         final_params["task_notes"] = _add_local_context_to_task_notes(
             params["task_notes"])
         url_fragment = f"/api/v1/script/{script_id}/run"
-        response = api.call_api(url_fragment, "post",
+        response = Api.call_api(url_fragment, "post",
                                 final_params, use_token=True)
         try:
             raw_job = response["data"]

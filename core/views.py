@@ -1,14 +1,11 @@
-from json.encoder import JSONEncoder
 from django.http import (
     HttpResponse,
-    HttpResponseRedirect,
     JsonResponse
 )
 from django.shortcuts import render
 from django.template import loader
 from account import models
-from utils.util import matrix_to_table, table_to_matrix
-# Create your views here.
+from utils.util import matrix_to_table
 
 
 def dashboard(request):
