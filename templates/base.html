@@ -31,95 +31,74 @@
     <div class="row-flex">
         {% if user.is_authenticated %}
         <div class="sidebar" id="sidebar">
-
             <div class="header">
-                <img src="{% static 'images/trends_earth_logo_square_32x32.png' %}" width="30px">
-                <labe>Trends.Earth</label>
-                    <!--<img src="{% static 'images/user_img.svg' %}" width="30%">
-                <br />
-                <label class="username">{{user.first_name}} {{user.last_name}}</label>
-                <a href="/profile" style="margin-bottom: 15px;">View Profile</a>
-
                 <div class="row">
-                    <div class="col-sm-4">
-                        <a href="#">
-                            <i class="fa fa-cog"></i>
-                            <br><br>
-                            Settings
-                        </a>
-
+                    <div class="logo-div">
+                        <img src="{% static 'images/trends_earth_logo_square_32x32.png' %}" width="30px">
                     </div>
-                    <div class="col-sm-4">
-                        <a href="#">
-                            <i class="fa fa-bell"></i>
-                            <span class="badge badge-danger badge-pill" style="position: absolute; margin-top: -5px;">
-                                {% if cases_list %}
-                                {{cases_list|length}}
-                                {% else %}
-                                0
-                                {% endif %}
-                            </span>
-                            <br><br>
-                            Notifications
-                        </a>
+                    <div class="col-md-8">
+                        <h1>Trends.Earth</h1>
                     </div>
-                    <div class="col-sm-4">
-                        <a href="/logout">
-                            <i class="fa fa-power-off"></i><br><br>Log Out</a>
-                    </div>
-                </div>-->
+                </div>
             </div>
             <hr>
-            <a href="/dashboard" style="padding-left: 10px;" class="item" id="dashboard_item">
-                <i class="fa fa-home"></i>
-                <span class="menu-items">DASHBOARD</span>
+
+
+            <a href="/dashboard" style="padding-left: 0px;" class="item active" id="dashboard_item">
+                <h3 class="menu-items"><i class="fa fa-home"></i> &nbsp;DASHBOARD</h3>
             </a>
             <hr>
-            <h3 class="menu-items">ANALYSIS</h3>
+            <div class="row">
+                <div class="col-md-10" style="padding-left: 0px;">
+                    <h3 class="menu-items"><i class="fa fa-random"></i> &nbsp;ALGORITHMS</h3>
+                </div>
+                <div class="col-md-2">
+                    <h3 class="menu-items"><i class="fa fa-chevron-right"></i></h3>
+                </div>
+            </div>
+
             {% for algo in parents %}
             {% if algo.children %}
-            <a href="#" class="item" id="item_{{algo.id}}">
-                <i class="fa fa-caret-down"></i>
-                <span class="menu-items">{{algo.name}}</span>
-                <span style="font-size: 12px; line-height: 20px;">{% if algo.name_details %} - {{algo.name_details}}
-                    {% endif %}</span>
+            <div class="row menu-items">
+                <div class="col-md-10" style="padding-left: 0px;">
+                    <div class="div-item haschild" id="item_{{algo.id}}">
+                        <span class="haschild" id="menu-items_{{algo.id}}"
+                            style="font-size: 14px; line-height:1.2; font-weight: 600;">{{algo.name}}</span>
+                        <span class="haschild" style="font-size: 12px; line-height: 20px;">{% if algo.name_details %} -
+                            {{algo.name_details}}
+                            {% endif %}</span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h3 style="padding: 0px 10px;"><i class="fa fa-chevron-right" id="icon_{{algo.id}}"></i></h3>
+                </div>
+            </div>
+
+            {% for child in algo.children %}
+            <a href="/dashboard/{{child.id}}" class="item child-items-{{algo.id}}" id="item_{{child.id}}"
+                style="padding-left: 40px;">
+                <span class="menu-items">{{child.name}}</span>
+                <span style="font-size: 12px; line-height: 20px;"> {% if child.name_details %} -
+                    {{child.name_details}} {% endif %}</span>
             </a>
-            <ul>
-                {% for child in algo.children %}
-                <li>
-                    <a href="/dashboard/{{child.id}}" class="item" id="item_{{child.id}}">
-                        <i class="fa fa-caret-right"></i>
-                        <span class="menu-items">{{child.name}}</span>
-                        <span style="font-size: 12px; line-height: 20px;"> {% if child.name_details %} -
-                            {{child.name_details}} {% endif %}</span>
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
+            {% endfor %}
             {% else %}
             <a href="/dashboard/{{algo.id}}" class="item" id="item_{{algo.id}}">
-                <i class="fa fa-caret-right"></i>
-                <span class="menu-items">{{algo.name}}</span>
+                <span class="menu-items"
+                    style="font-size: 14px; line-height:1.2; font-weight: 600;">{{algo.name}}</span>
                 <span style="font-size: 12px; line-height: 20px;">{% if algo.name_details %} - {{algo.name_details}}
                     {% endif %}</span>
             </a>
+            <hr>
             {% endif %}
             {% endfor %}
             <hr>
 
-            <a href="#" style="padding-left: 10px;" class="item" id="reports_item">
-                <i class="fa fa-clone"></i>
-                <span class="menu-items">REPORTS</span>
+            <a href="#" style="padding-left: 0px;" class="item" id="reports_item">
+                <h3 class="menu-items"><i class="fa fa-clone"></i> &nbsp;REPORTS</h3>
             </a>
             <hr>
-            {% if user.is_superuser %}
-            <h3 class="menu-items">Admin</h3>
-            <a href="/users" class="item" id="users_item">
-                <i class="fa fa-users"></i>
-                <span class="menu-items">Users</span>
-            </a>
 
-            {% endif %}
             <div class="footer">
                 &copy; {% now 'Y' %} Trends.Earth &nbsp;&nbsp; | &nbsp;&nbsp; {{version}} &nbsp;&nbsp;
             </div>
@@ -167,6 +146,12 @@
                                         <a class="dropdown-item" href="#">
                                             <i class="fa fa-cog"></i> Settings</a>
                                     </li>
+                                    {% if user.is_superuser %}
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fa fa-users"></i> Admin</a>
+                                    </li>
+                                    {% endif %}
                                     <li><a class="dropdown-item" href="{% url 'logout' %}"><i
                                                 class="fa fa-power-off"></i> Log out</a></li>
                                 </ul>
@@ -212,8 +197,24 @@
     <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/dataTables.select.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/bs-stepper.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ol.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/app.js' %}"></script>
     {% endblock %}
 </body>
+<script>
+    $(document).ready(function () {
+        $(".div-item .haschild").on("click", function () {
+            var id = $(this).attr('id').split("_")[1];
+            if ($("#icon_" + id).hasClass("fa-chevron-right")) {
+                $("#icon_" + id).removeClass("fa-chevron-right");
+                $("#icon_" + id).addClass("fa-chevron-down");
+            } else {
+                $("#icon_" + id).addClass("fa-chevron-right");
+                $("#icon_" + id).removeClass("fa-chevron-down");
+            }
+            $(".child-items-" + id).toggle();
+        });
+    });
+</script>
 
 </html>

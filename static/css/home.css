@@ -1,41 +1,17 @@
 /* LOGIN FORM */
 
 body {
-  /* background-image: url("../images/landhouse.jpg") !important;
-  background-size: cover !important; */
+  clear: both;
   background-color: #fff;
   width: 100% !important;
-  height: 100% !important;
 
 }
 
-.container-fluid{
-  margin: 0px !important;
-  padding: 0px !important;
-}
-
-.about{  
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-#map{
-  height: calc(100vh - 25px);
-  border-right: 1px solid rgba(0, 0, 0, 0.2); 
-  border-left: 1px solid rgba(0, 0, 0, 0.2);
-}
-.col-md-3, .col-md-4, .col-md-8, .col-md-9, .col-md-12{
-  padding: 0px !important;
-  margin: 0px !important;
-
-}
-#side-panel{
-  margin: 0px !important;
-  padding: 0px !important;
-  height: 100vh;
-}
-
-.row{
-  margin: 0px;
-  padding-left: 0px;
+.row-flex,
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
 }
 
 .row-flex {
@@ -44,14 +20,70 @@ body {
   flex-grow: 1;
 }
 
-.row .bottom{
-  width: 80% !important;
-  margin: auto;
-}
 .col-flex {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
+
+.container-fluid{
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+#map{
+  min-height: calc(100vh - 25px);
+  border-right: 1px solid rgba(0, 0, 0, 0.2); 
+  border-left: 1px solid rgba(0, 0, 0, 0.2);
+}
+.col-md-3, .col-md-4, .col-md-8, .col-md-9, .col-md-12{
+  padding: 0px !important;
+  margin: 0px !important;
+
+}
+#side-panel {
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  width: 300px !important;
+  min-width: 300px;
+  margin: 0px !important;
+  padding: 0px !important;
+  min-height: 100vh;
+  background-color: rgba(28, 38, 61, 0.8);
+  border: 1px solid #F60404;
+  overflow: hidden !important;
+  transition: 1s;
+}
+
+#side-panel .welcome-div{
+  font-weight: 700; 
+  font-size: 20px; 
+  letter-spacing: 2px;
+  padding-top: 30px;
+  background-color: #fff;
+  border-bottom: 1px solid #F60404;
+}
+
+#side-panel a{
+  color: #ffffff;
+}
+
+#side-panel .about{
+  padding: 10px;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.row{
+  margin: 0px;
+  padding-left: 0px;
+}
+
+
+.row .bottom{
+  width: 80% !important;
+  margin: auto;
 }
 
 
@@ -72,7 +104,7 @@ body {
   max-width: 100%;
   margin-top: 1px;
   margin-bottom: auto;
-  background-color: #000;
+  background-color: #1C263D;
 }
 
 #login-form .row{
@@ -206,7 +238,7 @@ Control buttons
 }
 
 .menu-carret{
-  background: rgb(0, 0, 0);
+  background: #1C263D;
   content: "";
   display: block;
   height: 20px;
@@ -225,7 +257,7 @@ Control buttons
 .dropdown-menu{
   transform-origin: 228px top !important;
   transform: scale(1) translateZ(0) !important;
-  background: rgb(0, 0, 0);
+  background: #1C263D;
   width: 400px !important;
   margin-top: 10px !important;
 }

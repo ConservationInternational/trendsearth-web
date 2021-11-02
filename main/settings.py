@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'ldmpweb.urls'
+ROOT_URLCONF = 'main.urls'
 
 TEMPLATES = [
     {
@@ -70,13 +70,13 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'libraries':{
-                'template_filters': 'ldmpweb.template_filters',
+                'template_filters': 'main.template_filters',
             }
         },
     },
 ]
 
-WSGI_APPLICATION = 'ldmpweb.wsgi.application'
+WSGI_APPLICATION = 'main.wsgi.application'
 
 
 # Database
