@@ -1,0 +1,453 @@
+<!-- All SDG 15.3.1 sub-indicators in one step-->
+{% load static %}
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-new-tab" data-bs-toggle="tab" data-bs-target="#nav-new" type="button"
+            role="tab" aria-controls="nav-new" aria-selected="true">
+            <i class="fa fa-plus-circle"></i>
+            New Job
+        </button>
+        <button class="nav-link" id="nav-perm-tab" data-bs-toggle="tab" data-bs-target="#nav-perm" type="button"
+            role="tab" aria-controls="nav-perm" aria-selected="false">
+            <i class="fa fa-list"></i>
+            View Jobs</button>
+        <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button"
+            role="tab" aria-controls="nav-info" aria-selected="false">
+            <i class="fa fa-info-circle"></i>
+            About</button>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade border show active" id="nav-new" role="tabpanel" aria-labelledby="nav-new-tab"
+        style="padding: 10px;">
+        <div class="row">
+            <form method="post" id="payload_form">
+                {% csrf_token %}
+                <div class="border">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Land productivity dataset</h3>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio_lpd_jrc"
+                                    checked>
+                                <label class="form-check-label" for="radio_lpd_jrc">
+                                    Trends.Earth land productivity
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio_te_prod">
+                                <label class="form-check-label" for="radio_te_prod">
+                                    UNCCD default data (Land Productivity Dynamics (LPD) Product 1999-2013 from Join
+                                    Research
+                                    Commission)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <p>
+                                When the JRC LPD is chosen as the productivity dataset, <b>the initial and final years
+                                    selected below apply to the land cover and soil organic carbon indicators only</b>.
+                                The time period used for the JRC LPD depends on the JRC LPD is chosen. Use caution
+                                intepreting the results when these time periods differ.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Baseline period</h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="year_initial_baseline" class="form-label">Initial Year</label>
+                            <select class="form-select form-select-sm" name="year_initial_baseline"
+                                id="year_initial_baseline">
+                                {% for tr in 2001|range:2022 %}
+                                <option value="{{tr}}">{{tr}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="year_final_baseline" class="form-label">Final Year</label>
+                            <select class="form-select form-select-sm" name="year_final_baseline"
+                                id="year_final_baseline">
+                                {% for tr in 2001|range:2022 %}
+                                <option value="{{tr}}">{{tr}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="cb_jrc_baseline" class="form-label">JRC JPD dataset for baseline
+                                period</label>
+                            <select class="form-select form-select-sm" name="cb_jrc_baseline" id="cb_jrc_baseline">
+                                {% for tr in jrc_lpd_datasets %}
+                                <option value="{{tr}}">{{tr}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="checkBox_progress_period">
+                                <label class="form-check-label" for="checkBox_progress_period">
+                                    Include progress period (for comparison to baseline)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="progress_years_panel" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="year_initial_progress" class="form-label">Initial Year</label>
+                                <select class="form-select form-select-sm" name="year_initial_progress"
+                                    id="year_initial_progress">
+                                    {% for tr in 2001|range:2022 %}
+                                    <option value="{{tr}}">{{tr}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="year_final_progress" class="form-label">Final Year</label>
+                                <select class="form-select form-select-sm" id="year_final_progress"
+                                    name="year_final_progress">
+                                    {% for tr in 2001|range:2022 %}
+                                    <option value="{{tr}}">{{tr}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="cb_jrc_progress" class="form-label">JRC JPD dataset for progress
+                                    period</label>
+                                <select class="form-select form-select-sm" name="cb_jrc_progress" id="cb_jrc_progress">
+                                    {% for tr in jrc_lpd_datasets %}
+                                    <option value="{{tr}}">{{tr}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class="border">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Current region</h3>
+                            <label>{{aoi.name}}</label>
+                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
+                                data-bs-target="#aoiModal">
+                                <i class="fa fa-edit"></i> Change Region</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Execution Name</h3>
+                            <input type="text" class="form-control" name="execution_name" id="execution_name"
+                                placeholder="Execution Name" autofocus="" autocapitalize="none">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Notes</h3>
+                            <textarea class="form-control" id="task_notes" name="task_notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion" id="accordionAdvanced">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingAdvanced">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseAdvanced" aria-expanded="true"
+                                aria-controls="collapseAdvanced">
+                                Advanced configuration
+                            </button>
+                        </h2>
+                        <div id="collapseAdvanced" class="accordion-collapse collapse hide"
+                            aria-labelledby="headingAdvanced" data-bs-parent="#accordionAdvanced">
+                            <div class="accordion-body">
+                                <label>Land Cover Set Up</label>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Aggregation Method</label>
+                                        <button type="button" class="btn btn-outline-success" id="btn_editAggregation"
+                                            data-bs-toggle="modal" data-bs-target="#aggregationDefinitionModal">
+                                            <i class="fa fa-edit"></i> Edit definition</button>
+                                        <br /><br />
+                                    </div>
+                                </div>
+
+                                <p>Define Effects of Land Cover Change</p>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="matrix-table" id="matrix_table">
+                                            {{table | safe}}
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Legend</label>
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <div
+                                                        style="width: 30; height: 20px; background-color: #AB2727; border: 1px solid gray;">
+                                                    </div>
+                                                </td>
+                                                <td>Degradation</td>
+                                                <td>
+                                                    <div
+                                                        style="width: 30; height: 20px; background-color: #45A146; border: 1px solid gray;">
+                                                    </div>
+                                                </td>
+                                                <td>Improvement</td>
+                                                <td>
+                                                    <div
+                                                        style="max-width: 30; height: 20px; background-color: #FFFFE0; border: 1px solid gray;">
+                                                    </div>
+                                                </td>
+                                                <td>Stable</td>
+                                            </tr>
+
+                                        </table>
+                                        <p>* The <em>Grassland</em> class consists of grassland, shrub, and
+                                            sparsely
+                                            vegetated areas (if the default aggregation is used).</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="button" class="btn btn-outline-primary"
+                                            id="btn_reset_matrix_tbl">Reset
+                                            matrix</button>
+                                        <button type="button" class="btn btn-outline-danger">Load matrix from
+                                            file</button>
+                                        <button type="button" class="btn btn-outline-secondary">Save matrix to
+                                            file</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <br />
+            </form>
+            <div class="row">
+                <div class="col-md-11 mb-3">
+                    <button type="submit" class="btn btn-danger" id="btn_execute">SCHEDULE EXECUTION</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="tab-pane fade border" id="nav-perm" role="tabpanel" aria-labelledby="nav-perm-tab"
+        style="padding-top: 10px;">
+        <iframe src="/ajax/job/results/{{script.id}}" id="iframe" frameborder="0" scrolling="yes"></iframe>
+
+    </div>
+    <div class="tab-pane fade border" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab"
+        style="padding: 10px;">
+        <div class="row">
+            <div class="col-md-11">
+                <div class="section" id="sdg-indicator-15-3-1">
+                    <span id="indicator-15-3-1"></span>
+                    <h1>SDG Indicator 15.3.1</h1>
+                    <label>Calculate all SDG 15.3.1 sub-indicators in a single step</label>
+                    <p>
+                        This algorithm enables the simultaneous calculation of the three SDG 15.3.1
+                        sub-indicators (Productivity,
+                        Land
+                        Cover
+                        and Soil Organic Carbon) in a single step. This is done using the remote
+                        Trends.Earth datasets described in
+                        each
+                        of
+                        the individual sub-indicator's sections.
+                    </p>
+
+                    <p>As part of the “2030 Agenda for Sustainable Development”, Sustainable
+                        Development Goal (SDG) 15 is to:</p>
+                    <blockquote>
+                        <div>
+                            <p>"Protect, restore and promote sustainable use of terrestrial ecosystems,
+                                sustainably manage forests, combat desertification, and halt and reverse
+                                land degradation and halt biodiversity loss"</p>
+                        </div>
+                    </blockquote>
+                    <p>Each SDG has specific targets addressing different components, in this case, of
+                        life on land. Target 15.3 aims to:</p>
+                    <blockquote>
+                        <div>
+                            <p>"By 2030, combat desertification, restore degraded land and soil, including
+                                land affected by desertification, drought and floods, and strive to achieve
+                                a land degradation-neutral world"</p>
+                        </div>
+                    </blockquote>
+                    <p>Indicators will be used then to assess the progress of each SDG target. In the
+                        case of SDG 15.3 the progress towards a land degradation neutral world will be
+                        assessed using indicator 15.3.1:</p>
+                    <blockquote>
+                        <div>
+                            <blockquote>"proportion of land that is degraded over total land area"</blockquote>
+                        </div>
+                    </blockquote>
+                    <p>As the custodian agency for SDG 15.3, the United Nations Convention to Combat
+                        Desertification (UNCCD) has developed a <a class="reference external"
+                            href="http://www2.unccd.int/sites/default/files/relevant-links/2017-10/Good%20Practice%20Guidance_SDG%20Indicator%2015.3.1_Version%201.0.pdf">Good
+                            Practice Guidance (GPG)</a>.
+                        providing recommendations on how to calculate SDG Indicator 15.3.1.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $(".lc-input").on("keyup", function () {
+            var inputVal = $(this).val();
+            if (! /[-0+]/.test(inputVal)) {
+                $(this).val("");
+            } else {
+                $(this).removeClass("stable");
+                $(this).removeClass("degradation");
+                $(this).removeClass("improvement");
+
+                if (inputVal == "0") {
+                    $(this).addClass("stable");
+                } else if (inputVal == "-") {
+                    $(this).addClass("degradation");
+                } else {
+                    $(this).addClass("improvement");
+                }
+            }
+        });
+
+        $("#checkBox_progress_period").on("change", function () {
+            $("#progress_years_panel").toggle();
+        });
+
+        $("#year_initial_baseline, #year_final_baseline").on("change", function () {
+            if ((+$("#year_final_baseline").val() - (+$("#year_initial_baseline").val())) < 10) {
+                console.log(`Initial and final year are less 10 years 
+                            apart in baseline period - results will be more 
+                            reliable if more data (years) are included 
+                            in the analysis.`);
+            }
+        });
+
+        if ($("#checkBox_progress_period").attr(":checked")) {
+            $("#year_final_progress, #year_initial_progress").on("change", function () {
+                if ((+$("#year_final_progress").val() - (+$("#year_initial_progress").val())) < 10) {
+                    console.log(`Initial and final year are less 10 years 
+                            apart in progress period - results will be more 
+                            reliable if more data (years) are included 
+                            in the analysis.`);
+                }
+            });
+        }
+
+        $("#btn_reset_matrix_tbl").on("click", function () {
+            $.get("/ajax/matrix_table", function (response, status) {
+                $("#matrix_table").empty();
+                $("#matrix_table").append(response);
+            });
+        });
+
+        $("#btn_reset_aggregation").on("click", function () {
+            $.get("/ajax/aggregation_table/reset", function (response, status) {
+                $("#aggregation_tbl_panel").empty();
+                $("#aggregation_tbl_panel").append(response);
+                $("#aggregation_definition_tbl").DataTable({
+                    scrollY: "400px",
+                    scrollCollapse: true,
+                    paging: false,
+                });
+            });
+        });
+
+
+        $("#btn_execute").on("click", function () {
+            let tbody = $("#matrix_table tbody");
+            let tdata = [];
+            tbody.find("tr").each(function (i, el) {
+                let trow = [];
+                $(this).find("td").each(function (j, el) {
+                    var val = $(this).find("input")
+                        .eq(0)
+                        .val();
+                    trow.push(val);
+                });
+                if (trow.length > 1)
+                    tdata.push(trow);
+            });
+
+            let periods = {
+                "baseline": {
+                    'period_year_initial': +$("#year_initial_baseline").val(),
+                    'period_year_final': +$("#year_final_baseline").val()
+                },
+            }
+
+            if ($("#checkBox_progress_period").is(":checked")) {
+                periods["progress"] = {
+                    'period_year_initial': +$("#year_initial_progress").val(),
+                    'period_year_final': +$("#year_final_progress").val(),
+                }
+            }
+
+            let formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("tdata", JSON.stringify(tdata));
+            formData.append("periods", JSON.stringify(periods));
+            if ($("#radio_lpd_jrc").is(":checked")) {
+                formData.append("prod_mode", 'Trends.Earth productivity');
+            } else {
+                formData.append("prod_mode", 'JRC LPD');
+            }
+            formData.append("algo", "sdg-15-3-1-sub-indicators");
+            formData.append("runmode", "REMOTE");
+            formData.append("task_name", $("#execution_name").val());
+            formData.append("task_notes", $("#task_notes").val());
+            formData.append("cb_jrc_baseline", $("#cb_jrc_baseline").val());
+            formData.append("cb_jrc_progress", $("#cb_jrc_progress").val());
+            $.ajax({
+                url: "/ajax/run/job",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#iframe').attr('src', function (i, val) { return val; });
+                    $("#aggregationDefinitionModal .btn-close").click()
+                    $("#messages-list").removeClass("msg-white");
+                    $("#messages-list").addClass("msg-dark");
+                    const messages = document.getElementById("messages-list");
+                    messages.innerHTML += response.msg;
+
+                    $("#messages-list").fadeOut(2000, "swing", function () {
+                        messages.innerHTML = "";
+                        $("#messages-list").show();
+                        $("#messages-list").removeClass("msg-black");
+                        $("#messages-list").addClass("msg-white");
+                    });
+                }
+            });
+        });
+    });
+</script>

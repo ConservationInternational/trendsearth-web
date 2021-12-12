@@ -1,0 +1,139 @@
+body {
+  clear: both;
+  background-color: #F7F7F7;
+  width: 100% !important;
+  border-top: 10px solid #161E32;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.container{
+  max-width: 700px;
+}
+
+.row{
+  margin: 0px;
+  padding-left: 0px;
+}
+
+
+.row .bottom{
+  width: 80% !important;
+  margin: auto;
+}
+
+
+.welcome-div{
+  font-weight: 700; 
+  font-size: 20px; 
+  letter-spacing: 2px;
+  padding-top: 30px;
+  padding-bottom: 20px;
+  margin-top: 30px; 
+  background-color: #fff;
+  border-bottom: 4px solid #dc3545;
+  box-shadow: 0 10px 20px rgb(0 0 0 / 20%);
+}
+
+/****
+Forms
+****/
+
+
+.form-label {
+  font-size: 18px;
+  font-weight: 300;  
+}
+
+
+.btn {
+  width: 100% !important;
+  font-size: 18px !important;
+  font-weight: 300 !important;
+  color: #fff !important;
+}
+
+.controls input{
+  width: 100%;
+}
+
+input[type="submit"]{
+  background-color: #dc3545;
+}
+
+.error {
+  color: #a94442;
+}
+
+.required{
+  color: red !important;
+  font-weight: 900 !important;
+}
+
+#login-form, #registration-form{  
+  margin-top: 1px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: auto;
+  box-shadow: 0 10px 20px rgb(0 0 0 / 20%);
+  padding: 40px 20px 40px 40px;
+  background-color: #ffffff;
+}
+
+#login-form label, #login-form span{
+  color: #161E32;
+}
+
+
+
+
+
+/* form errors and request messages and alerts */
+.badge-light {
+  margin-top: 2.5em;
+}
+.errorlist {
+  list-style: none;
+  padding-left: 0px;
+  opacity: 0.8;
+  color: #dc3545;
+  font-size: 12px;
+}
+.msg {
+  margin: 0 !important;
+  margin-bottom: 4px !important;
+  margin-top: 4px !important;
+}
+.messages {
+  margin-top: 0px;
+  list-style: none;
+}
+
+.msg-dark{
+  color: #fff;
+  padding: 13px;
+  border-radius: 5px;
+  background-color: #000;
+}
+
+.msg-white{
+  color: #000;
+  background-color: #fff;
+}
+
+.alert {
+  margin-top: 1rem;
+}
+.alert-error {
+  background-color: #f2dede;
+  border-color: #ebcccc;
+  color: #a94442;
+}
+
+.alert-info{
+  color: #ffffff;
+}

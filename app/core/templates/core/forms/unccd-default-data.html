@@ -1,0 +1,192 @@
+<!-- Calculate default data for UNCCD -->
+{% load static %}
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-new-tab" data-bs-toggle="tab" data-bs-target="#nav-new" type="button"
+            role="tab" aria-controls="nav-new" aria-selected="true">
+            <i class="fa fa-plus-circle"></i>
+            New Job
+        </button>
+        <button class="nav-link" id="nav-perm-tab" data-bs-toggle="tab" data-bs-target="#nav-perm" type="button"
+            role="tab" aria-controls="nav-perm" aria-selected="false">
+            <i class="fa fa-list"></i>
+            View Jobs</button>
+        <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button"
+            role="tab" aria-controls="nav-info" aria-selected="false">
+            <i class="fa fa-info-circle"></i>
+            About</button>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade border show active" id="nav-new" role="tabpanel" aria-labelledby="nav-new-tab"
+        style="padding: 10px;">
+        <div class="row">
+            <form method="post" id="login-form">
+                {% csrf_token %}
+                <div class="border">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Baseline period</h3>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="year_initial_baseline" class="form-label">Initial Year</label>
+                            <select class="form-select form-select-sm" name="year_initial_baseline"
+                                id="year_initial_baseline">
+                                {% for tr in 2001|range:2022 %}
+                                <option value="{{tr}}">{{tr}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="year_final_baseline" class="form-label">Final Year</label>
+                            <select class="form-select form-select-sm" name="year_final_baseline"
+                                id="year_final_baseline">
+                                {% for tr in 2001|range:2022 %}
+                                <option value="{{tr}}">{{tr}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Progress period</h3>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="year_initial_progress" class="form-label">Initial Year</label>
+                            <select class="form-select form-select-sm" name="year_initial_progress"
+                                id="year_initial_progress">
+                                {% for tr in 2001|range:2022 %}
+                                <option value="{{tr}}">{{tr}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="year_final_progress" class="form-label">Final Year</label>
+                            <select class="form-select form-select-sm" id="year_final_progress"
+                                name="year_final_progress">
+                                {% for tr in 2001|range:2022 %}
+                                <option value="{{tr}}">{{tr}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h3>Indicators</h3>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="so1_cb" id="so1_cb" checked>
+                                <label class="form-check-label" for="so1_cb">
+                                    Strategic objective 1 (land condition)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="so2_cb" id="so2_cb" checked>
+                                <label class="form-check-label" for="so2_cb">
+                                    Strategic objective 2 (population affected)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="so3_cb" id="so3_cb" checked>
+                                <label class="form-check-label" for="so3_cb">
+                                    Strategic objective 3 (drought vulnerability)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h3>Current region</h3>
+                            <label>{{aoi.name}}</label>
+                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
+                                data-bs-target="#aoiModal">
+                                <i class="fa fa-edit"></i> Change Region</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h3>Execution Name</h3>
+                            <input type="text" class="form-control" name="execution_name" id="execution_name"
+                                placeholder="Execution Name" autofocus="" autocapitalize="none">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h3>Notes</h3>
+                            <textarea class="form-control" id="task_notes" name="task_notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <br />
+
+                <div class="row">
+                    <div class="col-md-11 mb-3">
+                        <button type="submit" class="btn btn-danger">SCHEDULE EXECUTION</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <div class="tab-pane fade border" id="nav-perm" role="tabpanel" aria-labelledby="nav-perm-tab"
+        style="padding-top: 10px;">
+        <div class="row">
+            <div class="col-md-12" style="padding: 10px 0px;">
+                <table id="task_tbl" class="table table-striped hover" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>ID</th>
+                            <th>Status</th>
+                            <th>Started</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade border" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab"
+        style="padding: 10px;">
+        <div class="row">
+            <div class="col-md-11">
+                <div class="section" id="sdg-indicator-15-3-1">
+                    <span id="indicator-15-3-1"></span>
+                    <h1>Default data for UNCCD reporting</h1>
+                    <p>Generates the default data for submission to the United Nations Convention to Combat
+                        Desertification (UNCCD), consisent with relevant Good Practice Guidances</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+
+    });
+</script>

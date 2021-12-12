@@ -1,0 +1,49 @@
+<table class="table table-hover" style="width:100%" id="users_tbl">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>Country</th>
+            <th>Organization</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Jobs</th>
+            <th>Last Login</th>
+            <th style="width: 150px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if users_list %}
+        {% for profile in users_list %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{ profile.user.first_name}} {{ profile.user.last_name}}</td>
+            <td>{{ profile.country.name }}</td>
+            <td>{{ profile.organization }}</td>
+            <td>{{ profile.role.value }}</td>
+            <td>{{ profile.user.email }}</td>
+            <td>{{ profile.user.job_set.all.count }}</td>
+            <td>{% if profile.user.last_login %}
+                {{ profile.user.last_login }}
+                {% else %}
+                Never
+                {% endif %}
+            </td>
+            <td>
+                <a class="btn btn-outline-primary" role="button" href="/admin/users/{{profile.user.id}}"
+                    style="line-height: 1; min-width: 24px; border-radius: 5px; text-decoration: none;">
+                    <i class="fa fa-eye"></i> View
+                </a>
+                <button class="btn btn-outline-danger delete_user" data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-id="{{profile.user.id}}" data-name="{{profile.user.first_name}} {{profile.user.last_name}}"
+                    style="line-height: 1; min-width: 24px; border-radius: 5px;">
+                    <i class="fa fa-trash"></i> Delete
+                </button>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+        {% endif %}
+    </tbody>
+</table>

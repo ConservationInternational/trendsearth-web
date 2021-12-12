@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Trends.Earth{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<div id="breadcrumbs" class="d-print-none">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb border-bottom">
+            <li class="breadcrumb-item">
+                <a href="/"><i class="fa fa-home"></i></a>
+            </li>
+            <li class="breadcrumb-item">
+                Profile
+            </li>
+            <li class="breadcrumb-item active">{{user.first_name}} {{user.last_name}}</li>
+        </ol>
+    </nav>
+</div>
+
+{% include 'account/user.html' %}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="block-content">
+            <br />
+            <a class="btn btn-outline-danger" role="button" href="profile/edit">Edit Profile</a>
+        </div>
+        <br />
+    </div>
+</div>
+
+{% endblock %}

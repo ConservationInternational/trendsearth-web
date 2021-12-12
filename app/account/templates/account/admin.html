@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Trends.Earth{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<style>
+    .admin-algo-tbl {
+        border-color: unset !important;
+        border-style: none;
+        border-width: 0px !important;
+        margin-bottom: 0px !important;
+        width: 70%;
+        border-collapse: collapse;
+    }
+
+    .admin-algo-tbl td {
+        padding: 5px 10px !important;
+        border-bottom: none !important;
+    }
+
+    .admin-algo-tbl tr {
+        padding: 0px 3px;
+    }
+
+    .admin-algo-tbl tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
+
+<div id="breadcrumbs" class="d-print-none">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb border-bottom">
+            <li class="breadcrumb-item">
+                <a href="/"><i class="fa fa-home"></i></a>
+            </li>
+            <li class="breadcrumb-item active">Admin</li>
+        </ol>
+    </nav>
+</div>
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-new-tab" data-bs-toggle="tab" data-bs-target="#nav-new" type="button"
+            role="tab" aria-controls="nav-new" aria-selected="true">
+            <i class="fa fa-users"></i> Users
+        </button>
+        <button class="nav-link" id="nav-perm-tab" data-bs-toggle="tab" data-bs-target="#nav-perm" type="button"
+            role="tab" aria-controls="nav-perm" aria-selected="false">
+            <i class="fa fa-list"></i>
+            Jobs</button>
+        <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button"
+            role="tab" aria-controls="nav-info" aria-selected="false">
+            <i class="fa fa-cog"></i>
+            Algorithms</button>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade border show active" id="nav-new" role="tabpanel" aria-labelledby="nav-new-tab"
+        style="padding: 10px;">
+        {% include 'account/list_users.html' %}
+    </div>
+    <div class="tab-pane fade border" id="nav-perm" role="tabpanel" aria-labelledby="nav-perm-tab"
+        style="padding-top: 10px;">
+        {% include 'account/list_jobs.html' %}
+    </div>
+    <div class="tab-pane fade border" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab"
+        style="padding: 10px;">
+        {% for algo in algorithms %}
+        {% if algo.children %}
+        <div class="row border">
+            <div class="col-md-12">
+                <div class="form-check">
+                    <input class="form-check-input algorithm-check" type="checkbox" typeof="algorithm"
+                        id="id-{{algo.id}}" {% if not algo.deleted %} checked {% endif %}>
+                    <label class="form-check-label" for="id-{{algo.id}}">
+                        {{algo.name}}
+                        {% if algo.name_details %} -
+                        {{algo.name_details}} {% endif %}
+                    </label>
+                </div>
+                {% for child in algo.children %}
+                <div class="row border">
+                    <div class="col-md-12">
+                        <div class="form-check">
+                            <input class="form-check-input algorithm-check" type="checkbox" typeof="algorithm"
+                                id="id-{{child.id}}" {% if not child.deleted %} checked {% endif %}>
+                            <label class="form-check-label" for="id-{{child.id}}">
+                                {{child.name}}
+                                {% if child.name_details %} -
+                                {{child.name_details}} {% endif %}
+                            </label>
+                        </div>
+
+                        <table class="admin-algo-tbl">
+                            {% for item in child.id|get_children %}
+                            <tr>
+                                <td><span>{{item.name}}</span></td>
+                                <td style="width: 200px;">
+                                    <div class="row">
+                                        {% for script in item.scripts.all %}
+                                        <div class="col-sm-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input algorithm-check" type="checkbox"
+                                                    typeof="script" id="id-{{script.id}}" {% if not script.deleted %}
+                                                    checked {% endif %}>
+                                                <label class="form-check-label" for="flexCheckChecked">
+                                                    {{script.execution_script.run_mode.value}}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="row border">
+            <div class="col-md-12">
+                <div class="form-check">
+                    <input class="form-check-input algorithm-check" type="checkbox" typeof="algorithm"
+                        id="id-{{algo.id}}" {% if not algo.deleted %} checked {% endif %}>
+                    <label class="form-check-label" for="id-{{algo.id}}">
+                        {{algo.name}}
+                        {% if algo.name_details %} -
+                        {{algo.name_details}} {% endif %}
+                    </label>
+                </div>
+                <table class="admin-algo-tbl">
+                    {% for child in algo.id|get_children %}
+                    <tr>
+                        <td><span>{{child.name}}</span></td>
+                        <td style="width: 200px;">
+                            <div class="row">
+                                {% for script in child.scripts.all %}
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input algorithm-check" type="checkbox" typeof="script"
+                                            id="id-{{script.id}}" {% if not script.deleted %} checked {% endif %}>
+                                        <label class="form-check-label" for="id-{{script.id}}">
+                                            {{script.execution_script.run_mode.value}}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        <button class="btn btn-danger" style="border-radius: 5px;" id="btn_save_settings">SAVE</button>
+    </div>
+</div>
+{% include 'dialogs/confirm_dialog.html' %}
+
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $("#users_tbl").DataTable();
+        $("#jobs_tbl").DataTable();
+
+        $("#btn_save_settings").on("click", function () {
+            var algorithms = [];
+            $(".algorithm-check").each(function () {
+                algorithms.push({
+                    id: +$(this).attr("id").split("-")[1],
+                    checked: $(this).is(":checked"),
+                    typeof: $(this).attr("typeof")
+                });
+            });
+            let formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("data", JSON.stringify(algorithms));
+            $.ajax({
+                url: "{% url 'ajax_update_algorithms_visibility' %}",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (response) {
+                    // showMessage(response.responseJSON.msg, 10000);
+                },
+
+            });
+
+        });
+
+
+    });
+</script>
+{% endblock %}

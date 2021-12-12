@@ -1,0 +1,50 @@
+<table id="jobs_tbl" class="table table-bordered" style="width:100%">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th data-orderable="false">Task</th>
+            <th data-orderable="true">Script</th>
+            <th data-orderable="true">Status</th>
+            <th>Started</th>
+            <th data-orderable="false" style="width: 150px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{job.params.task_name}}
+                {% if job.params.task_name %}
+                -
+                {% endif %}
+                {% if job.results.name %}
+                {{job.results.name}}
+                {% endif %}
+            </td>
+            <td>{{job.script.name_readable}}</td>
+            <td>{{job.status.value}}</td>
+            <td>{{job.start_date}}</td>
+            <td>
+                {% if job.status.value == "FINISHED" %}
+                <button class="btn btn-outline-primary download-job" role="button" job-id="{{job.uid}}"
+                    style="line-height: 1; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-download"></i> Download
+                </button>
+                {% endif %}
+                {% if job.status.value == "RUNNING" or job.status.value == "READY" %}
+                <button class="btn btn-danger cancel-job" role="button" job-id="{{job.uid}}"
+                    style="color: #ffffff; padding: 2px; height: 20px; margin:0px; line-height: 2px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-ban"></i>
+                </button>
+                {% else %}
+                <button class="btn btn-outline-danger delete-job" role="button" job-id="{{job.uid}}"
+                    style="line-height: 1; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-trash"></i> Delete
+                </button>
+                {% endif %}
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+{% block header %}
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %} Trends Earth {% endblock %}</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="icon" href="{% static 'images/trends_earth_logo_square_32x32.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/dataTables.bootstrap5.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.dataTables.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/select2.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/select.dataTables.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bs-stepper.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{%  static 'css/ol.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/app.css' %}">
+
+</head>
+{% endblock %}
+
+<body>
+    <div class="row-flex">
+        {% if user.is_authenticated %}
+        <div class="sidebar" id="sidebar">
+            <div class="header">
+                <div class="row">
+                    <div class="logo-div">
+                        <img src="{% static 'images/trends_earth_logo_square_32x32.png' %}" width="30px">
+                    </div>
+                    <div class="col-md-8">
+                        <h1>Trends.Earth</h1>
+                    </div>
+                </div>
+            </div>
+            <hr>
+
+
+            <a href="/dashboard" style="padding-left: 0px;" class="item active" id="dashboard_item">
+                <h3 class="menu-items"><i class="fa fa-home"></i> &nbsp;DASHBOARD</h3>
+            </a>
+            <hr>
+            <div class="row">
+                <div class="col-md-10" style="padding-left: 0px;">
+                    <h3 class="menu-items"><i class="fa fa-random"></i> &nbsp;ALGORITHMS</h3>
+                </div>
+                <div class="col-md-2">
+                    <h3 class="menu-items"><i class="fa fa-chevron-right"></i></h3>
+                </div>
+            </div>
+
+            {% for algo in parents %}
+            {% if algo.children %}
+            <div class="row menu-items">
+                <div class="col-md-10" style="padding-left: 0px;">
+                    <div class="div-item haschild" id="item_{{algo.id}}">
+                        <span class="haschild" id="menu-items_{{algo.id}}"
+                            style="font-size: 14px; line-height:1.2; font-weight: 600;">{{algo.name}}</span>
+                        <span class="haschild" style="font-size: 12px; line-height: 20px;">{% if algo.name_details %} -
+                            {{algo.name_details}}
+                            {% endif %}</span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h3 style="padding: 0px 10px;"><i class="fa fa-chevron-right" id="icon_{{algo.id}}"></i></h3>
+                </div>
+            </div>
+
+            {% for child in algo.children %}
+            <a href="/dashboard/{{child.id}}" class="item child-items-{{algo.id}}" id="item_{{child.id}}"
+                style="padding-left: 40px;">
+                <span class="menu-items">{{child.name}}</span>
+                <span style="font-size: 12px; line-height: 20px;"> {% if child.name_details %} -
+                    {{child.name_details}} {% endif %}</span>
+            </a>
+            {% endfor %}
+            {% else %}
+            <a href="/dashboard/{{algo.id}}" class="item" id="item_{{algo.id}}">
+                <span class="menu-items"
+                    style="font-size: 14px; line-height:1.2; font-weight: 600;">{{algo.name}}</span>
+                <span style="font-size: 12px; line-height: 20px;">{% if algo.name_details %} - {{algo.name_details}}
+                    {% endif %}</span>
+            </a>
+            <hr>
+            {% endif %}
+            {% endfor %}
+            <hr>
+
+            <a href="#" style="padding-left: 0px;" class="item" id="reports_item">
+                <h3 class="menu-items"><i class="fa fa-clone"></i> &nbsp;REPORTS</h3>
+            </a>
+            <hr>
+
+            <div class="footer">
+                &copy; {% now 'Y' %} Trends.Earth &nbsp;&nbsp; | &nbsp;&nbsp; {{version}} &nbsp;&nbsp;
+            </div>
+
+        </div>
+        {% endif %}
+        <div class="col-flex">
+            {% if user.is_authenticated %}
+            <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+                <div class="container-fluid">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a href="#" style="margin-right: 10px; color: #fff;">
+                                    <i class="fa fa-question-circle"></i> USER GUIDE</a>
+                            </li>
+                            <li class="nav-item" style="margin-right: 10px; color: #fff;">|</li>
+                            <li class="nav-item">
+                                <a href="#" style="color: #fff; ">
+                                    <i class="fa fa-question-circle"></i> REPORT SYSTEM ISSUE</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <i class="fa fa-bell"></i>
+                                <span class="badge badge-danger badge-pill"
+                                    style="position: absolute; margin-left: -5px;">4</span>
+                            </li>
+                            <li class="nav-item dropdown">
+                                {% if user.profile.photo != '' %}
+                                <img src="/media/{{user.profile.photo}}" class="user-photo" data-placement="right"
+                                    type="button" data-bs-toggle="dropdown" style="margin-left: 30px;">
+                                {% else %}
+                                <button type=" button" class="btn btn-success btn-circle btn-lg"
+                                    data-bs-toggle="dropdown"
+                                    style="margin-left: 30px;">{{user.first_name|slice:"0:1"}}{{user.last_name|slice:"0:1"}}
+                                </button>
+                                {% endif %}
+
+                                <ul class=" dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'profile' %}">
+                                            <i class="fa fa-user"></i> View profile
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'settings' %}">
+                                            <i class="fa fa-cog"></i> Settings</a>
+                                    </li>
+                                    {% if user.is_superuser %}
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'admin' %}">
+                                            <i class="fa fa-users"></i> Admin</a>
+                                    </li>
+                                    {% endif %}
+                                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i
+                                                class="fa fa-power-off"></i> Log out</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </nav>
+            {% endif %}
+
+            <div class="main" id="main">
+                {% if user.is_authenticated %}
+                {% block messages %}
+                <ul class="messages" id="messages-list">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <li>
+                        {% if message.tags %}
+                        <div class="alert alert-{{ message.tags }} msg fade show" role="alert">{{ message }}</div>
+                        {% else %}
+                        <div class="alert alert-info msg fade show" role="alert">{{ message }}</div>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                    {% endif %}
+                </ul>
+                {% endblock %}
+                {% endif %}
+                {% block content %}
+
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+
+    {% block footer-js %}
+    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/popper.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/dataTables.select.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bs-stepper.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ol.js' %}"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/chart.js' %}"></script>
+    {% endblock %}
+</body>
+<script>
+    $(document).ready(function () {
+        $(".div-item .haschild").on("click", function () {
+            var id = $(this).attr('id').split("_")[1];
+            if ($("#icon_" + id).hasClass("fa-chevron-right")) {
+                $("#icon_" + id).removeClass("fa-chevron-right");
+                $("#icon_" + id).addClass("fa-chevron-down");
+            } else {
+                $("#icon_" + id).addClass("fa-chevron-right");
+                $("#icon_" + id).removeClass("fa-chevron-down");
+            }
+            $(".child-items-" + id).toggle();
+        });
+    });
+</script>
+
+</html>

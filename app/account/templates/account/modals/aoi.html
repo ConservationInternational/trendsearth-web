@@ -1,0 +1,248 @@
+{% load static %}
+<div class="modal fade" id="aoiModal" tabindex="-1" aria-labelledby="title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Region of Interest</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-check">
+                    <input class="form-check-input" value="country" type="radio" name="aoi" id="aoi_country" checked>
+                    <label class="form-check-label" for="aoi_country">
+                        Country/Region
+                    </label>
+                    <div class="row" id="country_panel" style="{% if not aoi.country %} display: none; {% endif %}">
+                        <div class="col-md-12">
+                            <label for="country" class="form-label">First Level</label>
+                            <span class="required">*</span>
+                            <select class="form-select form-select-sm" name="country" id="country">
+                                {% for country in countries %}
+                                {% if aoi.country.id == country.id %}
+                                <option value="{{country.id}}" selected>{{country.name}}</option>
+                                {% else %}
+                                <option value="{{country.id}}">{{country.name}}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="region" class="form-label">Second Level</label>
+                            <span class="required">*</span>
+                            <div class="form-check">
+                                <input class="form-check-input" value="region" type="radio" name="second_level"
+                                    id="second_level_region" {% if not aoi.city %} checked {% endif %}>
+                                <label class="form-check-label" for="second_level">
+                                    Region
+                                </label>
+
+                            </div>
+                            <select style="{% if not aoi.region %} display: none; {% endif %}"
+                                class="form-select form-select-sm" name="region" id="region">
+                                {% for region in regions %}
+                                {% if aoi.region.id == region.id %}
+                                <option value="{{region.id}}" data-rel="{{region.name}}" selected>{{region.name}}
+                                </option>
+                                {% else %}
+                                <option value="{{region.id}}" data-rel="{{region.name}}">{{region.name}}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                            <div class="form-check">
+                                <input class="form-check-input" value="city" type="radio" name="second_level"
+                                    id="second_level_city" {% if aoi.city %} checked {% endif %}>
+                                <label class="form-check-label" for="second_level">
+                                    City
+                                </label>
+                            </div>
+                            <select style="{% if not aoi.city %} display: none; {% endif %}"
+                                class="form-select form-select-sm" name="city" id="city">
+                                {% for city in cities %}
+                                {% if aoi.city.id == city.id %}
+                                <option value="{{city.id}}" data-rel="{{city.name_en}}" selected>{{city.name_en}}
+                                </option>
+                                {% else %}
+                                <option value="{{city.id}}" data-rel="{{city.name_en}}">{{city.name_en}}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                            <span>
+                                Disclaimer: The provided boundaries are
+                                from <a href="http://www.naturalearthdata.com/"
+                                    style="text-decoration: underline; color:#0000ff;">Natural
+                                    Earth</a> and are in the <a href="http://creativecommons.org/publicdomain" style="
+                                text-decoration: underline; color:#0000ff;">public
+                                    domain</a>. The boundaries and names used, and the designations used,
+                                in Trends.Earth do not imply official endorsement or acceptance by Conservation
+                                International Foundation, or by its partner organizations and
+                                contributors.
+                            </span>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" value="point" type="radio" name="aoi" id="aoi_point">
+                    <label class="form-check-label" for="aoi_point">
+                        Point
+                    </label>
+                </div>
+                <div class="row" id="point_panel" style="display: none;">
+                    <div class="col-md-6 mb-3">
+                        <label for="longitude" class="form-label">Longitude</label>
+                        <input type="number" class="form-control" name="longitude" id="longitude" placeholder="0.0"
+                            value="0.0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="latitude" class="form-label">Latitude</label>
+                        <input type="number" class="form-control" name="latitude" id="latitude" placeholder="0.0"
+                            value="0.0">
+                    </div>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" value="file" type="radio" name="aoi" id="aoi_file"
+                        accept=".wkt,.zip,.kml,.txt,.json,.geojson">
+                    <label class="form-check-label" for="aoi_file">
+                        Area from file
+                    </label>
+                </div>
+                <div class="mb-3" id="file_panel" style="display: none;">
+                    <input class="form-control" type="file" id="data_file">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="chbox_buffer" checked>
+                    <label class="form-check-label" for="chbox_buffer">
+                        Apply a buffer to the chosen area
+                    </label>
+                </div>
+                <div class="mb-3" id="buffer_panel">
+                    <label for="buffer_size" class="form-label">Buffer size (kilometers)</label>
+                    <input type="number" class="form-control" name="buffer_size" id="buffer_size" placeholder="10.0"
+                        value="10.0" min="0.1">
+                </div>
+                <div class="mb-3">
+                    <label for="area_name" class="form-label">Area Name</label>
+                    <input type="text" class="form-control" name="area_name" id="area_name" value="">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-success" id="btn_save_aoi">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#region option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+        $("input[name=aoi").on("change", function () {
+            $("#country_panel").hide();
+            $("#point_panel").hide();
+            $("#file_panel").hide();
+            $("#" + $(this).val() + "_panel").show();
+            if ($(this).val() == "country") {
+                $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#region option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+            } else if ($(this).val() == "point") {
+                $("#area_name").val("pt-lon" + $("#longitude").val() + "lat" + $("#latitude").val() + "-buffer-" + $("#buffer_size").val());
+            } else {
+                $("#area_name").val("area-of-interest" + "-buffer-" + $("#buffer_size").val());
+            }
+        });
+
+        $("input[name=second_level").on("change", function () {
+            $("#region").hide();
+            $("#city").hide();
+            $("#" + $(this).val()).show();
+            if ($(this).val() == "region") {
+                $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#region option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+            } else {
+                $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#city option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+            }
+        });
+
+        $("#chbox_buffer").on("change", function () {
+            if ($(this).is(":checked")) {
+                $("#buffer_panel").show();
+            } else {
+                $("#buffer_panel").hide();
+            }
+        });
+
+        $("#country").on("change", function () {
+            $.get("/ajax/regions?country_id=" + $(this).val(), function (response, status) {
+                $("#region").empty();
+                $("#region").append(response);
+            });
+
+            $.get("/ajax/cities?country_id=" + $(this).val(), function (response, status) {
+                $("#city").empty();
+                $("#city").append(response);
+            });
+            if ($("input[name=second_level").val() === "region") {
+                $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#region option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+            } else {
+                $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#city option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+            }
+        });
+        $("#region").on("change", function () {
+            $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#region option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+        });
+
+        $("#city").on("change", function () {
+            $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#city option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+        });
+
+        $("#btn_save_aoi").on("click", function () {
+            var country = null, region = null, city = null,
+                lat = null, lon = null, file = null,
+                buffer_size = null, area_name = null, data_file = null;
+            if ($("#aoi_country").is(":checked")) {
+                country = +$("#country").val();
+
+                if ($("#second_level_region").is(":checked")) {
+                    region = +$("#region").val();
+                } else {
+                    city = +$("#city").val();
+                }
+            } else if ($("#aoi_point").is(":checked")) {
+                lat = +$("#latitude").val(), lon = +$("#longitude").val()
+            } else if ($("#aoi_file").is(":checked")) {
+                data_file = $("#data_file")[0];
+                if (data_file == undefined || data_file.files.length == 0) {
+                    showMessage("Input file is required!", 3000);
+                    return;
+                } else {
+                    data_file = data_file.files[0];
+                }
+            }
+
+            if ($("#chbox_buffer").is(":checked")) {
+                buffer_size = +$("#buffer_size").val();
+            }
+
+            area_name = $("#area_name").val();
+
+            let formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("country", country);
+            formData.append("region", region);
+            formData.append("city", city);
+            formData.append("lat", lat);
+            formData.append("lon", lon);
+            formData.append("buffer_size", buffer_size);
+            formData.append("name", area_name);
+            formData.append("file", data_file);
+            $.ajax({
+                url: "/ajax/change/aoi",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    showMessage(response.msg, 3000);
+                }
+            });
+        });
+    });
+</script>

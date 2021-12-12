@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Trends.Earth{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<div id="breadcrumbs" class="d-print-none">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb border-bottom">
+            <li class="breadcrumb-item">
+                <a href="/"><i class="fa fa-home"></i></a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/admin">Admin</a>
+            </li>
+            <li class="breadcrumb-item active"> {{this_user.first_name}} {{this_user.last_name}}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        {% include 'account/user.html' %}
+
+        <div class="row">
+
+            <div class="col-md-6 border">
+                <h3>Summary Information</h3>
+                <div id="line_chart_div" class="line-chart">
+
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row border">
+                    <div class="col-md-6 pie-chart" id="pie_chart_div"></div>
+                    <div class="col-md-6" id="legend_div"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    var domains = [];
+    ({{ pie_chart_data | safe }}).forEach(element => {
+        domains.push(element.name);
+    });
+
+
+    $(document).ready(function () {
+        var color = d3.scaleOrdinal(domains, d3.schemeTableau10);
+        drawLineChart({{ line_chart_data| safe }}, {
+        x: (d) => d.date,
+        y: (d) => d.count,
+        z: (d) => d.name,
+        code: (d) => d.code,
+        yLabel: "",
+        width: $("#line_chart_div").width(),
+        height: 400,
+        color: color,
+        voronoi: false,
+        targetPanel: "line_chart_div"
+    });
+
+    drawPieChart({{ pie_chart_data| safe }}, color, "pie_chart_div", 430);
+    drawPieLegend({{ pie_chart_data| safe }}, color, "legend_div");
+
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,418 @@
+<!-- Main SDG 15.3.1 indicator-->
+
+{% load static %}
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-new-tab" data-bs-toggle="tab" data-bs-target="#nav-new" type="button"
+            role="tab" aria-controls="nav-new" aria-selected="true">
+            <i class="fa fa-plus-circle"></i>
+            New Job
+        </button>
+        <button class="nav-link" id="nav-perm-tab" data-bs-toggle="tab" data-bs-target="#nav-perm" type="button"
+            role="tab" aria-controls="nav-perm" aria-selected="false">
+            <i class="fa fa-list"></i>
+            View Jobs</button>
+        <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button"
+            role="tab" aria-controls="nav-info" aria-selected="false">
+            <i class="fa fa-info-circle"></i>
+            About</button>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade border show active" id="nav-new" role="tabpanel" aria-labelledby="nav-new-tab"
+        style="padding: 10px;">
+        <div class="row">
+            <form method="post" id="form">
+                {% csrf_token %}
+                <div class="row border">
+                    <div class="col-md-12 mb-3">
+                        <label for="baseline_dataset" class="form-label">Baseline dataset</label>
+                        <select class="form-select form-select-sm" name="baseline_dataset" id="baseline_dataset">
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <div class="accordion" id="accordionAdvancedBaseline">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingAdvancedBaseline">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseAdvancedBaseline" aria-expanded="true"
+                                        aria-controls="collapseAdvancedBaseline">
+                                        Advanced configuration (Baseline period)
+                                    </button>
+                                </h2>
+                                <div id="collapseAdvancedBaseline" class="accordion-collapse collapse hide"
+                                    aria-labelledby="headingAdvancedBaseline"
+                                    data-bs-parent="#accordionAdvancedBaseline">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-12 border">
+                                                <h3>Productivity</h3>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="productivity_method_baseline" id="rb_trends_baseline"
+                                                        value="trends" checked>
+                                                    <label class="form-label form-check-label" for="rb_trends_baseline">
+                                                        Trends.Earth land productivity
+                                                    </label>
+                                                    <div id="baseline_panel_1">
+                                                        <p for="year_initial_baseline">Trajectory
+                                                            (degradation)</p>
+                                                        <select class="form-select form-select-sm"
+                                                            name="year_initial_baseline" id="year_initial_baseline">
+                                                        </select>
+                                                        <p for="year_initial_baseline">Performance
+                                                            (degradation)</p>
+                                                        <select class="form-select form-select-sm"
+                                                            name="year_initial_baseline" id="year_initial_baseline">
+                                                        </select>
+                                                        <p for="year_initial_baseline">State
+                                                            (degradation)</p>
+                                                        <select class="form-select form-select-sm"
+                                                            name="year_initial_baseline" id="year_initial_baseline">
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="productivity_method_baseline" id="rb_unccd_baseline"
+                                                        value="unccd">
+                                                    <label class="form-check-label" for="rb_unccd_baseline">
+                                                        UNCCD default data (Land Productivity Dynamics (LPD) from Join
+                                                        Research Commission)
+                                                    </label>
+                                                </div>
+                                                <div id="baseline_panel_2" style="display: none;">
+                                                    <select class="form-select form-select-sm"
+                                                        name="year_initial_baseline" id="year_initial_baseline">
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="row ">
+                                            <div class="col-md-12 border">
+                                                <h3>Land Cover (degradation)</h3>
+                                                <select class="form-select form-select-sm" name="lc_baseline"
+                                                    id="lc_baseline">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row ">
+                                            <div class="col-md-12 border">
+                                                <h3>Soil carbon (degradation)</h3>
+                                                <select class="form-select form-select-sm" name="soc_baseline"
+                                                    id="soc_baseline">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="pop_baseline"
+                                                        id="pop_baseline">
+                                                    <label class="form-check-label" for="pop_baseline">
+                                                        Population (required to calculate population affected by
+                                                        degradation)
+                                                    </label>
+                                                </div>
+                                                <div id="init_year_baseline_panel" style="display: none;">
+                                                    <select class="form-select form-select-sm"
+                                                        name="year_initial_baseline" id="year_initial_baseline">
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row border">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="checkbox_include_progress"
+                                id="checkbox_include_progress">
+                            <label class="form-check-label" for="checkbox_include_progress">
+                                Include progress period (for comparison to baseline)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mb-3" id="progress_panel" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="progress_dataset" class="form-label">Progress dataset</label>
+                                <select class="form-select form-select-sm" name="progress_dataset"
+                                    id="progress_dataset">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <div class="accordion" id="accordionAdvancedProgress">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="headingAdvancedProgress">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseAdvancedProgress" aria-expanded="true"
+                                                aria-controls="collapseAdvancedBaseline">
+                                                Advanced configuration (Progress period)
+                                            </button>
+                                        </h2>
+                                        <div id="collapseAdvancedProgress" class="accordion-collapse collapse hide"
+                                            aria-labelledby="headingAdvancedProgress"
+                                            data-bs-parent="#accordionAdvancedProgress">
+                                            <div class="accordion-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="comparison_approach" id="rb_approach_trends">
+                                                            <label class="form-check-label" for="rb_approach_trends">
+                                                                Trends.Earth
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="comparison_approach" id="rb_approach_unccd"
+                                                                checked>
+                                                            <label class="form-check-label" for="rb_approach_unccd">
+                                                                UNCCD Good Practice Guidance Version 2
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12 border">
+                                                        <h3>Productivity</h3>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="productivity_method" id="rb_trends_progress"
+                                                                checked>
+                                                            <label class="form-label form-check-label"
+                                                                for="rb_trends_progress">
+                                                                Trends.Earth land productivity
+                                                            </label>
+                                                            <p for="year_initial_progress">Trajectory
+                                                                (degradation)</p>
+                                                            <select class="form-select form-select-sm"
+                                                                name="year_initial_progress" id="year_initial_progress">
+                                                            </select>
+                                                            <p for="year_initial_baseline">Performance
+                                                                (degradation)</p>
+                                                            <select class="form-select form-select-sm"
+                                                                name="year_initial_baseline" id="year_initial_baseline">
+                                                            </select>
+                                                            <p for="year_initial_baseline">State
+                                                                (degradation)</p>
+                                                            <select class="form-select form-select-sm"
+                                                                name="year_initial_baseline" id="year_initial_baseline">
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="productivity_method" id="rb_lpd">
+                                                            <label class="form-check-label" for="rb_lpd">
+                                                                UNCCD default data (Land Productivity Dynamics (LPD)
+                                                                from
+                                                                Join
+                                                                Research Commission)
+                                                            </label>
+                                                        </div>
+                                                        <select class="form-select form-select-sm"
+                                                            name="year_initial_baseline" id="year_initial_baseline">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row ">
+                                                    <div class="col-md-12 border">
+                                                        <h3>Land Cover (degradation)</h3>
+                                                        <select class="form-select form-select-sm"
+                                                            name="comboBox_custom_soc" id="comboBox_custom_soc">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row ">
+                                                    <div class="col-md-12 border">
+                                                        <h3>Soil carbon (degradation)</h3>
+                                                        <select class="form-select form-select-sm"
+                                                            name="comboBox_custom_soc" id="comboBox_custom_soc">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                name="chbx_population" id="chbx_population">
+                                                            <label class="form-check-label" for="chbx_population">
+                                                                Population (required to calculate population affected by
+                                                                degradation)
+                                                            </label>
+                                                        </div>
+                                                        <select class="form-select form-select-sm"
+                                                            name="year_initial_baseline" id="year_initial_baseline">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h3>Current region</h3>
+                            <label>{{aoi.name}}</label>
+                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
+                                data-bs-target="#aoiModal">
+                                <i class="fa fa-edit"></i> Change Region</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12  mb-3">
+                            <label class="form-label">Execution Name</label>
+                            <input type="text" class="form-control" name="execution_name" id="execution_name"
+                                placeholder="Execution Name" autofocus="" autocapitalize="none">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12  mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" id="task_notes" name="task_notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-md-11 mb-3">
+                        <button type="submit" class="btn btn-danger">SCHEDULE EXECUTION</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <div class="tab-pane fade border" id="nav-perm" role="tabpanel" aria-labelledby="nav-perm-tab"
+        style="padding-top: 10px;">
+        <div class="row">
+            <div class="col-md-12" style="padding: 10px 0px;">
+                <table id="task_tbl" class="table table-striped hover" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>ID</th>
+                            <th>Status</th>
+                            <th>Started</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade border" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab"
+        style="padding: 10px;">
+        <div class="row">
+            <div class="col-md-11">
+                <div class="section" id="sdg-indicator-15-3-1">
+                    <span id="indicator-15-3-1"></span>
+                    <h1>SDG Indicator 15.3.1</h1>
+                    <p>As part of the "2030 Agenda for Sustainable Development", Sustainable
+                        Development Goal (SDG) 15 is to:</p>
+                    <blockquote>
+                        <div>
+                            <p>"Protect, restore and promote sustainable use of terrestrial ecosystems,
+                                sustainably manage forests, combat desertification, and halt and reverse
+                                land degradation and halt biodiversity loss"</p>
+                        </div>
+                    </blockquote>
+                    <p>Each SDG has specific targets addressing different components, in this case, of
+                        life on land. Target 15.3 aims to:</p>
+                    <blockquote>
+                        <div>
+                            <p>"By 2030, combat desertification, restore degraded land and soil, including
+                                land affected by desertification, drought and floods, and strive to achieve
+                                a land degradation-neutral world"</p>
+                        </div>
+                    </blockquote>
+                    <p>Indicators will be used then to assess the progress of each SDG target. In the
+                        case of SDG 15.3 the progress towards a land degradation neutral world will be
+                        assessed using indicator 15.3.1:</p>
+                    <blockquote>
+                        <div>
+                            <blockquote>"proportion of land that is degraded over total land area"</blockquote>
+                        </div>
+                    </blockquote>
+                    <p>As the custodian agency for SDG 15.3, the United Nations Convention to Combat
+                        Desertification (UNCCD) has developed a <a class="reference external"
+                            href="http://www2.unccd.int/sites/default/files/relevant-links/2017-10/Good%20Practice%20Guidance_SDG%20Indicator%2015.3.1_Version%201.0.pdf">Good
+                            Practice Guidance (GPG)</a>.
+                        providing recommendations on how to calculate SDG Indicator 15.3.1.</p>
+                    <p>
+                        In order to assess the area degraded, SDG Indicator 15.3.1 uses information from 3
+                        sub-indicators:
+                    </p>
+                    <ol>
+                        <li>
+                            <p>Vegetation productivity</p>
+                        </li>
+                        <li>
+                            <p>Land cover</p>
+                        </li>
+                        <li>
+                            <p>Soil organic carbon</p>
+                        </li>
+                    </ol>
+                    <p>
+                        Trends.Earth allows the user to compute each of these subindicators in a spatially explicit way
+                        generating raster maps which are then integrated into a final SDG 15.3.1 indicator map and
+                        produces a table result reporting areas potentially improved and degraded for the area of
+                        analysis.
+                    </p>
+                    <a
+                        href="https://trends.earth/docs/en/background/understanding_indicators15.html#sdg-indicator-15-3-1">
+                        <p>More information on indicator SDG 15.3.1</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $("#checkbox_include_progress").on("change", function () {
+            $("#progress_panel").toggle();
+        });
+
+        $("input[name=productivity_method_baseline]").on("change", function () {
+            if ($(this).val() == "trends") {
+                $("#baseline_panel_2").hide();
+                $("#baseline_panel_1").show();
+            } else {
+                $("#baseline_panel_2").show();
+                $("#baseline_panel_1").hide();
+            }
+        });
+
+        $("#pop_baseline").on("change", function () {
+            $("#init_year_baseline_panel").toggle();
+        });
+    });
+</script>

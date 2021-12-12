@@ -1,0 +1,129 @@
+{% extends 'account/base.html' %}
+
+{% block title %} Trends.Earth {% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="sign-up-container" style=" margin-top: 14px !important;">
+    <div class="row welcome-div">
+        <div class="col-md-2">
+            <img src="{% static 'images/trends_earth_logo_square_32x32.png' %}" width="32px">
+        </div>
+        <div class="col-md-8">
+            <span>WELCOME TO</span>
+            <span style="color: #dc3545; ">TRENDS.EARTH</span>
+        </div>
+    </div>
+
+    <form method="post" id="registration-form">
+        <div class="row">
+            <div class="col-md-12">
+                <span>Fill in the following information to register. Mandatory fields are denoted by</span>
+                <span class="required">*</span>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-12">
+                <span class="alert-error" id="alert_error"></span>
+            </div>
+        </div>
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="id_firstname" class="form-label">First Name</label>
+                <span class="required">*</span>
+                <input type="text" class="form-control" name="first_name" id="id_firstname" placeholder="John"
+                    required="true" autofocus="" autocapitalize="none" autocomplete="first_name">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="id_lastname" class="form-label">Last Name</label>
+                <span class="required">*</span>
+                <input type="text" class="form-control" name="last_name" id="id_lastname" placeholder="Doe"
+                    required="true" autofocus="" autocapitalize="none" autocomplete="last_name">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="country" class="form-label">Country</label>
+                <span class="required">*</span>
+                <select class="form-select form-select-sm" name="country" id="country">
+                    {% for country in countries %}
+                    <option value="{{country.id}}">{{country.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="region" class="form-label">Region</label>
+                <span class="required">*</span>
+                <select class="form-select form-select-sm" name="region" id="region">
+                    {% for region in regions %}
+                    <option value="{{region.id}}">{{region.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="organization" class="form-label">Institution</label>
+                <input type="text" class="form-control" name="organization" id="organization"
+                    placeholder="Conservation International" required="true" autofocus="" autocapitalize="none"
+                    autocomplete="organization">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email
+                    Address</label>
+                <span class="required">*</span>
+                <input type="email" class="form-control" name="email" id="email" placeholder="Your Email Address"
+                    required="true" autofocus="" autocapitalize="none" autocomplete="email">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="confirm_email" class="form-label">Confirm Email
+                    Address</label>
+                <span class="required">*</span>
+                <input type="email" class="form-control" name="email2" id="confirm_email"
+                    placeholder="Confirm Email Address" required="true" autofocus="" autocapitalize="none"
+                    autocomplete="email">
+                <input type="hidden" class="form-control" name="username" id="username" value="">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="password" class="form-label">Password</label>
+                <span class="required">*</span>
+                <input type="password" class="form-control" name="password1" id="password1" placeholder="Your password"
+                    required="true" autocomplete="password">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="password2" class="form-label">Confirm Password</label>
+                <span class="required">*</span>
+                <input type="password" class="form-control" name="password2" id="password2"
+                    placeholder="Confirm password" required="true" autocomplete="password2">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <input class="form-check-input" type="checkbox" name="chbox_mail" id="chbox-mail" checked>
+                <label class="form-check-label" for="checkBox">
+                    I would like to be added to the mailling list
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <button type="submit" class="btn btn-danger">
+                    SIGN UP
+                </button>
+            </div>
+        </div>
+        <div class="row text-center">
+            <span>Already having account? <a href="/login" style="color: #000; font-weight: 600;">Sign In</a></span>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

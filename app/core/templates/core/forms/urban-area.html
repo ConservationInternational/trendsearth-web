@@ -1,0 +1,251 @@
+<!-- Urban change spatial layer -->
+
+{% load static %}
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-new-tab" data-bs-toggle="tab" data-bs-target="#nav-new" type="button"
+            role="tab" aria-controls="nav-new" aria-selected="true">
+            <i class="fa fa-plus-circle"></i>
+            New Job
+        </button>
+        <button class="nav-link" id="nav-perm-tab" data-bs-toggle="tab" data-bs-target="#nav-perm" type="button"
+            role="tab" aria-controls="nav-perm" aria-selected="false">
+            <i class="fa fa-list"></i>
+            View Jobs</button>
+        <button class="nav-link" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button"
+            role="tab" aria-controls="nav-info" aria-selected="false">
+            <i class="fa fa-info-circle"></i>
+            About</button>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade border show active" id="nav-new" role="tabpanel" aria-labelledby="nav-new-tab"
+        style="padding: 10px;">
+        <div class="row">
+            <form method="post" id="login-form">
+                {% csrf_token %}
+                <div class="border">
+                    <div class="row">
+                        <div class="col-md-11">
+                            <h3>Threshold</h3>
+                            <em>See the <a
+                                    href="https://geflanddegradation.users.earthengine.app/view/trendsearth-urban-mapper">
+                                    Urban Mapper page
+                                </a> for assistance choosing these values</em>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Impervious Surface Index (0-100)</label>
+                            <span>(lower values will include low density areas)</span>
+                            <input type="number" class="form-control" value="31" min="0" max="100" name="isi_thr"
+                                id="isi_thr" style="max-width: 200px;">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Night Time Lights Index (0-100)</label>
+                            <span>(lower values will include low light areas)</span>
+                            <input type="number" class="form-control" value="10" min="0" max="100" name="ntl_thr"
+                                id="ntl_thr" style="max-width: 200px;">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Water Frequency (0-100)</label>
+                            <span>(lower values will include low frequency waters)</span>
+                            <input type="number" class="form-control" value="25" min="0" max="100" name="wat_thr"
+                                id="wat_thr" style="max-width: 200px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h3>Current region</h3>
+                            <label>{{aoi.name}}</label>
+                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
+                                data-bs-target="#aoiModal">
+                                <i class="fa fa-edit"></i> Change Region</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Execution Name</label>
+                            <input type="text" class="form-control" name="execution_name" id="execution_name"
+                                placeholder="Execution Name" autofocus="" autocapitalize="none">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Notes</h3>
+                            <textarea class="form-control" id="task_notes" name="task_notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+                <div class="row border">
+                    <div class="col-md-12">
+                        <div class="accordion" id="accordionAdvanced">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingAdvanced">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseAdvanced" aria-expanded="true"
+                                        aria-controls="collapseAdvanced">
+                                        Advanced configuration
+                                    </button>
+                                </h2>
+                                <div id="collapseAdvanced" class="accordion-collapse collapse hide"
+                                    aria-labelledby="headingAdvanced" data-bs-parent="#accordionAdvanced">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-11">
+                                                <h3>Urban definition</h3>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label class="form-check-label" for="pct_suburban">
+                                                    Percentage built-up considered suburban
+                                                </label>
+                                                <span>(values below this will be considered rural</span>
+                                                <div class="input-group">
+                                                    <input type="number" value="30" class="form-control" aria-label=""
+                                                        id="pct_suburban" name="pct_suburban" style="max-width: 200px;">
+                                                    <span class="input-group-text" style="height: 36px;">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label class="form-check-label" for="pct_urban">
+                                                    Percentage built-up considered urban
+                                                </label>
+                                                <span>(values below this will be considered suburban</span>
+                                                <div class="input-group">
+                                                    <input type="number" value="30" class="form-control" aria-label=""
+                                                        id="pct_urban" name="pct_urban" style="max-width: 200px;">
+                                                    <span class="input-group-text" style="height: 36px;">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h3>Open space definition</h3>
+                                                <div class="form-input">
+                                                    <label class="form-label" for="cap_ope">
+                                                        Area of largest captured open space (hectares)
+                                                    </label>
+                                                    <span>(continguous captured open space larger than this area will be
+                                                        considered rural)</span>
+                                                    <input class="form-control" type="number" name="cap_ope"
+                                                        id="cap_ope" value="200">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h3>Population definition (Gridded Population of the World, v4)</h3>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="pop_def"
+                                                        id="pop_unadjusted" checked>
+                                                    <label class="form-check-label" for="pop_unadjusted">
+                                                        Population density consistent with national census and
+                                                        population registers
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="pop_def"
+                                                        id="pop_adjusted">
+                                                    <label class="form-check-label" for="pop_adjusted">
+                                                        Population density adjusted to match official UN population
+                                                        estimates
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+                <div class="row">
+                    <div class="col-md-11 mb-3">
+                        <button type="button" class="btn btn-danger" id="btn_execute">SCHEDULE EXECUTION</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <div class="tab-pane fade border" id="nav-perm" role="tabpanel" aria-labelledby="nav-perm-tab"
+        style="padding-top: 10px;">
+        <iframe src="/ajax/job/results/{{script.id}}" id="iframe" frameborder="0" scrolling="no"></iframe>
+    </div>
+    <div class="tab-pane fade border" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab"
+        style="padding: 10px;">
+        <div class="row">
+            <div class="col-md-11">
+                <div class="section" id="sdg-indicator-15-3-1">
+                    <span id="indicator-15-3-1"></span>
+                    <h1>Urban Area Change Metrics</h1>
+                    <p>SDG 11.3.1 Indicator algorithm for ratio of land consumption rate to population growth rate.</p>
+                    <p><a href="https://trends.earth/docs/en/background/understanding_indicators11.html">More
+                            information</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $("#btn_execute").on("click", function () {
+            let formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("algo", "urban-area");
+            formData.append("runmode", "REMOTE");
+            formData.append("task_name", $("#execution_name").val());
+            formData.append("task_notes", $("#task_notes").val());
+            formData.append("isi_thr", +$("#isi_thr").val());
+            formData.append("ntl_thr", +$("#ntl_thr").val());
+            formData.append("wat_thr", +$("#wat_thr").val());
+            formData.append("un_adju", $("#pop_adjusted").is(":checked"));
+            formData.append("cap_ope", +$("#cap_ope").val());
+            formData.append("pct_suburban", +$("#pct_suburban").val() / 100.0);
+            formData.append("pct_urban", +$("#pct_urban").val() / 100.0);
+
+            $.ajax({
+                url: "/ajax/run/job",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $("#messages-list").removeClass("msg-white");
+                    $("#messages-list").addClass("msg-dark");
+                    const messages = document.getElementById("messages-list");
+                    messages.innerHTML += response.msg;
+
+                    $("#messages-list").fadeOut(2000, "swing", function () {
+                        messages.innerHTML = "";
+                        $("#messages-list").show();
+                        $("#messages-list").removeClass("msg-black");
+                        $("#messages-list").addClass("msg-white");
+                    });
+                    $('#iframe').attr('src', function (i, val) { return val; });
+                    $("#aggregationDefinitionModal .btn-close").click()
+                }
+            });
+        });
+    });
+</script>

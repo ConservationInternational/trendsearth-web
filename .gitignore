@@ -18,9 +18,6 @@ env/
 .vscode/
 
 
-# Migrations
-migrations/*
-
 # media
 app/media/*
 

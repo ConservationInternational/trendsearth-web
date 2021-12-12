@@ -1,0 +1,109 @@
+{% load static %}
+
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .photo-container img {
+        cursor: pointer;
+        border-radius: 50%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 150px;
+        height: 150px;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-4 border center" style="background-color: #f5f5f5; padding-top: 10px;">
+        <div class="photo-container">
+            {% if user.profile.photo == '' %}
+            <img src="{% static 'assets/images/profile.png' %}" alt="" class="profile-photo" data-toggle="popover"
+                title="" data-placement="right" type="button" data-original-title="Help?" id="profile_photo">
+            {% else %}
+            <img src="/media/{{user.profile.photo}}" alt="" class="profile-photo" data-toggle="popover" title=""
+                data-placement="right" type="button" data-original-title="Help?" id="profile_photo">
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-12 border" style="background-color: #f5f5f5; padding-top: 10px;">
+                <h3>General Information</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>First Name</h6>
+                        <h4>{{user.first_name}}</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Last Name</h6>
+                        <h4>{{user.last_name}}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Institution</h6>
+                        <h4>{{user.profile.organization}}</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Email Address</h6>
+                        <h4>{{user.email}}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Role</h6>
+                        <h4>{{user.profile.role.value}}</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Status</h6>
+                        <h4>{% if user.is_active %} Active {% else %} Inactive {% endif %}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 border">
+        <h3>Area of Interest Information</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="block-content">
+                    Country
+                    <h6> {{user.profile.country.name}} </h6>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="block-content">
+                    Region
+                    <h6> {{user.profile.region.name}}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-12 border">
+                <h3>Login Information</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        Date Joined
+                        <h6> {{user.date_joined}} </h6>
+                    </div>
+                    <div class="col-md-6">
+                        Last Login Date
+                        <h6> {{user.last_login}}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

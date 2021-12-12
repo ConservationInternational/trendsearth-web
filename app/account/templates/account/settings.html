@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Trends.Earth{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+<style>
+    input[type="text"],
+    input[type="number"] {
+        width: 80%;
+        margin-top: 10px;
+    }
+
+    .control-group {
+        margin-top: 10px;
+    }
+</style>
+
+<div id="breadcrumbs" class="d-print-none">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb border-bottom">
+            <li class="breadcrumb-item">
+                <a href="/"><i class="fa fa-home"></i></a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/profile">Profile</a>
+            </li>
+            <li class="breadcrumb-item active">Settings {{this_user.first_name}} {{this_user.last_name}}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="container">
+    <div class="row border">
+        <div class="col-md-12">
+            <form id="settings_form" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-11">
+
+                        <h3>Settings</h3>
+                        <div class="row">
+                            <div class="col-sm-12 mb-3">
+                                {{ form|crispy }}
+                            </div>
+                        </div>
+                    </div>
+            </form>
+            <br />
+            <div class="row">
+                <div class="col-md-11 mb-3">
+                    <button class="btn btn-danger" type="submit"
+                        style="width: 250px; border-radius: 5px;">UPDATE</button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+
+        $("#countryInput").on("change", function () {
+            $.get("/ajax/regions?country_id=" + $(this).val(), function (response, status) {
+                $("#regionInput").empty();
+                $("#regionInput").append(response);
+            });
+        });
+
+        $("#btn_save_user").on("click", function () {
+            let formData = new FormData(document.getElementById("user_form"));
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("user_id", "{{this_user.id}}");
+            $.ajax({
+                url: "/ajax/user/edit/",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    showMessage(response.msg, 10000);
+                },
+            });
+        });
+        $("#btn_upload_profile_photo").on("click", function () {
+            $("#file_profile").click();
+        })
+        $("#file_profile").on("change", function () {
+            const fileinput = $(this)[0];
+            if (fileinput !== undefined && fileinput.files.length > 0) {
+                let formData = new FormData();
+                formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+                formData.append("user_id", "{{this_user.id}}");
+                formData.append("file", fileinput.files[0]);
+                $.ajax({
+                    url: "/ajax/upload/profile_image/",
+                    type: "POST",
+                    dataType: "json",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        $("#profile_photo").attr("src", "/media/" + response.image)
+                        showMessage(response.msg, 10000);
+                    },
+                    error: function (response) {
+                        showMessage(response.responseJSON.msg, 10000);
+                    },
+
+                });
+            }
+
+        });
+
+    });
+</script>
+{% endblock %}

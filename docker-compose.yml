@@ -1,0 +1,70 @@
+version: "3.8"
+
+networks:
+    ldmp:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+            -
+                subnet: 173.16.150.0/12
+services:
+    db:
+        build:
+            context: ./config/db
+            dockerfile: Dockerfile
+        container_name: db
+        hostname: db
+        mem_limit: 512m
+        command: postgres -c max_connections=300 -c log_min_messages=LOG
+        environment:
+          - POSTGRES_DB=ldmpdb
+          - POSTGRES_USER=postgres
+          - POSTGRES_PASSWORD=postgres
+          - POSTGRES_PORT=5432
+        ports:
+            - "5432:5432"
+        networks:
+            ldmp:
+                ipv4_address: 173.16.150.1
+        env_file:
+            - ./.env
+    ldmpweb:
+        build:
+            context: ./app
+        command: >
+                sh -c "python manage.py migrate && gunicorn main.wsgi:application --bind 0.0.0.0:9000"
+        container_name: ldmpweb
+        hostname: ldmpweb
+        volumes:
+            - ./app:/home/app
+            - static_volume:/home/app/static
+            - staticfiles_volume:/home/app/staticfiles
+        env_file:
+            - ./.env
+        depends_on:
+            - db
+        networks:
+            ldmp:
+                ipv4_address: 173.16.150.2
+
+    nginxserver:
+        build:
+            context: ./config/nginx
+            dockerfile: Dockerfile
+        container_name: nginxserver
+        ports:
+            - "80:80"
+        volumes:
+            - static_volume:/home/app/static
+            - staticfiles_volume:/home/app/staticfiles
+        depends_on:
+            - db
+            - ldmpweb
+        networks:
+            ldmp:
+                ipv4_address: 173.16.150.3
+  
+volumes:
+    static_volume:
+    staticfiles_volume:
