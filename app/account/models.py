@@ -158,6 +158,18 @@ class Algorithm(models.Model):
         db_table = "algorithm"
 
 
+class Feedback(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, default=None)
+    title = models.CharField(max_length=255, blank=False, null=False)
+    message = models.TextField(blank=False, null=False)
+    deleted = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "feedbacks"
+
+
 class Role(models.Model):
     code = models.CharField(max_length=50, default="", null=True, blank=True)
     value = models.CharField(max_length=100, default="", null=True, blank=True)

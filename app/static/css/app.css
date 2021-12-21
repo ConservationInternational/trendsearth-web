@@ -11,10 +11,6 @@ body {
   flex-grow: 1;
 }
 
-#map{
-  min-height: auto;
-  height: calc(100vh - 125px) !important;
-}
 
 * {
   font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
@@ -57,7 +53,6 @@ body {
   padding: 15px 10px !important;
   padding: 8px;
   text-align: left;
-  background-color: #161E32;
   border-bottom: 2px solid #dc3545;
   
 }
@@ -94,7 +89,8 @@ body {
   width: 300px !important;
   min-width: 300px;
   overflow: hidden !important;
-  background: linear-gradient(to bottom, #1C263D, #273146) !important;
+  /* background-color: rgba(28, 38, 61, 0.8); */
+  background: linear-gradient(to bottom, rgba(0,0,0, 0.8), rgba(28, 38, 61, 0.8)) !important;
   transition: 1s;
 }
 
@@ -346,6 +342,15 @@ thead th,
 tfoot th {
   color: #212529;
   font-size: 16px;
+}
+
+#task_tbl td{
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+  line-height: 140% !important;
+  letter-spacing: -.3px!important;
+  margin: 0!important;
+  font-size: 13px!important;
+  font-weight: 400;
 }
 
 #task-table_wrapper {
@@ -663,14 +668,14 @@ tr.details td.details-control {
 
 .matrix-table .degradation {
   border: 1px solid gray; 
-  background: #AB2727;
+  background: #9b2779;
   color: #fff;
 }
 
 .matrix-table .improvement {
   color: #fff;
   border: 1px solid gray; 
-  background: #45A146;
+  background: #006500;
 }
 
 .matrix-table .stable {

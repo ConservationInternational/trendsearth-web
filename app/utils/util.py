@@ -1,5 +1,7 @@
 import os
 import requests
+import json
+
 from marshmallow.exceptions import ValidationError
 from te_schemas.land_cover import (
     LCLegend,

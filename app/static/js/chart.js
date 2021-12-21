@@ -368,7 +368,7 @@ const drawPieLegend = function (data, color, targetPanel) {
   lg.panel = $("#" + targetPanel);
 
   lg.width = lg.panel.width();
-  lg.height = 30 * data.length;
+  lg.height = 50 * data.length;
 
   /* Legend object */
   lg.obj = d3
@@ -377,10 +377,10 @@ const drawPieLegend = function (data, color, targetPanel) {
     .attr("id", "pie_legend")
     .attr("width", lg.width)
     .attr("height", lg.height)
-    .attr("viewBox", [0, -20, lg.width, lg.height]);
+    .attr("viewBox", [0, 0, lg.width, lg.height]);
 
-  var square = 28; /* size of the color squares */
-  var top = (lg.height - square * (data.length - 1)) * 0.6;
+  var square = 28;
+  var top = 50;
 
   /* Containers for each legend item */
   lg.obj

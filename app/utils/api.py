@@ -348,3 +348,9 @@ class Api(object):
             return resp['data']
         else:
             return None
+
+    def send_mail(self, toemail, msg):
+        payload = {"recipients": toemail,
+                   "html": msg, }
+
+        return self.call_api('/api/v1/email', 'post', payload, use_token=True)

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Trends.Earth{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div id="breadcrumbs" class="d-print-none">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb border-bottom">
+            <li class="breadcrumb-item">
+                <a href="/home"><i class="fa fa-home"></i></a>
+            </li>
+            <li class="breadcrumb-item active">New message</li>
+        </ol>
+    </nav>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <label>Use the form below to send us your feedback. You can also send us an email through
+                    <span style="text-decoration: underline; color: #dc3545;">{{mailto}}</span>.</label>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-12">
+                <form id="user_form" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="titleInput" class="form-label">Title</label>
+                        <span class="required">*</span>
+                        <input type="text" name="title" class="form-control" id="titleInput" value="">
+                    </div>
+                    <div class="mb-3">
+                        <label for="messageInput" class="form-label">Message</label>
+                        <span class="required">*</span>
+                        <textarea name="message" class="form-control" id="messageInput" value="" rows="10"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-danger" type="submit" style="border-radius: 3px;">SEND</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}

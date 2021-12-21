@@ -1,0 +1,109 @@
+{% load static %}
+
+<div id="map">
+    <div class="map-nav-main">
+        <div class="nav-panel">
+            <div class="map-control-buttons">
+                <div class="control-panel">
+                    <ul>
+                        <li>
+                            <button role="button" class="btn-menu-item" id="dropdownZoomIn" title="Zoom In">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="btn-menu-item" id="dropdownZoomOut" title="Zoom Out">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </li>
+                    </ul>
+
+                </div>
+                <div class="control-panel">
+                    <ul>
+                        <li>
+                            <button role="button" class="btn-menu-item" id="btnLegend" title="Legend">
+                                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="palette"
+                                    class="svg-inline--fa fa-palette fa-w-16" role="img"
+                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                    <path fill="currentColor"
+                                        d="M204.3 5C104.9 24.4 24.8 104.3 5.2 203.4c-37 187 131.7 326.4 258.8 306.7 41.2-6.4 61.4-54.6 42.5-91.7-23.1-45.4 9.9-98.4 60.9-98.4h79.7c35.8 0 64.8-29.6 64.9-65.3C511.5 97.1 368.1-26.9 204.3 5zM96 320c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm32-128c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm128-64c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm128 64c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </li>
+                        <li>
+                            <button role="button" class="btn-menu-item" id="btnLayers" title="Layers">
+                                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="layer-group"
+                                    class="svg-inline--fa fa-layer-group fa-w-16" role="img"
+                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                    <path fill="currentColor"
+                                        d="M12.41 148.02l232.94 105.67c6.8 3.09 14.49 3.09 21.29 0l232.94-105.67c16.55-7.51 16.55-32.52 0-40.03L266.65 2.31a25.607 25.607 0 0 0-21.29 0L12.41 107.98c-16.55 7.51-16.55 32.53 0 40.04zm487.18 88.28l-58.09-26.33-161.64 73.27c-7.56 3.43-15.59 5.17-23.86 5.17s-16.29-1.74-23.86-5.17L70.51 209.97l-58.1 26.33c-16.55 7.5-16.55 32.5 0 40l232.94 105.59c6.8 3.08 14.49 3.08 21.29 0L499.59 276.3c16.55-7.5 16.55-32.5 0-40zm0 127.8l-57.87-26.23-161.86 73.37c-7.56 3.43-15.59 5.17-23.86 5.17s-16.29-1.74-23.86-5.17L70.29 337.87 12.41 364.1c-16.55 7.5-16.55 32.5 0 40l232.94 105.59c6.8 3.08 14.49 3.08 21.29 0L499.59 404.1c16.55-7.5 16.55-32.5 0-40z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="map-control-buttons">
+
+
+            </div>
+
+            <div class="map-control-buttons">
+                <div class="control-panel">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layers-panel bpvjuW" id="layers_panel">
+        <div class="htjuUx">
+            <h4 class="gKIZCJ jaEwnR">LAYERS</h4>
+            <button id="btn_close_layers_panel">
+                <i class="fa fa-close"></i>
+            </button>
+        </div>
+
+        <div class="row">
+            <div class="col-md-11 layer-list">
+                <ul class="m-basemap-selectors is-active">
+                    <li>
+                        <button type="button" id="bg-1">
+                            <span class="icon-satellite">Satellite</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="bg-2">
+                            <span class="icon-topographic">Topographic</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="bg-3">
+                            <span class="icon-dark">Dark</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="bg-0" class="is-active">
+                            <span class="icon-default">Default</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row footer" id="map_footer">
+    <div class="col-sm-4">
+        <span>© OpenStreetMap contributors</span>
+    </div>
+    <div class="col-sm-4">
+        <span id="lat">Lat </span>&nbsp; | &nbsp; <span id="lon">Lon 0</span>
+    </div>
+    <div class="col-sm-4">
+        &copy; {% now 'Y' %} Conservation International &nbsp;&nbsp; | &nbsp;&nbsp;
+        Trends.Earth
+    </div>
+</div>

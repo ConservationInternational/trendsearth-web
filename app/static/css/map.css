@@ -1,0 +1,188 @@
+#map{
+    min-height: calc(100vh);
+  }
+
+.bpvjuW {
+    z-index: 99999;
+    border-radius: 5px;
+  }
+  .layers-panel {
+    display: flex;
+    box-sizing: border-box;
+    position: absolute;
+    z-index: 1;
+    width: 350px;
+    max-width: 400px;
+    max-height: 60vh;
+    flex-direction: column;
+    background-color: rgb(255, 255, 255);
+  }
+  .jaEwnR {
+    margin: 0px;
+  }
+  .htjuUx {
+    display: flex;
+    box-sizing: border-box;
+    position: relative;
+    background-color: rgb(89, 91, 96);
+    padding: 10px;
+  }
+  
+  .gKIZCJ {
+    text-align: center;
+    color: #fff;
+    width: 100%;
+    font-size: 16px;
+  }
+  
+  .layers-panel button{
+    background-color: transparent;
+    border: 0px;
+    color: #fff;
+  }
+  
+  .layer-list .m-basemap-selectors {
+    align-content: center;
+    justify-content: space-between;
+    padding: 0.625rem 0!important;
+    list-style: none;
+  }
+  .layer-list ul{
+    list-style: none;
+  }
+  ul.is-active.m-basemap-selectors {
+    display: flex;
+    list-style: none;
+    margin: 0;
+  }
+  .layer-list .m-basemap-selectors li {
+    flex-basis: 25%;
+    list-style-type: none;
+  }
+  
+  .layer-list .m-basemap-selectors button.is-active span {
+    color: #ddd;
+  }
+  
+  .m-basemap-selectors button{
+    -webkit-appearance: none;
+      appearance: none;
+      box-shadow: none;
+      background: none;
+      border: 0;
+      text-decoration: none;
+      outline: none;
+      color: #000;
+  }
+  
+  .m-basemap-selectors span {
+    display: flex;
+    flex-direction: column-reverse;
+    height: 90px;
+    width: 72px;
+    background-position: top;
+    background-repeat: no-repeat;
+    background-size: 58px;
+  }
+  
+  .m-basemap-selectors span.icon-default {
+    background-image: url(/static/images/default_map.jpg);
+  }
+  
+  .m-basemap-selectors span.icon-satellite {
+    background-image: url(/static/images/satellite_map.jpg);
+  }
+  
+  .m-basemap-selectors span.icon-dark {
+    background-image: url(/static/images/dark_map.jpg);
+  }
+  
+  .m-basemap-selectors span.icon-topographic {
+    background-image: url(/static/images/topographic_map.jpg);
+  }
+  .map-nav-main{
+    top: 80px;
+    bottom: 50px;
+    right: 24px;
+    position: absolute;
+    z-index: 1;
+  }
+  
+  .nav-panel{
+    display: flex;
+    box-sizing: border-box;
+    position: relative;
+    height: 100%;
+    -webkit-box-align: center;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-direction: column;
+  }
+  
+  .map-control-buttons{
+    display: flex;
+    box-sizing: border-box;
+    position: relative;
+    flex-direction: column;
+  }
+  
+  .control-panel{
+    display: flex;
+    box-sizing: border-box;
+    position: relative;
+    width: 30px;
+    height: 60px;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: rgb(255, 255, 255);
+  }
+  .control-panel ul{
+    list-style: none !important;    
+    padding: 0px;
+    margin: 0px;  
+  }
+
+  .control-panel ul li{
+    list-style-type: none !important;
+    padding: 0px;
+  }
+  
+  .control-panel button{
+    margin: 0px !important;
+    padding: 0px !important;
+    border: 1px solid #ddd;
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.8);
+    width: 30px;
+    height: 30px;
+    min-height: 25px;
+    min-width: 20px;
+    border-radius: 1px;  
+  }
+  
+  .control-panel button i, .control-panel button svg{
+    margin: auto;
+    margin-left: unset !important;
+    margin-right: unset !important;
+    font-size: 15px;
+    
+  }
+  
+  .control-panel button svg{
+    width: 20px;
+    height: 20px;
+  }
+
+  
+/****/
+
+@media (min-width: 768px) {
+    .bpvjuW {
+      top: 172px;
+      right: 60px;
+    }
+  }

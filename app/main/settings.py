@@ -35,10 +35,12 @@ INSTALLED_APPS = [
     'account',
     'job',
     'core',
-    'crispy_forms'
+    'crispy_forms',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,6 +51,18 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'main.urls'
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:8000', 'http://trends.earth.s3.us-east-1.amazonaws.com'
+)
+
+CORS_ALLOWED_ORIGINS = [
+    'http://trends.earth.s3.us-east-1.amazonaws.com',
+    'http://localhost:8000'
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
@@ -61,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.mailto'
             ],
             'libraries':{
                 'template_filters': 'main.template_filters',
@@ -153,21 +168,24 @@ LOGOUT_REDIRECT_URL = 'login'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 
-# Define email service on GeoNode
-EMAIL_ENABLE = ast.literal_eval(os.getenv('EMAIL_ENABLE', 'False'))
+# Define email service
+
+MAIL_TO_ADMIN = os.getenv('MAIL_TO_ADMIN', 'info@trends.earth')
+
+EMAIL_ENABLE = True
 
 if EMAIL_ENABLE:
     EMAIL_BACKEND = os.getenv(
-        'DJANGO_EMAIL_BACKEND',
+        'EMAIL_BACKEND',
         default='django.core.mail.backends.smtp.EmailBackend')
-    EMAIL_HOST = os.getenv('DJANGO_EMAIL_HOST', 'localhost')
-    EMAIL_PORT = os.getenv('DJANGO_EMAIL_PORT', 25)
-    EMAIL_HOST_USER = os.getenv('DJANGO_EMAIL_HOST_USER', '')
-    EMAIL_HOST_PASSWORD = os.getenv('DJANGO_EMAIL_HOST_PASSWORD', '')
-    EMAIL_USE_TLS = ast.literal_eval(
-        os.getenv('DJANGO_EMAIL_USE_TLS', 'False'))
+    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.sparkpostmail.com')
+    EMAIL_PORT = os.getenv('EMAIL_PORT', 587)
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'SMTP_Injection')
+    EMAIL_HOST_PASSWORD = os.getenv(
+        'EMAIL_HOST_PASSWORD', '1588d5eafd9a0ee1f4acbb4f389c54a4990bf1f6')
+    EMAIL_USE_TLS = True
     DEFAULT_FROM_EMAIL = os.getenv(
-        'DEFAULT_FROM_EMAIL', 'Trends.Earth <no-reply@trends.earth.org>')
+        'DEFAULT_FROM_EMAIL', 'info@trends.earth')
 else:
 
     EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
@@ -202,7 +220,7 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = ast.literal_eval(
 
 
 SITE_HOST_SCHEMA = os.getenv('SITE_HOST_SCHEMA', 'http')
-SITE_HOST_NAME = os.getenv('SITE_HOST_NAME', 'localhost')
+SITE_HOST_NAME = os.getenv('SITE_HOST_NAME', 'localhost:8000')
 SITE_HOST_PORT = os.getenv('SITE_HOST_PORT', 80)
 _default_siteurl = "%s://%s:%s/" % (
     SITE_HOST_SCHEMA,
@@ -214,5 +232,10 @@ SITENAME = os.getenv('SITENAME', "Trends.Earth")
 
 
 # API Settings
-API_URL = 'https://api.trends.earth'
+API_URL = os.getenv('API_URL', 'https://api.trends.earth')
 TIMEOUT = 200
+
+# Colors
+DEGRADED_HEX = '#9b2779'
+INCREASING_HEX = '#006500'
+STABLE_HEX = '#FFFFE0'

@@ -1,0 +1,20 @@
+{% autoescape off %}
+<p>Dear Sir/Madam,</p>
+
+<p>We have received the following feedback.</p>
+
+<blockquote>
+{{message}}
+</blockquote>
+
+<p>The message was sent by:</p>
+<p><b>Name:</b> {{sender}}</p>
+<p><b>Email:</b> {{email}}</p>
+<p><b>User ID:</b> {{uid}}</p>
+<p><b>Sent on:</b> {{date}}</p>
+
+<br/>
+<p>Sincerely,</p>
+<p>Trend.Earth Team</p>
+
+{% endautoescape %}

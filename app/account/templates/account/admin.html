@@ -66,6 +66,22 @@
     </div>
     <div class="tab-pane fade border" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab"
         style="padding: 10px;">
+        <div class="row">
+            <div class="col-md-6">
+                <label>Algorithm name</label>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Run mode</label>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Version</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
         {% for algo in algorithms %}
         {% if algo.children %}
         <div class="row border">
@@ -91,30 +107,33 @@
                                 {{child.name_details}} {% endif %}
                             </label>
                         </div>
-
-                        <table class="admin-algo-tbl">
-                            {% for item in child.id|get_children %}
-                            <tr>
-                                <td><span>{{item.name}}</span></td>
-                                <td style="width: 200px;">
-                                    <div class="row">
-                                        {% for script in item.scripts.all %}
-                                        <div class="col-sm-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input algorithm-check" type="checkbox"
-                                                    typeof="script" id="id-{{script.id}}" {% if not script.deleted %}
-                                                    checked {% endif %}>
-                                                <label class="form-check-label" for="flexCheckChecked">
-                                                    {{script.execution_script.run_mode.value}}
-                                                </label>
-                                            </div>
+                        {% for item in child.id|get_children %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <span>{{item.name}}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    {% for script in item.scripts.all %}
+                                    <div class="col-sm-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input algorithm-check" type="checkbox"
+                                                typeof="script" id="id-{{script.id}}" {% if not script.deleted %}
+                                                checked {% endif %}>
+                                            <label class="form-check-label" for="flexCheckChecked">
+                                                {{script.execution_script.run_mode.value}}
+                                            </label>
                                         </div>
-                                        {% endfor %}
                                     </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </table>
+                                    <div class="col-sm-6">
+                                        <input class="form-control" value="{{script.execution_script.version}}"
+                                            type="text" id="version-{{script.id}}">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 {% endfor %}
@@ -132,28 +151,32 @@
                         {{algo.name_details}} {% endif %}
                     </label>
                 </div>
-                <table class="admin-algo-tbl">
-                    {% for child in algo.id|get_children %}
-                    <tr>
-                        <td><span>{{child.name}}</span></td>
-                        <td style="width: 200px;">
-                            <div class="row">
-                                {% for script in child.scripts.all %}
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input class="form-check-input algorithm-check" type="checkbox" typeof="script"
-                                            id="id-{{script.id}}" {% if not script.deleted %} checked {% endif %}>
-                                        <label class="form-check-label" for="id-{{script.id}}">
-                                            {{script.execution_script.run_mode.value}}
-                                        </label>
-                                    </div>
+                {% for child in algo.id|get_children %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <span>{{child.name}}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            {% for script in child.scripts.all %}
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input algorithm-check" type="checkbox" typeof="script"
+                                        id="id-{{script.id}}" {% if not script.deleted %} checked {% endif %}>
+                                    <label class="form-check-label" for="id-{{script.id}}">
+                                        {{script.execution_script.run_mode.value}}
+                                    </label>
                                 </div>
-                                {% endfor %}
                             </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" value="{{script.execution_script.version}}"
+                                    id="version-{{script.id}}">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
         {% endif %}
@@ -172,10 +195,12 @@
         $("#btn_save_settings").on("click", function () {
             var algorithms = [];
             $(".algorithm-check").each(function () {
+                var id = +$(this).attr("id").split("-")[1];
                 algorithms.push({
-                    id: +$(this).attr("id").split("-")[1],
+                    id: id,
                     checked: $(this).is(":checked"),
-                    typeof: $(this).attr("typeof")
+                    typeof: $(this).attr("typeof"),
+                    version: $("#version-" + id).val()
                 });
             });
             let formData = new FormData();
@@ -194,12 +219,8 @@
                 error: function (response) {
                     // showMessage(response.responseJSON.msg, 10000);
                 },
-
             });
-
         });
-
-
     });
 </script>
 {% endblock %}

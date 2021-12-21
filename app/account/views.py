@@ -4,6 +4,7 @@ from datetime import (
     datetime,
     timedelta
 )
+from django.db.backends.base import features
 from django.db.models import query
 
 from django.http import (
@@ -32,7 +33,6 @@ from django.views.generic.edit import FormView
 from django.contrib import messages
 from django.conf import settings
 from django.db import connection
-from psycopg2.extras import RealDictCursor
 
 from account import models
 from job.models import (Job, Status)
@@ -62,6 +62,9 @@ def signout(request):
 def home_view(request):
     """Load logged in user profile view
     """
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(reverse_lazy('dashboard'))
+
     template = loader.get_template('account/index.html')
     context = {
         'user': request.user
@@ -90,7 +93,7 @@ class LoginView(FormView):
         api_user = api.get_user()
         if api_user is None:
             messages.add_message(self.request, messages.ERROR,
-                                 'User with this credentials not available!')
+                                 'User with these credentials not available!')
             return HttpResponseRedirect(reverse_lazy('login'))
         else:
             user, created = User.objects.update_or_create(
@@ -135,6 +138,10 @@ class LoginView(FormView):
         if user is not None and not user.profile.deleted:
             login(self.request, user)
             today = datetime.now()
+            if models.Settings.objects.filter(user=user).count() == 0:
+                models.Settings.objects.update_or_create(
+                    in_mail_list=False, user=user)
+
             startdate = today - \
                 timedelta(days=models.Settings.objects.get(
                     user=user).data_age_limit)
@@ -334,7 +341,7 @@ def password_reset_view(request):
                     'User with the email provided does not exist!')
                 return render(request, template_name, {'form': form})
             subject = "Password Reset Requested"
-            email_template_name = "account/password_reset_email.txt"
+            email_template_name = "messages/password_reset_email.txt"
             content = {
                 "name": user.first_name + " " + user.last_name,
                 "email": user.email,
@@ -347,9 +354,12 @@ def password_reset_view(request):
             }
             email = render_to_string(email_template_name, content)
             try:
-                send_mail(subject, email, settings.DEFAULT_FROM_EMAIL,
-                          [user.email], fail_silently=False)
-            except BadHeaderError:
+                print(settings.DEFAULT_FROM_EMAIL)
+                ret = send_mail(subject, email, from_email=settings.DEFAULT_FROM_EMAIL,
+                                recipient_list=[user.email], fail_silently=False)
+                print(ret, settings.EMAIL_USE_TLS, settings.EMAIL_ENABLE)
+            except BadHeaderError as e:
+                print(e)
                 return HttpResponse('Invalid header found.')
             return HttpResponseRedirect(
                 reverse_lazy('password_reset_done'))
@@ -466,9 +476,72 @@ def admin_view(request):
             user=request.user,
             user__profile__deleted=False),
         "parents": get_algorithms(),
-        "algorithms": get_algorithms()
+        "algorithms": get_algorithms(include_deleted=True)
     }
     return HttpResponse(template.render(context, request))
+
+
+@ login_required
+def view_feedback(request):
+    """Loads a feedback form
+    """
+    template = loader.get_template('account/feedback.html')
+
+    if request.POST:
+        form = forms.FeedbackForm(data=request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.user = request.user
+            feedback.save()
+
+            # Notify the admin
+            subject = feedback.title
+            email_template_name = "messages/feedback_text.txt"
+            user = request.user
+            content = {
+                "sender": user.first_name + " " + user.last_name,
+                "message": feedback.message,
+                "email": user.email,
+                "uid": user.profile.uid,
+                "date": feedback.created_at
+            }
+            email = render_to_string(email_template_name, content)
+            try:
+                ret = send_mail(subject, html_message=email, message=email, from_email=settings.DEFAULT_FROM_EMAIL,
+                                recipient_list=[settings.MAIL_TO_ADMIN], fail_silently=False)
+            except BadHeaderError as e:
+                print(e)
+
+            # Notify the user of the receipt
+            subject = "Reciept of your feedback: " + feedback.title
+            email_template_name = "messages/feedback_sent_text.txt"
+            user = request.user
+            content = {
+                "name": user.first_name + " " + user.last_name,
+                "message": feedback.message,
+                "title": feedback.title,
+            }
+            email = render_to_string(email_template_name, content)
+            try:
+                ret = send_mail(subject, html_message=email, message=email, from_email=settings.DEFAULT_FROM_EMAIL,
+                                recipient_list=[user.email], fail_silently=False)
+            except BadHeaderError as e:
+                print(e)
+
+            return HttpResponseRedirect(reverse_lazy('feedback'))
+        else:
+            messages.add_message(
+                request, messages.ERROR,
+                "Error occured while sending your message! Required fields cannot be empty.",
+                fail_silently=True)
+            return HttpResponseRedirect(reverse_lazy('feedback'))
+
+    else:
+        context = {
+            'user': request.user,
+            "parents": get_algorithms()
+        }
+        return HttpResponse(template.render(context, request))
 
 
 def ajax_register_user(request):
@@ -634,11 +707,55 @@ def ajax_update_algorithms_visibility(request):
             for algo in algos:
                 algo.deleted = not data["checked"]
                 algo.save(update_fields=["deleted"])
+                scripts = algo.scripts.all()
+                for script in scripts:
+                    script.execution_script.version = data["version"]
+                    script.execution_script.save(update_fields=["version"])
+
         return JsonResponse({
             "msg": "Settings updated!"}, status=200)
     else:
         return JsonResponse({
             "msg": "Settings not updated!"}, status=400)
+
+
+@login_required
+def ajax_load_aoi(request):
+    try:
+        aoi = models.Aoi.objects.get(user=request.user)
+
+        srid = 3857
+
+        if request.GET.get("srid"):
+            srid = request.GET.get("srid")
+        features = []
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT st_asgeojson(st_transform(geom, {})) as geom
+                FROM area_of_interest
+                WHERE user_id = {}
+                """.format(srid, request.user.id))
+            geoms = dictfetchall(cursor)
+
+            features = []
+            for geom in geoms:
+                features.append(
+                    {
+                        "type": "Feature",
+                        "geometry": json.loads(geom["geom"])
+                    })
+
+        geojson = {
+            "type": "FeatureCollection",
+            "features": features,
+            "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::3857"}}
+        }
+        return JsonResponse(
+            geojson,
+            safe=False)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"type": "Polygon", "coordinates": []}, safe=False)
 
 
 def get_chart_data(user=None):
@@ -705,9 +822,13 @@ def get_chart_data(user=None):
     return line_chart_data, pie_chart_data
 
 
-def get_algorithms():
-    parents = models.Algorithm.objects.filter(
-        parent_id=None, deleted=False).values().order_by("id")
+def get_algorithms(include_deleted=False):
+    if include_deleted:
+        parents = models.Algorithm.objects.filter(
+            parent_id=None).values().order_by("id")
+    else:
+        parents = models.Algorithm.objects.filter(
+            parent_id=None, deleted=False).values().order_by("id")
     algorithms = []
     for parent in parents:
         children = models.Algorithm.objects.filter(

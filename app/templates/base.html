@@ -21,8 +21,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/select2.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/select.dataTables.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/bs-stepper.min.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{%  static 'css/ol.css' %}" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/css/ol.css" type="text/css">
     <link rel="stylesheet" type="text/css" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/map.css' %}">
 
 </head>
 {% endblock %}
@@ -43,8 +45,7 @@
             </div>
             <hr>
 
-
-            <a href="/dashboard" style="padding-left: 0px;" class="item active" id="dashboard_item">
+            <a href="/home" style="padding-left: 0px;" class="item active" id="dashboard_item">
                 <h3 class="menu-items"><i class="fa fa-home"></i> &nbsp;DASHBOARD</h3>
             </a>
             <hr>
@@ -75,7 +76,7 @@
             </div>
 
             {% for child in algo.children %}
-            <a href="/dashboard/{{child.id}}" class="item child-items-{{algo.id}}" id="item_{{child.id}}"
+            <a href="/algorithm/{{child.id}}" class="item child-items-{{algo.id}}" id="item_{{child.id}}"
                 style="padding-left: 40px;">
                 <span class="menu-items">{{child.name}}</span>
                 <span style="font-size: 12px; line-height: 20px;"> {% if child.name_details %} -
@@ -83,7 +84,7 @@
             </a>
             {% endfor %}
             {% else %}
-            <a href="/dashboard/{{algo.id}}" class="item" id="item_{{algo.id}}">
+            <a href="/algorithm/{{algo.id}}" class="item" id="item_{{algo.id}}">
                 <span class="menu-items"
                     style="font-size: 14px; line-height:1.2; font-weight: 600;">{{algo.name}}</span>
                 <span style="font-size: 12px; line-height: 20px;">{% if algo.name_details %} - {{algo.name_details}}
@@ -94,10 +95,10 @@
             {% endfor %}
             <hr>
 
-            <a href="#" style="padding-left: 0px;" class="item" id="reports_item">
+            <!-- <a href="#" style="padding-left: 0px;" class="item" id="reports_item">
                 <h3 class="menu-items"><i class="fa fa-clone"></i> &nbsp;REPORTS</h3>
             </a>
-            <hr>
+            <hr> -->
 
             <div class="footer">
                 &copy; {% now 'Y' %} Trends.Earth &nbsp;&nbsp; | &nbsp;&nbsp; {{version}} &nbsp;&nbsp;
@@ -117,21 +118,22 @@
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
-                                <a href="#" style="margin-right: 10px; color: #fff;">
-                                    <i class="fa fa-question-circle"></i> USER GUIDE</a>
+                                <a href="https://trends.earth/docs/en/" target="_blank"
+                                    style="margin-right: 10px; color: #fff;">
+                                    <i class="fa fa-info-circle"></i> USER GUIDE</a>
                             </li>
                             <li class="nav-item" style="margin-right: 10px; color: #fff;">|</li>
                             <li class="nav-item">
-                                <a href="#" style="color: #fff; ">
-                                    <i class="fa fa-question-circle"></i> REPORT SYSTEM ISSUE</a>
+                                <a href="{% url 'feedback' %}" style="color: #fff; ">
+                                    <i class="fa fa-question-circle"></i> SEND FEEDBACK</a>
                             </li>
                         </ul>
                         <ul class="navbar-nav ml-auto">
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <i class="fa fa-bell"></i>
                                 <span class="badge badge-danger badge-pill"
                                     style="position: absolute; margin-left: -5px;">4</span>
-                            </li>
+                            </li> -->
                             <li class="nav-item dropdown">
                                 {% if user.profile.photo != '' %}
                                 <img src="/media/{{user.profile.photo}}" class="user-photo" data-placement="right"
@@ -205,10 +207,12 @@
     <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/dataTables.select.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/bs-stepper.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/ol.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/build/ol.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="text/javascript" src="{% static 'js/app.js' %}"></script>
     <script src="{% static 'js/chart.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
+
     {% endblock %}
 </body>
 <script>

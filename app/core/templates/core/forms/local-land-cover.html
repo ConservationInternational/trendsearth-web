@@ -80,50 +80,52 @@
                                 <div id="collapseAdvanced" class="accordion-collapse collapse hide"
                                     aria-labelledby="headingAdvanced" data-bs-parent="#accordionAdvanced">
                                     <div class="accordion-body">
+                                        <p>Define Effects of Land Cover Change</p>
                                         <div class="row">
-                                            <div class="col-md-8">
+                                            <div class="col-md-12">
                                                 <table class="matrix-table" id="matrix_table">
                                                     {{table | safe}}
                                                 </table>
-
-                                                <button type="button" class="btn btn-outline-primary">Reset
-                                                    matrix</button>
-                                                <button type="button" class="btn btn-outline-danger">Load matrix from
-                                                    file</button>
-                                                <button type="button" class="btn btn-outline-secondary">Save matrix to
-                                                    file</button>
                                             </div>
-                                            <div class="col-md-4">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
                                                 <label>Legend</label>
                                                 <table>
                                                     <tr>
                                                         <td>
                                                             <div
-                                                                style="max-width: 30; height: 20px; background-color: #AB2727; border: 1px solid gray;">
+                                                                style="width: 30; height: 20px; background-color: {{degraded_hex}}; border: 1px solid gray;">
                                                             </div>
                                                         </td>
-                                                        <td>Degradation</td>
-                                                    </tr>
-                                                    <tr>
+                                                        <td>Degraded</td>
                                                         <td>
                                                             <div
-                                                                style="max-width: 30; height: 20px; background-color: #45A146; border: 1px solid gray;">
+                                                                style="width: 30; height: 20px; background-color: {{increasing_hex}}; border: 1px solid gray;">
                                                             </div>
                                                         </td>
-                                                        <td>Improvement</td>
-                                                    </tr>
-                                                    <tr>
+                                                        <td>Increasing</td>
                                                         <td>
                                                             <div
-                                                                style="max-width: 30; height: 20px; background-color: #FFFFE0; border: 1px solid gray;">
+                                                                style="max-width: 30; height: 20px; background-color: {{stable_hex}}; border: 1px solid gray;">
                                                             </div>
                                                         </td>
                                                         <td>Stable</td>
                                                     </tr>
+
                                                 </table>
                                                 <p>* The <em>Grassland</em> class consists of grassland, shrub, and
                                                     sparsely
                                                     vegetated areas (if the default aggregation is used).</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <button type="button" class="btn btn-outline-primary"
+                                                    id="btn_reset_matrix_tbl">Reset
+                                                    matrix</button>
+                                                <button type="button" class="btn btn-outline-secondary">Save
+                                                    matrix</button>
                                             </div>
                                         </div>
                                     </div>
@@ -145,23 +147,7 @@
     </div>
     <div class="tab-pane fade border" id="nav-perm" role="tabpanel" aria-labelledby="nav-perm-tab"
         style="padding-top: 10px;">
-        <div class="row">
-            <div class="col-md-12" style="padding: 10px 0px;">
-                <table id="task_tbl" class="table table-striped hover" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Task</th>
-                            <th>ID</th>
-                            <th>Status</th>
-                            <th>Started</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        {% include 'core/jobs.html' %}
     </div>
     <div class="tab-pane fade border" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab"
         style="padding: 10px;">
@@ -212,6 +198,13 @@
 <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
 <script>
     $(document).ready(function () {
+        $("#btn_reset_matrix_tbl").on("click", function () {
+            $.get("/ajax/matrix_table", function (response, status) {
+                $("#matrix_table").empty();
+                $("#matrix_table").append(response);
+            });
+        });
+
         $(".lc-input").on("keyup", function () {
             var inputVal = $(this).val();
             if (! /[-0+]/.test(inputVal)) {

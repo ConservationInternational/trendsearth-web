@@ -1,0 +1,25 @@
+{% autoescape off %}
+<p>Dear {{name}},</p>
+
+<p>This is to notify you that we have received the following message from you.</p>
+
+<blockquote>
+
+<p><b>Title</b></p>
+
+<p>{{title}}</p>
+
+<p><b>Message</b></p>
+<p>{{ message }}</p>
+
+</blockquote>
+
+<p>If the message requires action from us, we will get back to you as soon as possible.</p>
+
+<p>If you did not send this message, you can simply ignore this email.</p>
+
+<br/>
+<p>Sincerely,</p>
+<p>Trend.Earth Team</p>
+
+{% endautoescape %}

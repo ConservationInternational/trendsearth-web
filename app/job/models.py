@@ -44,6 +44,26 @@ class Job(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     deleted = models.BooleanField(default=False)
     results = models.JSONField({}, null=True, blank=True)
+    task_name = models.CharField(max_length=250, default="")
+    task_notes = models.TextField(default="")
 
     class Meta:
         db_table = "jobs"
+        ordering = ('-start_date',)
+
+
+class Layer(models.Model):
+    name = models.CharField(max_length=200)
+    layername = models.CharField(max_length=100, default="")
+    url = models.CharField(max_length=200)
+    workspace = models.CharField(max_length=50, default="ldmp")
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_result = models.BooleanField(default=False)
+    is_visible = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    job = models.OneToOneField(Job, on_delete=models.CASCADE,
+                               null=True)
+    is_base = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "layers"

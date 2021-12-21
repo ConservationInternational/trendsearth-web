@@ -154,23 +154,7 @@
     </div>
     <div class="tab-pane fade border" id="nav-perm" role="tabpanel" aria-labelledby="nav-perm-tab"
         style="padding-top: 10px;">
-        <div class="row">
-            <div class="col-md-12" style="padding: 10px 0px;">
-                <table id="task_tbl" class="table table-striped hover" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Task</th>
-                            <th>ID</th>
-                            <th>Status</th>
-                            <th>Started</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        {% include 'core/jobs.html' %}
     </div>
     <div class="tab-pane fade border" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab"
         style="padding: 10px;">

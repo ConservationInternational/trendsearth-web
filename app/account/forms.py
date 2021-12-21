@@ -55,6 +55,17 @@ class AoiForm(forms.ModelForm):
         self.fields['date_created'].required = False
 
 
+class FeedbackForm(forms.ModelForm):
+    """The feedback form"""
+    class Meta:
+        model = models.Feedback
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['user'].required = False
+
+
 class PasswordResetForm(forms.Form):
     """Password reset form"""
     email = forms.CharField(widget=forms.TextInput)

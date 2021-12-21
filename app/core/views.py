@@ -13,7 +13,7 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse_lazy
 from account import models as accountmodels
-from job.models import Job, Status
+from job.models import Job, Status, Layer
 from utils.api import Api
 
 from . import models
@@ -25,12 +25,19 @@ from account.views import get_chart_data, signout, get_algorithms
 @login_required
 def dashboard(request):
     template = loader.get_template('core/index.html')
+    center = [0, 0]
+    try:
+        aoi = accountmodels.Aoi.objects.get(user=request.user)
+        center = json.loads(aoi.geom.centroid.json)["coordinates"]
+    except Exception as e:
+        print(e)
 
     line_chart_data, pie_chart_data = get_chart_data()
     context = {
         "parents": get_algorithms(),
         'line_chart_data': line_chart_data,
-        'pie_chart_data': pie_chart_data
+        'pie_chart_data': pie_chart_data,
+        'center': center
     }
     return HttpResponse(template.render(context, request))
 
@@ -72,6 +79,23 @@ def view_algorithm(request, algo_id):
         "aoi": aoi,
         "conf": conf.REMOTE_DATASETS
 
+    }
+    return HttpResponse(template.render(context, request))
+
+
+@login_required
+def view_job(request, job_id):
+    template = loader.get_template('core/job.html')
+    parents = accountmodels.Algorithm.objects.filter(
+        parent_id=None, deleted=False).values().order_by("id")
+
+    job = Job.objects.get(id=job_id)
+    exec_script = job.script
+    algo = accountmodels.Algorithm.objects.get(
+        scripts__execution_script=exec_script)
+    context = {
+        "parents":  get_algorithms(),
+        "id": algo.parent.id,
     }
     return HttpResponse(template.render(context, request))
 
@@ -204,7 +228,9 @@ def ajax_get_algorithm_view(request, id, runmode):
         "cities": cities,
         "script": script.first(),
         "aoi": aoi,
-        "conf": conf.REMOTE_DATASETS
+        "id": id,
+        "conf": conf.REMOTE_DATASETS,
+        "jobs": getjobs(request, script.first().id)
     }
 
     if script.first().name == "productivity":
@@ -245,8 +271,9 @@ def ajax_reset_aggregation_table(request):
 
 def getjobs(request, script_id):
     jobs = Job.objects.filter(
-        user=request.user, script_id=script_id, deleted=False)
-    if not 'bearer_token' in request.session:
+        user=request.user, script_id=script_id, deleted=False).order_by("-start_date")
+
+    if not request.session.get('bearer_token'):
         signout(request)
 
     api = Api(token=request.session['bearer_token'])
@@ -274,14 +301,14 @@ def ajax_load_results(request, script_id):
 
 
 @login_required
-def ajax_download_job(request, uid):
-    job = Job.objects.get(user=request.user, uid=uid, deleted=False)
+def ajax_download_job(request, id):
+    job = Job.objects.get(user=request.user, id=id, deleted=False)
     urls = job.results["urls"]
     if len(urls) == 1:
         if url_exists(urls[0]["url"]):
             return JsonResponse({"url": urls[0]["url"]}, status=200)
         else:
-            return JsonResponse({"msg": "File not found"}, status=400)
+            return JsonResponse({"msg": "Cannot download the results for this job!"}, status=400)
 
     date = datetime.now()
     filename = "../" + \
@@ -296,28 +323,37 @@ def ajax_download_job(request, uid):
         return JsonResponse({"url": "/media/" + filename,
                              "fname": filename}, status=200)
     else:
-        return JsonResponse({"msg": "File not found"}, status=400)
+        return JsonResponse({"msg": "Cannot download the results for this job"}, status=400)
 
 
 @login_required
-def ajax_cancel_job(request, uid):
-    job = Job.objects.get(user=request.user, uid=uid, deleted=False)
-    job.status = Status.objects.get(code="CANCELLED")
-    job.save(update_fields=['status'])
+def ajax_cancel_job(request, id):
+    jobs = Job.objects.filter(user=request.user, id=id, deleted=False)
+    for job in jobs:
+        job.status = Status.objects.get(code="CANCELLED")
+        job.save(update_fields=['status'])
     # api = Api(token=request.session['bearer_token'])
-    return JsonResponse({"msg": "Job cancelled successfully"}, status=200)
+    template = loader.get_template('core/task_tbl.html')
+    context = {
+        "jobs": getjobs(request, jobs.first().script.id)
+    }
+    return HttpResponse(template.render(context, request))
 
 
 @login_required
-def ajax_delete_job(request, uid):
+def ajax_delete_job(request, id):
     # api = Api(token=request.session['bearer_token'])
 
     try:
-        job = Job.objects.get(user=request.user, uid=uid, deleted=False)
+        job = Job.objects.get(user=request.user, id=id, deleted=False)
         job.deleted = True
         job.status = Status.objects.get(code="DELETED")
         job.save(update_fields=['deleted', 'status'])
-        return JsonResponse({"msg": "Job deleted successfully"}, status=200)
+        template = loader.get_template('core/task_tbl.html')
+        context = {
+            "jobs": getjobs(request, job.script.id)
+        }
+        return HttpResponse(template.render(context, request))
     except Exception as e:
         print(e)
         return JsonResponse({"msg": "Job not found"}, status=400)
@@ -341,3 +377,35 @@ def ajax_load_climate_dataset(request):
         for data in climate_datasets:
             options += "<option value='{}'>{}</option>".format(data, data)
         return HttpResponse(options)
+
+
+@login_required
+def add_layer_to_map(request):
+    try:
+        uid, checked = request.POST.get("uid"), request.POST.get("checked")
+        job = Job.objects.get(user=request.user, uid=uid, deleted=False)
+        Layer.objects.update_or_create(
+            job=job,
+            user=request.user,
+            defaults={
+                "name": job.task_name,
+                "url": "",
+                "is_visible": int(checked) == 1
+            })
+        return JsonResponse({"msg": "Result for this task added to the Map" if int(checked) else "Results for this task removed from the Map"}, status=200)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"msg": "Job not found"}, status=400)
+
+
+@login_required
+def ajax_load_jobs(request, script_id):
+    template = loader.get_template('core/task_tbl.html')
+    context = {
+        "jobs": getjobs(request, script_id)
+    }
+    return HttpResponse(template.render(context, request))
+
+
+def ajax_proxy_results(request):
+    pass

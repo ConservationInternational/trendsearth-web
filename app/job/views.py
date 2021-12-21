@@ -477,9 +477,13 @@ def ajax_run_job(request):
         api = Api(token=request.session['bearer_token'])
 
         for payload in payloads:
+            print([payload["crs"]])
+            if payload["crs"] == 'None':
+                payload["crs"] = "GEOGCS[\"unknown\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]]"
             url_fragment = f"/api/v1/script/{script.uid}/run"
             response = api.call_api(url_fragment, "post",
                                     payload, use_token=True)
+
             try:
                 out = response["data"]
                 out["params"] = ""
@@ -491,8 +495,11 @@ def ajax_run_job(request):
                 job.script = script
                 job.status = Status.objects.get(code=out.get("status"))
                 job.uid = out.get("id", "")
+                job.task_name = payload.get("task_name")
+                job.task_notes = payload.get("task_notes")
                 job.user = request.user
                 job.user.profile.uid = out.get("user_id", "")
+
                 job.save()
                 job.user.profile.save(update_fields=["uid"])
 

@@ -20,14 +20,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install https://github.com/ConservationInternational/trends.earth-schemas/archive/refs/heads/master.zip
 
-# RUN apt-get install software-properties-common -y && apt-get update
-# RUN add-apt-repository ppa:ubuntugis/ppa && apt-get update
-# RUN apt-get update
-# RUN apt-get install -y gdal-bin
-# RUN apt-get install -y libgdal-dev
-# RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal
-# RUN export C_INCLUDE_PATH=/usr/include/gdal
-# RUN pip install GDAL
 
 COPY ./requirements.txt $APP_HOME
 RUN pip install -r requirements.txt

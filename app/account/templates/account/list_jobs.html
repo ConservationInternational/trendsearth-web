@@ -1,3 +1,4 @@
+{% load static %}
 <table id="jobs_tbl" class="table table-bordered" style="width:100%">
     <thead>
         <tr>
@@ -26,25 +27,78 @@
             <td>{{job.start_date}}</td>
             <td>
                 {% if job.status.value == "FINISHED" %}
-                <button class="btn btn-outline-primary download-job" role="button" job-id="{{job.uid}}"
-                    style="line-height: 1; min-width: 20px; border-radius: 5px;">
-                    <i class="fa fa-download"></i> Download
+                <button class="btn btn-danger download-job" job-id="{{job.id}}" title="Download"
+                    style="margin-right: 5px; line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
+                    <i class="fa fa-arrow-circle-down"></i>
                 </button>
-                {% endif %}
-                {% if job.status.value == "RUNNING" or job.status.value == "READY" %}
-                <button class="btn btn-danger cancel-job" role="button" job-id="{{job.uid}}"
-                    style="color: #ffffff; padding: 2px; height: 20px; margin:0px; line-height: 2px; min-width: 20px; border-radius: 5px;">
-                    <i class="fa fa-ban"></i>
-                </button>
-                {% else %}
-                <button class="btn btn-outline-danger delete-job" role="button" job-id="{{job.uid}}"
-                    style="line-height: 1; min-width: 20px; border-radius: 5px;">
-                    <i class="fa fa-trash"></i> Delete
-                </button>
+                <a class="btn btn-outline-primary view-job" role="button" job-id="{{job.id}}" title="View"
+                    href="/jobs/{{job.id}}/view"
+                    style="margin-right: 5px; line-height: 2px; min-width: 10px; width: 24px; height: 20px; padding: 2px; border-radius: 5px;">
+                    <i class="fa fa-eye"></i>
+                </a>
                 {% endif %}
 
+                {% if job.status.value == "RUNNING" or job.status.value == "READY" %}
+                <button class="btn btn-danger cancel-job" role="button" job-id="{{job.id}}" title="Cancel"
+                    style="margin-right: 5px;line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
+                    <i class="fa fa-ban"></i>
+                </button>
+                {% endif %}
+                <button class="btn btn-outline-danger delete-job" role="button" job-id="{{job.id}}" title="Delete"
+                    style="line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
+                    <i class="fa fa-remove delete-job"></i>
+                </button>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('#jobs_tbl').on('click', 'button.download-job', function (e) {
+            let uid = $(this).attr("job-id");
+            $.get({
+                url: "/ajax/download/" + uid,
+                success: function (response) {
+                    const link = document.createElement("a");
+                    link.href = response.url;
+                    link.download = response.fname;
+                    link.click();
+                    delete link;
+                },
+                error: function (response) {
+                    showMessage(response.responseJSON.msg, 2000);
+                }
+            });
+        });
+
+        $('#jobs_tbl').on('click', 'button.cancel-job', function (e) {
+            let uid = $(this).attr("job-id");
+            $.get({
+                url: "/ajax/cancel/" + uid,
+                success: function (response) {
+                    $("#jobs_tbl").empty();
+                    $("#jobs_tbl").append(response);
+                },
+            });
+        });
+
+        $('#jobs_tbl').on('click', 'button.delete-job', function (e) {
+            let uid = $(this).attr("job-id");
+            console.log(uid);
+            $.get({
+                url: "/ajax/delete/" + uid,
+                success: function (response) {
+                    $("#jobs_tbl").empty();
+                    $("#jobs_tbl").append(response);
+                },
+                error: function (response) {
+                    showMessage(response.responseJSON.msg, 2000);
+                }
+            });
+        });
+    });
+
+</script>

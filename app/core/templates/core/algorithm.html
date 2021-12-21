@@ -35,11 +35,6 @@
 <script>
     $(document).ready(function () {
         var clicks = 0;
-        $(".active").removeClass("active");
-        $("#item_{{id}}").addClass("active");
-
-        $("#nav-new-tab").addClass("active");
-        $("#nav-new").addClass("active");
 
         let algorithm_id = +$("#algorithm_children").val();
         let runmode = +$("#run_mode").val();
@@ -75,12 +70,6 @@
                 clicks = 0;
             });
         });
-
-        const reloadIFrame = function () {
-            document.getElementById("frame").src = "/ajax/job/results/{{script.id}}";
-        }
-
-        window.setInterval("reloadIFrame();", 30000);
 
         $("#btn_editAggregation").on("click", function () {
             if (clicks < 1)
@@ -136,6 +125,13 @@
                 }
             });
         });
+
+
+        $(".active").removeClass("active");
+        $("#item_{{id}}").addClass("active");
+
+        $("#nav-new-tab").addClass("active");
+        $("#nav-new").addClass("active");
 
     });
 </script>

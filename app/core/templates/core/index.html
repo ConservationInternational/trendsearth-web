@@ -5,109 +5,72 @@
 {% load static %}
 
 {% block content %}
-
-<nav>
-    <div class="nav nav-tabs" id="nav-tab" role="tablist">
-        <button class="nav-link active" id="nav-map-tab" data-bs-toggle="tab" data-bs-target="#nav-map" type="button"
-            role="tab" aria-controls="nav-map" aria-selected="true">
-            <i class="fa fa-map"></i>
-            Map
-        </button>
-        <button class="nav-link" id="nav-chart-tab" data-bs-toggle="tab" data-bs-target="#nav-chart" type="button"
-            role="tab" aria-controls="nav-chart" aria-selected="false">
-            <i class="fa fa-pie-chart"></i>
-            Chart</button>
-
+<div class="row">
+    <div class="col-md-12">
+        {% include 'account/map.html' %}
     </div>
-</nav>
-<div class="tab-content" id="nav-tabContent">
-    <div class="tab-pane fade border show active" id="nav-map" role="tabpanel" aria-labelledby="nav-map-tab"
-        style="padding: 10px;">
-        <div id="map">
+</div>
+
+<div class="row">
+    <div class="col-md-6 border">
+        <h3>Summary Information</h3>
+        <div id="line_chart_div" class="line-chart">
+
         </div>
     </div>
-    <div class="tab-pane fade border" id="nav-chart" role="tabpanel" aria-labelledby="nav-chart-tab"
-        style="padding: 10px;">
-        <div class="row">
-            <div class="col-md-6 border">
-                <h3>Summary Information</h3>
-                <div id="line_chart_div" class="line-chart">
-
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="row border">
-                    <div class="col-md-6 pie-chart" id="pie_chart_div"></div>
-                    <div class="col-md-6 legend" id="legend_div"></div>
-                </div>
-            </div>
-
+    <div class="col-md-6">
+        <div class="row border">
+            <div class="col-md-6 pie-chart" id="pie_chart_div"></div>
+            <div class="col-md-6 legend" id="legend_div"></div>
         </div>
     </div>
 </div>
 
 <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
 <script>
+
     var domains = [];
     ({{ pie_chart_data | safe }}).forEach(element => {
         domains.push(element.name);
     });
 
-    const renderCharts = function (data1, data2) {
-
-    }
+    var center = {{ center | safe}};
 
     $(document).ready(function () {
-        var mainView = new ol.View({
-            center: [0, 0],
-            minZoom: 1,
-            maxZoom: 20,
-            zoom: 3,
+        $("#map").css("min-height", '40vh');
+        $("#map").css("height", '60vh');
+        $("#map").css("margin-bottom", '5px');
+        $("#map_footer").hide();
+
+        var mainMap = drawMap("map");
+
+        var aoiLayer = new ol.layer.Vector({
+            title: 'added Layer',
+            source: new ol.source.Vector({
+                url: '/ajax/load/aoi',
+                format: new ol.format.GeoJSON()
+            })
         });
 
-        var mainMap = new ol.Map({
-            controls: [],
-            target: "map",
-            view: mainView,
-        });
+        mainMap.addLayer(aoiLayer);
 
-        var baseLayer = new ol.layer.Tile({
-            name: "Base Map",
-            source: new ol.source.TileImage({
-                url: "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            }),
-        });
-
-        // Add the base layer to the maps
-        mainMap.addLayer(baseLayer);
-
-        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-            console.log(e.target.id);
-            if (e.target.id == "nav-map-tab") {
-                return;
-            }
-            console.log(e.target.id);
-            var color = d3.scaleOrdinal(domains, d3.schemeTableau10);
-            drawLineChart({{ line_chart_data| safe }}, {
+        var color = d3.scaleOrdinal(domains, d3.schemeTableau10);
+        drawLineChart({{ line_chart_data| safe }}, {
         x: (d) => d.date,
         y: (d) => d.count,
         z: (d) => d.name,
         code: (d) => d.code,
         yLabel: "",
         width: $("#line_chart_div").width(),
-        height: 400,
+        height: 300,
         color: color,
         voronoi: false,
         targetPanel: "line_chart_div"
     });
 
 
-    drawPieChart({{ pie_chart_data| safe }}, color, "pie_chart_div", 430);
+    drawPieChart({{ pie_chart_data| safe }}, color, "pie_chart_div", 330);
     drawPieLegend({{ pie_chart_data| safe }}, color, "legend_div");
-
-    
-    });
-
     });
 
 </script>

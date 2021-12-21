@@ -1,0 +1,58 @@
+{% extends 'core/index.html' %}
+
+{% block title %} Trends.Earth {% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="col-flex">
+    {% include 'account/map.html' %}
+</div>
+
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        // var mainMap = drawMap("map");
+
+        const source = new ol.source.GeoTIFF({
+            sources: [
+                {
+                    min: -5,
+                    max: 5,
+                    url: 'https://www.googleapis.com/download/storage/v1/b/ldmt/o/5ad83865-0e48-491b-9424-37e8599e81ac0_sdg_sub_indicators_1.tif?generation=1639919168607733&alt=media',
+                },
+            ],
+            normalize: false
+        });
+
+        const band = ['band', 4];
+        const resultLayer = new ol.layer.WebGLTile({
+            source: source,
+            style: {
+                color: [
+                    'case',
+                    ['>=', band, 3],
+                    [255, 0, 0],
+                    ['>=', band, 1],
+                    [0, 255, 0],
+                    ['>=', band, -3],
+                    [0, 0, 255],
+                    [255, 255, 255],
+                ],
+            }
+        });
+        var mainMap = drawMap("map");
+        // mainMap.setView(source.getView());
+        // mainMap.addLayer(resultLayer);
+        // mainMap.addLayer(aoiLayer);
+
+
+
+
+        $(".active").removeClass("active");
+        $("#item_{{id}}").addClass("active");
+
+        $("#map_footer").hide();
+    });
+</script>
+{% endblock %}

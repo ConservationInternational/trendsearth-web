@@ -8,6 +8,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{%  static 'css/ol.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/css/ol.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/map.css' %}">
 </head>
 
 <body>
@@ -26,97 +30,49 @@
         {% endif %}
     </ul>
     {% endblock %}
-    <div class="container-fluid">
-        <div class="row-flex">
-            <div id="side-panel">
-                <div class="row welcome-div">
-                    <div class="col-md-2">
-                        <img src="{% static 'images/trends_earth_logo_square_32x32.png' %}" width="32px">
-                    </div>
-                    <div class="col-md-8">
-                        <span>WELCOME TO</span>
-                        <span style="color: #dc3545; ">TRENDS.EARTH</span>
-                    </div>
-                </div>
-                <div class="about">
-                    <h2>About</h2>
-                    <p>
-                        Trends.Earth (formerly the Land Degradation Monitoring Toolbox) is a platform from <a
-                            href="http://www.conservation.org/trendsearth">Conservation
-                            International</a> for monitoring land change using earth observations in an
-                        innovative
-                        desktop
-                        and cloud-based system.
-                    </p>
+    {% include 'header.html' %}
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row-flex">
+                <div id="side-panel">
+                    <div class="about">
+                        <h2>About</h2>
+                        <p>
+                            <a href="https://trends.earth/">Trends.Earth</a> is a platform from <a
+                                href="https://www.conservation.org/">Conservation
+                                International</a> for monitoring land change using
+                            earth observations. The tool allows users to assess time series of key indicators of land
+                            change to produce maps and other graphics that can support monitoring and reporting, and to
+                            track the impact of sustainable land management.
+                        </p>
+                        <p>The tool supports monitoring progress on land degradation neutrality (SDG 15.3.1), land
+                            consumption (SDG 11.3.1), modeling carbon
+                            emissions from deforestation, and modeling potential carbon sequestration from restoration
+                            activities.
+                        </p>
+                        <p>Trends.Earth supports monitoring and reporting on Sustainable Development Goals
+                            (SDGs) 15.3.1 (area of degraded land) and 11.3.1 (ration of land consumption rate to
+                            population growth) by providing a platform for analyzing data for reporting commitments to
+                            the United Nations Convention to Combat Desertification (UNCCD) and UN-Habitat.
+                        </p>
+                        <p>
+                            The development of Trends.Earth was funded by the Global Environment
+                            Facility and NASA, and led by Conservation International and its partners. Conservation
+                            International works to spotlight and secure the critical
+                            benefits that nature provides to humanity.
+                        </p>
 
-                    <p>
-                        Trends.Earth (formerly the Land Degradation Monitoring Toolbox) is a platform from <a
-                            href="http://www.conservation.org/trendsearth">Conservation
-                            International</a> for monitoring land change using earth observations in an
-                        innovative
-                        desktop
-                        and cloud-based system.
-                    </p>
-                    <p>
-                        Trends.Earth (formerly the Land Degradation Monitoring Toolbox) is a platform from <a
-                            href="http://www.conservation.org/trendsearth">Conservation
-                            International</a> for monitoring land change using earth observations in an
-                        innovative
-                        desktop
-                        and cloud-based system.
-                    </p>
-                </div>
-            </div>
-            <div class="col-flex">
-                <div id="map" class="col-flex">
-                    <div class="menu_panel">
-                        <div class="dropdown">
-                            <button class="btn-menu-item" type="button" id="dropdownMenuAbout" data-bs-toggle="dropdown"
-                                data-bs-display="static" aria-expanded="false">
-                                <i class="fa fa-info-circle"></i>
-                                About
-                            </button>
 
-                        </div>
-                        <div style="display: flex;">
-                            <ul class="menu-bar_menu">
-                                <li class="menu-bar_menu-item">
-                                    <div class="dropdown">
-                                        <a role="button" class="btn-menu-item" id="dropdownMenuRegister"
-                                            href="{% url 'register' %}">
-                                            <i class="fa fa-user-plus"></i>Register
-                                        </a>
-                                    </div>
-                                </li>
-                                <li class="menu-bar_menu-item">
-                                    <div class="dropdown">
-                                        <a class="btn-menu-item" role="button" id="dropdownMenuLogin"
-                                            href="{% url 'login' %}">
-                                            <i class="fa fa-sign-in"></i>Login
-                                        </a>
-                                    </div>
-                                </li>
+                    </div>
+                </div>
+                <div class="col-flex">
+                    {% include 'account/map.html' %}
+                </div>
 
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="row footer">
-                    <div class="col-sm-4">
-                        <span>© OpenStreetMap contributors, © CartoDB CC-BY 3.0</span>
-                    </div>
-                    <div class="col-sm-3">
-                        <span>Lat 0</span>&nbsp; | &nbsp; <span>Lon 0</span>
-                        <span>&nbsp; | &nbsp; 1000 KM</span>
-                    </div>
-                    <div class="col-sm-5">
-                        &copy; {% now 'Y' %} Conservation International &nbsp;&nbsp; | &nbsp;&nbsp;
-                        Trends.Earth
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+
     {% block footer-js %}
     <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/popper.min.js' %}"></script>
@@ -126,19 +82,12 @@
     <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/dataTables.select.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/bs-stepper.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/ol.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/build/ol.js"></script>
     <script type="text/javascript" src="{% static 'js/app.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
 
     <script>
         $(document).ready(function () {
-            $(document).click(function () {
-                console.log($(".dropdown-menu").hasClass('show'));
-                //$(".dropdown").removeClass('open');
-            });
-
-            $('.dropdown-menu').click(function (e) {
-                e.stopPropagation();
-            });
 
             $("#country").on("change", function () {
                 $.get("/ajax/regions?country_id=" + $(this).val(), function (response, status) {
@@ -182,28 +131,8 @@
                 });
 
             });
-            var mainView = new ol.View({
-                center: [0, 0],
-                minZoom: 1,
-                maxZoom: 20,
-                zoom: 3,
-            });
 
-            var mainMap = new ol.Map({
-                controls: [],
-                target: "map",
-                view: mainView,
-            });
-
-            var baseLayer = new ol.layer.Tile({
-                name: "Base Map",
-                source: new ol.source.TileImage({
-                    url: "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                }),
-            });
-
-            // Add the base layer to the maps
-            mainMap.addLayer(baseLayer);
+            var mainMap = drawMap("map");
         });
     </script>
     {% endblock %}

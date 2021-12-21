@@ -1,0 +1,117 @@
+.header {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 10px;
+    z-index: 1000;
+    border-bottom: 3px solid #dc3545;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 25%);
+    margin-bottom: 5px;
+  }
+  .header h1 {
+    color: #ffffff;
+    margin: auto;
+    width: 400px;
+  }
+
+  .header .ref-home{
+    margin: auto;
+  }
+  
+  .header img {
+    cursor: pointer;
+    display: block;
+    height: 50px;
+    margin-left: 20px;
+    margin-bottom: 0px;
+  }
+  
+  .sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+  }
+  
+  .sticky + .content {
+    padding-top: 60px;
+  }
+
+  .navbar-nav{
+    margin: 0 5px 5px 5px;
+    list-style: none;
+  }
+  
+  .navbar-nav .nav-item{
+    padding: 0 5px 0px 0px;
+  }
+  
+  .navbar-nav a{
+    text-decoration: none;
+  }
+  
+  
+  .navbar-nav>:first-child>button,
+  .navbar-nav>:first-child>a
+  {
+    border-radius: 16px 0 0 16px;
+  }
+  
+  .navbar-nav>:not(:first-child)>button,
+  .navbar-nav>:not(:first-child)>a
+  {
+    border-radius: 0px;
+  }
+  
+  .navbar-nav>:last-child>button,
+  .navbar-nav>:last-child>a
+  {
+    border-radius: 0px 16px 16px 0px;
+  }
+  
+  .btn-menu-item {
+    color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 16px;
+    font-size: .8125rem;
+    padding: 5px;
+    min-height: 32px;
+    font-family: "Nunito",sans-serif;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 25%);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100px;
+    border-width: 0px;
+  
+  }
+  
+  .btn-menu-item:hover, .btn-menu-item:focus, .btn-menu-item.active{
+    color: rgb(255, 255, 255) !important;
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+  }
+  
+  .btn-menu-item i {
+    height: 15px;
+    width: 15px;
+    vertical-align: middle;
+    display: inline-block;
+    margin: auto 5px;
+    margin-left: 7px;
+    margin-right: 3px;
+  }
+
+  @media only screen and (max-width: 995px){
+    .header .btn-menu-item {
+      width: 100%;
+      text-align: left;
+      justify-content: left;
+      border-radius: 0px !important;
+    }
+    .header .navbar-nav{
+      margin: 0px;
+    }
+    .header .navbar-nav .nav-item{
+      padding: 0px;
+    }
+  }

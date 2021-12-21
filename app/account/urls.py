@@ -25,4 +25,5 @@ urlpatterns = [
     path('settings', views.settings_view, name='settings'),
     path('admin', views.admin_view, name='admin'),
     path('admin/users/<int:user_id>', views.view_user, name='view_user'),
+    path('feedback', views.view_feedback, name='feedback'),
 ]

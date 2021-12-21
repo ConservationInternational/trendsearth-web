@@ -23,7 +23,7 @@ from account import views as account_views
 from job import views as job_views
 
 urlpatterns = [path('', include('account.urls')),
-               path('dashboard/', include('core.urls')), ]
+               path('', include('core.urls')), ]
 
 urlpatterns += [
     path('ajax/algorithm/<int:id>/runmode/<int:runmode>',
@@ -38,6 +38,8 @@ urlpatterns += [
          account_views.ajax_get_cities, name='ajax_get_cities'),
     path('ajax/change/aoi',
          account_views.ajax_change_aoi, name='ajax_change_aoi'),
+    path('ajax/load/aoi',
+         account_views.ajax_load_aoi, name='ajax_load_aoi'),
     path('register/user',
          account_views.ajax_register_user, name='ajax_register_user'),
     path('ajax/user/edit/',
@@ -62,15 +64,21 @@ urlpatterns += [
     path('ajax/job/results/<int:script_id>',
          core_views.ajax_load_results,
          name='ajax_job_results'),
-    path('ajax/download/<str:uid>',
+    path('ajax/job/table/<int:script_id>',
+         core_views.ajax_load_jobs,
+         name='ajax_job_table'),
+    path('ajax/download/<int:id>',
          core_views.ajax_download_job,
          name='ajax_download_job'),
-    path('ajax/cancel/<str:uid>',
+    path('ajax/cancel/<int:id>',
          core_views.ajax_cancel_job,
          name='ajax_download_job'),
-    path('ajax/delete/<str:uid>',
+    path('ajax/delete/<int:id>',
          core_views.ajax_delete_job,
-         name='ajax_download_job')]
+         name='ajax_download_job'),
+    path('ajax/add_layer',
+         core_views.add_layer_to_map,
+         name='add_layer_to_map')]
 
 urlpatterns += staticfiles_urlpatterns()
 

@@ -125,5 +125,12 @@
         </div>
     </form>
 </div>
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $(".btn-menu-item").removeClass("active");
+        $("#dropdownMenuRegister").addClass("active");
+    });
+</script>
 
 {% endblock %}
