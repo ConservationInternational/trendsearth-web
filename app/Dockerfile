@@ -16,12 +16,13 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get update && apt-get install -y \
 	binutils \
 	libproj-dev \
-	gdal-bin
+	gdal-bin \
+	postgresql-client
 
 RUN pip install https://github.com/ConservationInternational/trends.earth-schemas/archive/refs/heads/master.zip
 
-
 COPY ./requirements.txt $APP_HOME
+COPY ./wait_for_postgres.sh $APP_HOME
 RUN pip install -r requirements.txt
 
 ENV HOME=/home/
@@ -41,5 +42,7 @@ RUN chown -R app:app $APP_HOME/*
 # RUN chown -R www-data:www-data $APP_HOME/*
 
 # change to the app user
+EXPOSE 9000
 USER app
 
+ENTRYPOINT ["./wait_for_postgres.sh", "postgresdb", "./entrypoint.sh"]
