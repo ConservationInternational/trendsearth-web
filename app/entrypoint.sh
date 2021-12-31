@@ -4,11 +4,11 @@ set -e
 case "$1" in
     develop)
         echo "Running Development Server"
-        exec python manage.py migrate && gunicorn -c gunicorn.py gefapi.wsgi:application
+        exec python manage.py migrate && gunicorn main.wsgi:application --bind 0.0.0.0:9000
         ;;
     start)
         echo "Running Start"
-        exec gunicorn -c gunicorn.py gefapi.wsgi:application
+        exec gunicorn main.wsgi:application --bind 0.0.0.0:9000
         ;;
     *)
         exec "$@"
