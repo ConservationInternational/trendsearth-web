@@ -5,6 +5,4 @@ RUN apt-get update \
     && apt-get install postgresql-12-postgis-3 -y \
     && apt-get install postgis -y
 
-EXPOSE 5432
-
 # COPY ./populate.sql /home/populate.sql
