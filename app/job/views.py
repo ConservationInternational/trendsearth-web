@@ -1,22 +1,31 @@
+from datetime import datetime
+import urllib.request
 import json
-from django import utils
-from django.db.models.expressions import Value
+import os
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
     JsonResponse
 )
+from django.template import loader
+
 from te_schemas.land_cover import LCTransitionDefinitionDeg, LCLegendNesting
 from job.models import Job, Status
 
 from utils.util import table_to_matrix, get_lc_nesting, get_trans_matrix
 from account import models as accountmodels
+from account.views import logout
 from core import models as coremodels
+from core import views
 from utils import conf
-from utils.api import (Api, RequestTask)
+from utils.api import Api
 from utils.logger import log
-# Create your views here.
+from utils.util import url_exists, get_styles
+
+
+def index(request):
+    pass
 
 
 def get_nestings(request):
@@ -507,3 +516,128 @@ def ajax_run_job(request):
                 print(e)
         return JsonResponse({"msg": "Submitted Successfully!"}, status=200)
     pass
+
+
+@login_required
+def view_job(request, job_id):
+    template = loader.get_template('job/job.html')
+    parents = accountmodels.Algorithm.objects.filter(
+        parent_id=None, deleted=False).values().order_by("id")
+
+    job = Job.objects.get(id=job_id)
+
+    api = Api(token=request.session['bearer_token'])
+    currentjob = api.get_execution(job.uid)
+
+    styles = get_styles()
+    exec_script = job.script
+    algo = accountmodels.Algorithm.objects.get(
+        scripts__execution_script=exec_script)
+    bands = [{"name": currentjob["results"]["bands"][i]["name"],
+              "index": i,
+              "styles": styles[currentjob["results"]["bands"][i]["name"]]}
+             for i in range(len(currentjob["results"]["bands"])) if currentjob["results"]["bands"][i]["add_to_map"]]
+    context = {
+        "parents":  views.get_algorithms(),
+        "id": algo.parent.id,
+        "bands": bands,
+        "urls": currentjob["results"]["urls"]
+    }
+    return HttpResponse(template.render(context, request))
+
+
+@login_required
+def ajax_load_jobs(request, script_id):
+    template = loader.get_template('job/task_tbl.html')
+    context = {
+        "jobs": getjobs(request, script_id)
+    }
+    return HttpResponse(template.render(context, request))
+
+
+@login_required
+def ajax_load_results(request, script_id):
+    template = loader.get_template('job/jobs.html')
+    context = {
+        "jobs": getjobs(request, script_id)
+    }
+    return HttpResponse(template.render(context, request))
+
+
+@login_required
+def ajax_download_job(request, id):
+    job = Job.objects.get(user=request.user, id=id, deleted=False)
+    urls = job.results["urls"]
+    if len(urls) == 1:
+        if url_exists(urls[0]["url"]):
+            return JsonResponse({"url": urls[0]["url"]}, status=200)
+        else:
+            return JsonResponse({"msg": "Cannot download the results for this job!"}, status=400)
+
+    date = datetime.now()
+    filename = "../" + \
+        str(date.timestamp) + job.results.name + ".zip"
+    with open(filename, "wb") as fout:
+        for url in urls:
+            response = urllib.request.urlopen(url["url"])
+            # filename = response.headers.get(
+            #     "Content-Disposition").split("filename=")[1]
+            fout.write(response.read())
+    if os.path.exists(filename):
+        return JsonResponse({"url": "/media/" + filename,
+                             "fname": filename}, status=200)
+    else:
+        return JsonResponse({"msg": "Cannot download the results for this job"}, status=400)
+
+
+@login_required
+def ajax_cancel_job(request, id):
+    jobs = Job.objects.filter(user=request.user, id=id, deleted=False)
+    for job in jobs:
+        job.status = Status.objects.get(code="CANCELLED")
+        job.save(update_fields=['status'])
+    # api = Api(token=request.session['bearer_token'])
+    template = loader.get_template('job/task_tbl.html')
+    context = {
+        "jobs": getjobs(request, jobs.first().script.id)
+    }
+    return HttpResponse(template.render(context, request))
+
+
+@login_required
+def ajax_delete_job(request, id):
+    try:
+        job = Job.objects.get(user=request.user, id=id, deleted=False)
+        job.deleted = True
+        job.status = Status.objects.get(code="DELETED")
+        job.save(update_fields=['deleted', 'status'])
+        template = loader.get_template('job/task_tbl.html')
+        context = {
+            "jobs": getjobs(request, job.script.id)
+        }
+        return HttpResponse(template.render(context, request))
+    except Exception as e:
+        print(e)
+        return JsonResponse({"msg": "Job not found"}, status=400)
+
+
+def getjobs(request, script_id):
+    jobs = Job.objects.filter(
+        user=request.user, script_id=script_id, deleted=False).order_by("-start_date")
+
+    if not request.session.get('bearer_token'):
+        views.signout(request)
+
+    api = Api(token=request.session['bearer_token'])
+    job_result = []
+    for job in jobs:
+        if job.status.value in ("PENDING", "RUNNING", "READY"):
+            currentjob = api.get_execution(job.uid)
+            job.progress = currentjob["progress"]
+            job.end_date = currentjob["end_date"]
+            job.status = Status.objects.get(code=currentjob["status"])
+            job.results = currentjob["results"]
+            job.save(update_fields=["progress",
+                                    "end_date", "status", "results"])
+        job_result.append(job)
+    return job_result

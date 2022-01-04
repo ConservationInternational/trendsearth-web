@@ -13,13 +13,14 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse_lazy
 from account import models as accountmodels
-from job.models import Job, Status, Layer
+from job.models import Job, Layer
 from utils.api import Api
 
 from . import models
-from utils.util import (matrix_to_table, url_exists)
+from utils.util import matrix_to_table
 from utils import conf
-from account.views import get_chart_data, signout, get_algorithms
+from account.views import get_chart_data, get_algorithms
+from job.views import getjobs
 
 
 @login_required
@@ -79,23 +80,6 @@ def view_algorithm(request, algo_id):
         "aoi": aoi,
         "conf": conf.REMOTE_DATASETS
 
-    }
-    return HttpResponse(template.render(context, request))
-
-
-@login_required
-def view_job(request, job_id):
-    template = loader.get_template('core/job.html')
-    parents = accountmodels.Algorithm.objects.filter(
-        parent_id=None, deleted=False).values().order_by("id")
-
-    job = Job.objects.get(id=job_id)
-    exec_script = job.script
-    algo = accountmodels.Algorithm.objects.get(
-        scripts__execution_script=exec_script)
-    context = {
-        "parents":  get_algorithms(),
-        "id": algo.parent.id,
     }
     return HttpResponse(template.render(context, request))
 
@@ -269,96 +253,6 @@ def ajax_reset_aggregation_table(request):
     return HttpResponse(create_aggregation_table(request), status=200)
 
 
-def getjobs(request, script_id):
-    jobs = Job.objects.filter(
-        user=request.user, script_id=script_id, deleted=False).order_by("-start_date")
-
-    if not request.session.get('bearer_token'):
-        signout(request)
-
-    api = Api(token=request.session['bearer_token'])
-    job_result = []
-    for job in jobs:
-        if job.status.value in ("PENDING", "RUNNING", "READY"):
-            currentjob = api.get_execution(job.uid)
-            job.progress = currentjob["progress"]
-            job.end_date = currentjob["end_date"]
-            job.status = Status.objects.get(code=currentjob["status"])
-            job.results = currentjob["results"]
-            job.save(update_fields=["progress",
-                                    "end_date", "status", "results"])
-        job_result.append(job)
-    return job_result
-
-
-@login_required
-def ajax_load_results(request, script_id):
-    template = loader.get_template('core/jobs.html')
-    context = {
-        "jobs": getjobs(request, script_id)
-    }
-    return HttpResponse(template.render(context, request))
-
-
-@login_required
-def ajax_download_job(request, id):
-    job = Job.objects.get(user=request.user, id=id, deleted=False)
-    urls = job.results["urls"]
-    if len(urls) == 1:
-        if url_exists(urls[0]["url"]):
-            return JsonResponse({"url": urls[0]["url"]}, status=200)
-        else:
-            return JsonResponse({"msg": "Cannot download the results for this job!"}, status=400)
-
-    date = datetime.now()
-    filename = "../" + \
-        str(date.timestamp) + job.results.name + ".zip"
-    with open(filename, "wb") as fout:
-        for url in urls:
-            response = urllib.request.urlopen(url["url"])
-            # filename = response.headers.get(
-            #     "Content-Disposition").split("filename=")[1]
-            fout.write(response.read())
-    if os.path.exists(filename):
-        return JsonResponse({"url": "/media/" + filename,
-                             "fname": filename}, status=200)
-    else:
-        return JsonResponse({"msg": "Cannot download the results for this job"}, status=400)
-
-
-@login_required
-def ajax_cancel_job(request, id):
-    jobs = Job.objects.filter(user=request.user, id=id, deleted=False)
-    for job in jobs:
-        job.status = Status.objects.get(code="CANCELLED")
-        job.save(update_fields=['status'])
-    # api = Api(token=request.session['bearer_token'])
-    template = loader.get_template('core/task_tbl.html')
-    context = {
-        "jobs": getjobs(request, jobs.first().script.id)
-    }
-    return HttpResponse(template.render(context, request))
-
-
-@login_required
-def ajax_delete_job(request, id):
-    # api = Api(token=request.session['bearer_token'])
-
-    try:
-        job = Job.objects.get(user=request.user, id=id, deleted=False)
-        job.deleted = True
-        job.status = Status.objects.get(code="DELETED")
-        job.save(update_fields=['deleted', 'status'])
-        template = loader.get_template('core/task_tbl.html')
-        context = {
-            "jobs": getjobs(request, job.script.id)
-        }
-        return HttpResponse(template.render(context, request))
-    except Exception as e:
-        print(e)
-        return JsonResponse({"msg": "Job not found"}, status=400)
-
-
 @login_required
 def ajax_load_climate_dataset(request):
     script = accountmodels.ExecutionScript.objects.get(
@@ -396,15 +290,6 @@ def add_layer_to_map(request):
     except Exception as e:
         print(e)
         return JsonResponse({"msg": "Job not found"}, status=400)
-
-
-@login_required
-def ajax_load_jobs(request, script_id):
-    template = loader.get_template('core/task_tbl.html')
-    context = {
-        "jobs": getjobs(request, script_id)
-    }
-    return HttpResponse(template.render(context, request))
 
 
 def ajax_proxy_results(request):

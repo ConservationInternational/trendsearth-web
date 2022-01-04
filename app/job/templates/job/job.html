@@ -11,6 +11,8 @@
 
 <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
 <script>
+    let layerbands = {{ bands | safe}};
+    console.log(layerbands);
     $(document).ready(function () {
         // var mainMap = drawMap("map");
 
@@ -31,11 +33,11 @@
             style: {
                 color: [
                     'case',
-                    ['>=', band, 3],
+                    ['<=', band, -3],
                     [255, 0, 0],
-                    ['>=', band, 1],
+                    ['<=', band, 1],
                     [0, 255, 0],
-                    ['>=', band, -3],
+                    ['<=', band, 3],
                     [0, 0, 255],
                     [255, 255, 255],
                 ],

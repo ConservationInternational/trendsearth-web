@@ -15,6 +15,7 @@
     max-width: 400px;
     max-height: 60vh;
     flex-direction: column;
+    border: 1px solid #ddd;
     background-color: rgb(255, 255, 255);
   }
   .jaEwnR {

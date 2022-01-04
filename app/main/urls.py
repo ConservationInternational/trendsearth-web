@@ -23,7 +23,8 @@ from account import views as account_views
 from job import views as job_views
 
 urlpatterns = [path('', include('account.urls')),
-               path('', include('core.urls')), ]
+               path('', include('core.urls')),
+               path('', include('job.urls')), ]
 
 urlpatterns += [
     path('ajax/algorithm/<int:id>/runmode/<int:runmode>',
@@ -62,19 +63,19 @@ urlpatterns += [
          job_views.ajax_run_job,
          name='ajax_run_job'),
     path('ajax/job/results/<int:script_id>',
-         core_views.ajax_load_results,
+         job_views.ajax_load_results,
          name='ajax_job_results'),
     path('ajax/job/table/<int:script_id>',
-         core_views.ajax_load_jobs,
+         job_views.ajax_load_jobs,
          name='ajax_job_table'),
     path('ajax/download/<int:id>',
-         core_views.ajax_download_job,
+         job_views.ajax_download_job,
          name='ajax_download_job'),
     path('ajax/cancel/<int:id>',
-         core_views.ajax_cancel_job,
+         job_views.ajax_cancel_job,
          name='ajax_download_job'),
     path('ajax/delete/<int:id>',
-         core_views.ajax_delete_job,
+         job_views.ajax_delete_job,
          name='ajax_download_job'),
     path('ajax/add_layer',
          core_views.add_layer_to_map,

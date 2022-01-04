@@ -94,11 +94,12 @@
             {% endif %}
             {% endfor %}
             <hr>
-
-            <!-- <a href="#" style="padding-left: 0px;" class="item" id="reports_item">
-                <h3 class="menu-items"><i class="fa fa-clone"></i> &nbsp;REPORTS</h3>
+            {% if user.is_superuser %}
+            <a href="/admin" style="padding-left: 0px;" class="item" id="admin_item">
+                <h3 class="menu-items"><i class="fa fa-users"></i> &nbsp;Admin</h3>
             </a>
-            <hr> -->
+            <hr>
+            {% endif %}
 
             <div class="footer">
                 &copy; {% now 'Y' %} Trends.Earth &nbsp;&nbsp; | &nbsp;&nbsp; {{version}} &nbsp;&nbsp;
@@ -156,12 +157,12 @@
                                         <a class="dropdown-item" href="{% url 'settings' %}">
                                             <i class="fa fa-cog"></i> Settings</a>
                                     </li>
-                                    {% if user.is_superuser %}
+                                    <!-- {% if user.is_superuser %}
                                     <li>
                                         <a class="dropdown-item" href="{% url 'admin' %}">
                                             <i class="fa fa-users"></i> Admin</a>
                                     </li>
-                                    {% endif %}
+                                    {% endif %} -->
                                     <li><a class="dropdown-item" href="{% url 'logout' %}"><i
                                                 class="fa fa-power-off"></i> Log out</a></li>
                                 </ul>

@@ -188,7 +188,6 @@ const drawLineChart = function (
     });
 
     d3.selectAll(".pie-element").style("opacity", function (r) {
-      console.log(r);
       return r.data.code == Code[i] ? 1 : 0.2;
     });
   }

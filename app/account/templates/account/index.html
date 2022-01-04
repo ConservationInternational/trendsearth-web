@@ -133,6 +133,17 @@
             });
 
             var mainMap = drawMap("map");
+            var prodLayer = new ol.layer.Tile({
+                name: "",
+                source: new ol.source.TileImage({
+                    url: "https://global_ld_analysis.storage.googleapis.com/r20180821_lp7cl_globe_2001_2015_modis_newpalette/{z}/{x}/{y}.png",
+                }),
+                visible: true,
+                opacity: 1,
+            });
+
+            mainMap.addLayer(prodLayer);
+
         });
     </script>
     {% endblock %}

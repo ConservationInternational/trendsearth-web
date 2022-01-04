@@ -68,6 +68,7 @@
 
         <div class="row">
             <div class="col-md-11 layer-list">
+                <label for="inputBand" class="form-label">Base Layers</label>
                 <ul class="m-basemap-selectors is-active">
                     <li>
                         <button type="button" id="bg-1">
@@ -91,6 +92,20 @@
                     </li>
                 </ul>
             </div>
+            {% if bands %}
+            <br />
+            <div class="col-md-12 layer-list">
+                <div class="mb-3">
+                    <label for="inputBand" class="form-label">Result Layers</label>
+                    <select class="form-select" id="inputBand" name="inputBand">
+                        {% for band in bands %}
+                        <option value="{{band.index}}">{{band.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+            {% endif %}
         </div>
 
     </div>

@@ -160,3 +160,12 @@ def dictfetchall(cursor):
         dict(zip(columns, row))
         for row in cursor.fetchall()
     ]
+
+
+def get_styles():
+    styles = {}
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                           'data', 'styles.json'), encoding="utf-8") as script_file:
+        styles = json.load(script_file)
+
+    return styles

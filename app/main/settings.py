@@ -16,9 +16,9 @@ FORCE_SCRIPT_NAME = os.getenv('FORCE_SCRIPT_NAME', '')
 
 SECRET_KEY = 'django-insecure-!sxg#_zjx^3jcg*0twy^@(04^()_mu59lj4&^s1zr4a+6-io19'
 
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', 'localhost:8000']
 
 
 # Application definition
