@@ -5,7 +5,7 @@
         <th data-orderable="false">Task Reference</th>
         <th>Status</th>
         <th>Started</th>
-        <th data-orderable="false">Actions</th>
+        <th>Actions</th>
     </tr>
 </thead>
 <tbody>
@@ -21,7 +21,6 @@
         </td>
         <td>{{job.status.value}}</td>
         <td>{{job.start_date | date:"Y-m-d H:m:s" }}</td>
-
         <td>
             {% if job.status.value == "FINISHED" %}
             <button class="btn btn-danger download-job" job-id="{{job.id}}" title="Download"
@@ -65,7 +64,7 @@
                     delete link;
                 },
                 error: function (response) {
-                    showMessage(response.responseJSON.msg, 2000);
+                    showMessage(response.responseJSON.msg, 5000);
                 }
             });
         });

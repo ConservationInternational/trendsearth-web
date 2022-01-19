@@ -577,6 +577,7 @@ def ajax_load_results(request, script_id):
 def ajax_download_job(request, id):
     job = Job.objects.get(user=request.user, id=id, deleted=False)
     urls = job.results["urls"]
+    print(urls)
     if len(urls) == 1:
         if url_exists(urls[0]["url"]):
             return JsonResponse({"url": urls[0]["url"]}, status=200)

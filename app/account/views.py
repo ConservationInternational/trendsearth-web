@@ -5,8 +5,7 @@ from datetime import (
     timedelta
 )
 from tkinter.messagebox import NO
-from django.db.backends.base import features
-
+from django.db import connection
 from django.http import (
     HttpResponse,
     HttpResponseRedirect,
@@ -35,7 +34,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.db import connection
 
-from osgeo import ogr
+# from osgeo import ogr
 
 from account import models
 from job.models import (Job, Status)
@@ -140,6 +139,24 @@ class LoginView(FormView):
                             password=credentials['password'])
         if user is not None and not user.profile.deleted:
             login(self.request, user)
+
+            """if user.is_superuser:
+                with connection.cursor() as cursor:
+                    querystr = "SELECT id, code FROM country"
+                    cursor.execute(querystr)
+                    records = dictfetchall(cursor)
+                    for record in records:
+                        filepath = os.path.dirname(os.path.abspath(__file__)) + "/configs/admin_bounds/admin_bounds_polys_{country}.json/admin_bounds_polys_{country}.json".format(
+                            country=record.get("code"))
+                        country = json.load(open(filepath))
+                        querystr = "UPDATE country SET geom = ST_GeomFromGeoJSON('{}') WHERE id={}".format(
+                            json.dumps(country.get("geojson").get("geometry")), record.get("id"))
+                        cursor.execute(querystr)
+                        print(querystr)
+                        for key, value in country.get("admin1").items():
+                            querystr = "UPDATE region SET geom = ST_GeomFromGeoJSON('{}') WHERE code='{}' AND country_id={}".format(
+                                json.dumps(value.get("geojson").get("geometry")), key, record.get("id"))
+                            cursor.execute(querystr)"""
             today = datetime.now()
             if models.Settings.objects.filter(user=user).count() == 0:
                 models.Settings.objects.update_or_create(
@@ -150,6 +167,7 @@ class LoginView(FormView):
             startdate = today - timedelta(days=age_limits)
             executions = api.get_user_execution(
                 id=user.profile.uid, date=startdate)
+
             for execution in executions:
                 jobs = Job.objects.filter(
                     uid=execution.get("id"),
@@ -664,16 +682,16 @@ def ajax_change_aoi(request):
                 filename = fs.save(file.name, file)
                 uploaded_file_path = fs.path(filename)
 
-                ds = ogr.Open(uploaded_file_path)
-                layer = ds.GetLayer()
-                extent = layer.GetExtent()
-                geom = Polygon.from_bbox(extent)
+                # ds = ogr.Open(uploaded_file_path)
+                # layer = ds.GetLayer()
+                # extent = layer.GetExtent()
+                # geom = Polygon.from_bbox(extent)
 
-                layer = None
-                ds = None
+                # layer = None
+                # ds = None
 
-                if uploaded_file_path is not None:
-                    fs.delete(uploaded_file_path)
+                # if uploaded_file_path is not None:
+                #     fs.delete(uploaded_file_path)
 
             if request.POST.get("buffer_size") != "null":
                 buffer_size = float(request.POST.get("buffer_size"))

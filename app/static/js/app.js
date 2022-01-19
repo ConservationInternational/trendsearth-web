@@ -4,7 +4,7 @@ const showMessage = function (msg, timeout) {
   $("#messages-list").removeClass("msg-white");
   $("#messages-list").addClass("msg-dark");
   const messages = document.getElementById("messages-list");
-  messages.innerHTML += msg;
+  messages.innerHTML = msg;
 
   $("#messages-list").fadeOut(timeout, "swing", function () {
     messages.innerHTML = "";

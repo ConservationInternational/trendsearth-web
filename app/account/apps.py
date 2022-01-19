@@ -83,6 +83,7 @@ class AccountConfig(AppConfig):
                         querystr = "UPDATE country SET geom = ST_GeomFromGeoJSON('{}') WHERE id={}".format(
                             json.dumps(country.get("geojson").get("geometry")), record.get("id"))
                         cursor.execute(querystr)
+                        print(querystr)
                         for key, value in country.get("admin1").items():
                             querystr = "UPDATE region SET geom = ST_GeomFromGeoJSON('{}') WHERE code='{}' AND country_id={}".format(
                                 json.dumps(value.get("geojson").get("geometry")), key, record.get("id"))
