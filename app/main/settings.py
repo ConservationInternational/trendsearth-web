@@ -88,11 +88,11 @@ WSGI_APPLICATION = 'main.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get("POSTGRES_DB", 'ldmpdb'),
-        'USER': os.environ.get("POSTGRES_USER", 'postgres'),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'postgres'),
-        'HOST': os.environ.get("POSTGRES_HOST", 'localhost'),
-        'PORT': os.environ.get("POSTGRES_PORT", 5435),
+        'NAME': os.environ.get("POSTGRES_DB", ''),
+        'USER': os.environ.get("POSTGRES_USER", ''),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", ''),
+        'HOST': os.environ.get("POSTGRES_HOST", ''),
+        'PORT': os.environ.get("POSTGRES_PORT", 9999),
     }
 }
 
@@ -163,11 +163,10 @@ if EMAIL_ENABLE:
     EMAIL_BACKEND = os.getenv(
         'EMAIL_BACKEND',
         default='django.core.mail.backends.smtp.EmailBackend')
-    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.sparkpostmail.com')
+    EMAIL_HOST = os.getenv('EMAIL_HOST', '')
     EMAIL_PORT = os.getenv('EMAIL_PORT', 587)
-    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'SMTP_Injection')
-    EMAIL_HOST_PASSWORD = os.getenv(
-        'EMAIL_HOST_PASSWORD', '34480c4bf95051e7e73d8e60ab659e0d80ce83a5')
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
     EMAIL_USE_TLS = True
     DEFAULT_FROM_EMAIL = os.getenv(
         'DEFAULT_FROM_EMAIL', 'info@trends.earth')
