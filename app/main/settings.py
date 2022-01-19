@@ -18,7 +18,7 @@ SECRET_KEY = 'django-insecure-!sxg#_zjx^3jcg*0twy^@(04^()_mu59lj4&^s1zr4a+6-io19
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'localhost:8000']
+ALLOWED_HOSTS = ['localhost', 'localhost:8000', 'api-staging.trends.earth']
 
 
 # Application definition
@@ -167,7 +167,7 @@ if EMAIL_ENABLE:
     EMAIL_PORT = os.getenv('EMAIL_PORT', 587)
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'SMTP_Injection')
     EMAIL_HOST_PASSWORD = os.getenv(
-        'EMAIL_HOST_PASSWORD', '1588d5eafd9a0ee1f4acbb4f389c54a4990bf1f6')
+        'EMAIL_HOST_PASSWORD', '34480c4bf95051e7e73d8e60ab659e0d80ce83a5')
     EMAIL_USE_TLS = True
     DEFAULT_FROM_EMAIL = os.getenv(
         'DEFAULT_FROM_EMAIL', 'info@trends.earth')

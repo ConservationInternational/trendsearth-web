@@ -53,7 +53,8 @@
                         </div>
                         <div class="col-md-12 mb-3">
                             <h3>Current region</h3>
-                            <label>{{aoi.name}}</label>
+                            <label id="aoi_lbl">{{aoi.name}}</label>
+                            <input type="hidden" name="aoi_id" id="aoi_id" value="{{aoi.id}}">
                             <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
                                 data-bs-target="#aoiModal">
                                 <i class="fa fa-edit"></i> Change Region</button>
@@ -209,10 +210,16 @@
 </div>
 <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
 <script>
     $(document).ready(function () {
         $(".lc-input").on("keyup", function () {
             var inputVal = $(this).val();
+            if (inputVal.length > 1) {
+                inputVal = inputVal[0];
+                $(this).val(inputVal);
+            }
             if (! /[-0+]/.test(inputVal)) {
                 $(this).val("");
             } else {
@@ -275,6 +282,7 @@
             formData.append("task_notes", $("#task_notes").val());
             formData.append("initial_year_de", +$("#initial_year_de").val());
             formData.append("target_year_de", +$("#target_year_de").val());
+            formData.append("aoi_id", +$("#aoi_id").val());
             $.ajax({
                 url: "/ajax/run/job",
                 type: "POST",

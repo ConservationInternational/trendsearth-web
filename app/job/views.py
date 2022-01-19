@@ -1,4 +1,5 @@
 from datetime import datetime
+from tkinter.messagebox import NO
 import urllib.request
 import json
 import os
@@ -110,7 +111,8 @@ def process_land_cover(request):
 
     task_name = request.POST.get("task_name")
 
-    aoi = accountmodels.Aoi.objects.get(user=request.user)
+    aoi_id = int(request.POST.get("aoi_id"))
+    aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
     payload = {
         "year_initial": int(request.POST.get("initial_year_de")),
@@ -130,7 +132,8 @@ def process_soc(request):
     task_name = request.POST.get("task_name")
     matrix = LCTransitionDefinitionDeg.Schema().dumps(get_trans_matrix())
 
-    aoi = accountmodels.Aoi.objects.get(user=request.user)
+    aoi_id = int(request.POST.get("aoi_id"))
+    aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
     payload = {
         "year_initial": int(request.POST.get("initial_year_de")),
@@ -155,7 +158,8 @@ def process_drought_vulnerability(request):
     spi_dataset_name = "GPCC V6 (Global Precipitation Climatology Centre)"
     spi_dataset = conf.REMOTE_DATASETS["SPI"][spi_dataset_name]
 
-    aoi = accountmodels.Aoi.objects.get(user=request.user)
+    aoi_id = int(request.POST.get("aoi_id"))
+    aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
 
     payload = {}
@@ -189,7 +193,8 @@ def process_unccd_reporting(request):
     spi_dataset_name = "GPCC V6 (Global Precipitation Climatology Centre)"
     spi_dataset = conf.REMOTE_DATASETS["SPI"][spi_dataset_name]
 
-    aoi = accountmodels.Aoi.objects.get(user=request.user)
+    aoi_id = int(request.POST.get("aoi_id"))
+    aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
 
     payload = {}
@@ -218,7 +223,8 @@ def process_unccd_reporting(request):
 
 
 def process_urban_change(request):
-    aoi = accountmodels.Aoi.objects.get(user=request.user)
+    aoi_id = int(request.POST.get("aoi_id"))
+    aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
 
     payload = {
@@ -240,7 +246,8 @@ def process_urban_change(request):
 
 
 def process_restoration_biomass(request):
-    aoi = accountmodels.Aoi.objects.get(user=request.user)
+    aoi_id = int(request.POST.get("aoi_id"))
+    aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
 
     payload = {
@@ -257,7 +264,8 @@ def process_restoration_biomass(request):
 
 
 def process_total_carbon(request):
-    aoi = accountmodels.Aoi.objects.get(user=request.user)
+    aoi_id = int(request.POST.get("aoi_id"))
+    aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
 
     payload = {
@@ -300,8 +308,8 @@ def process_land_productivity(request, script):
             log(u'climate_gee_dataset {}'.format(climate_gee_dataset))
 
         task_name = request.POST.get("task_name")
-
-        aoi = accountmodels.Aoi.objects.get(user=request.user)
+        aoi_id = int(request.POST.get("aoi_id"))
+        aoi = accountmodels.Aoi.objects.get(id=aoi_id)
         geom = aoi.geom
 
         payload = {
@@ -421,7 +429,8 @@ def process_sub_indicators(request, script):
                 else:
                     task_name = f'{period}'
 
-            aoi = accountmodels.Aoi.objects.get(user=request.user)
+            aoi_id = int(request.POST.get("aoi_id"))
+            aoi = accountmodels.Aoi.objects.get(id=aoi_id)
             geom = aoi.geom
 
             payload.update({
@@ -486,34 +495,34 @@ def ajax_run_job(request):
         api = Api(token=request.session['bearer_token'])
 
         for payload in payloads:
-            print([payload["crs"]])
             if payload["crs"] == 'None':
                 payload["crs"] = "GEOGCS[\"unknown\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]]"
             url_fragment = f"/api/v1/script/{script.uid}/run"
             response = api.call_api(url_fragment, "post",
                                     payload, use_token=True)
 
-            try:
-                out = response["data"]
-                out["params"] = ""
+            if response is not None:
+                try:
+                    out = response["data"]
+                    out["params"] = ""
 
-                job = Job()
-                job.start_date = out.get("start_date", "")
-                job.end_date = out.get("end_date", "")
-                job.progress = out.get("progress", 0)
-                job.script = script
-                job.status = Status.objects.get(code=out.get("status"))
-                job.uid = out.get("id", "")
-                job.task_name = payload.get("task_name")
-                job.task_notes = payload.get("task_notes")
-                job.user = request.user
-                job.user.profile.uid = out.get("user_id", "")
+                    job = Job()
+                    job.start_date = out.get("start_date", "")
+                    job.end_date = out.get("end_date", "")
+                    job.progress = out.get("progress", 0)
+                    job.script = script
+                    job.status = Status.objects.get(code=out.get("status"))
+                    job.uid = out.get("id", "")
+                    job.task_name = payload.get("task_name")
+                    job.task_notes = payload.get("task_notes")
+                    job.user = request.user
+                    job.user.profile.uid = out.get("user_id", "")
 
-                job.save()
-                job.user.profile.save(update_fields=["uid"])
+                    job.save()
+                    job.user.profile.save(update_fields=["uid"])
 
-            except Exception as e:
-                print(e)
+                except Exception as e:
+                    print(e)
         return JsonResponse({"msg": "Submitted Successfully!"}, status=200)
     pass
 

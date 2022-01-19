@@ -35,7 +35,8 @@
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <h3>Current region</h3>
-                            <label>{{aoi.name}}</label>
+                            <label id="aoi_lbl">{{aoi.name}}</label>
+                            <input type="hidden" name="aoi_id" id="aoi_id" value="{{aoi.id}}">
                             <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
                                 data-bs-target="#aoiModal">
                                 <i class="fa fa-edit"></i> Change Region</button>
@@ -83,7 +84,8 @@
                     <p>Summary for SDG 11.3.1 Indicator for ratio of land consumption rate to population growth rate.
                     </p>
                     <p>
-                        <a href="https://trends.earth/docs/en/background/understanding_indicators11.html#">More
+                        <a target="_blank"
+                            href="https://trends.earth/docs/en/background/understanding_indicators11.html#">More
                             information</a>
                     </p>
                 </div>

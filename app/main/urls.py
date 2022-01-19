@@ -76,7 +76,7 @@ urlpatterns += [
          name='ajax_download_job'),
     path('ajax/delete/<int:id>',
          job_views.ajax_delete_job,
-         name='ajax_download_job'),
+         name='ajax_delete_job'),
     path('ajax/add_layer',
          core_views.add_layer_to_map,
          name='add_layer_to_map')]

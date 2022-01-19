@@ -41,7 +41,8 @@
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <h3>Current region</h3>
-                            <label>{{aoi.name}}</label>
+                            <label id="aoi_lbl">{{aoi.name}}</label>
+                            <input type="hidden" name="aoi_id" id="aoi_id" value="{{aoi.id}}">
                             <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
                                 data-bs-target="#aoiModal">
                                 <i class="fa fa-edit"></i> Change Region</button>
@@ -196,6 +197,7 @@
                             regions. As such, only land use conversion coefficient can be applied for estimating changes
                             in C stocks (using land cover as a proxy for land use). The coefficients used were the
                             result of a literature review performed by the UNCCD and are presented at the <a
+                                target="_blank"
                                 href="http://trends.earth/docs/en/background/understanding_indicators15.html#soil-organic-carbon">
                                 Trends.Earth website</a>.
                             Those coefficients represent the proportional in C stocks after 20 years of land cover

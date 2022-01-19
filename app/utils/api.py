@@ -255,12 +255,14 @@ class Api(object):
         :param date:
         :return:
         """
-        query = ['include=script']
+        # query = ['include=script']
+
+        query = []
 
         if id:
             query.append(u'user_id={}'.format(quote_plus(id)))
 
-        if date:
+        if date is not None:
             query.append(u'updated_at={}'.format(date))
         query = "?" + "&".join(query)
 

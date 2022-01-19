@@ -19,7 +19,7 @@ from utils.api import Api
 from . import models
 from utils.util import matrix_to_table
 from utils import conf
-from account.views import get_chart_data, get_algorithms
+from account.views import get_chart_data, get_algorithms, get_user_aoi
 from job.views import getjobs
 
 
@@ -38,7 +38,8 @@ def dashboard(request):
         "parents": get_algorithms(),
         'line_chart_data': line_chart_data,
         'pie_chart_data': pie_chart_data,
-        'center': center
+        'center': center,
+        'geom': get_user_aoi(request.user)
     }
     return HttpResponse(template.render(context, request))
 
@@ -54,9 +55,10 @@ def view_algorithm(request, algo_id):
         country=countries.first()).order_by("name")
     cities = accountmodels.City.objects.filter(
         country=countries.first()).order_by("name_en")
-    aoi = accountmodels.Aoi.objects.filter(user=request.user)
-    if aoi.count() > 0:
-        aoi = aoi.first()
+    aois = accountmodels.Aoi.objects.filter(
+        user=request.user).order_by("-date_created")
+    if aois.count() > 0:
+        aoi = aois.first()
         if aoi.country:
             regions = accountmodels.Region.objects.filter(
                 country=aoi.country).order_by("name")
@@ -77,6 +79,7 @@ def view_algorithm(request, algo_id):
         "regions": regions,
         "countries": countries,
         "cities": cities,
+        "aois": aois,
         "aoi": aoi,
         "conf": conf.REMOTE_DATASETS
 

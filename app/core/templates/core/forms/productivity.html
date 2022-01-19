@@ -38,11 +38,11 @@
                             <input class="form-check-input" type="radio" name="radio_lpd_jrc" id="radio_lpd_jrc"
                                 value="JRC">
                             <label class="form-check-label" for="radio_te_prod">
-                                UNCCD default data (Land Productivity Dynamics (LPD) from Join Research Commission)
+                                UNCCD default data (Land Productivity Dynamics (LPD) from Joint Research Commission)
                             </label>
                         </div>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" id="ndvi_dataset_panel">
                         <label for="ndvi_dataset" class="form-label">NDVI Dataset</label>
                         <select class="form-select form-select-sm" name="ndvi_dataset" id="ndvi_dataset">
                             {% for ds_name, ds_details in conf.NDVI.items %}
@@ -58,7 +58,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h3>Current region</h3>
-                            <label>{{aoi.name}}</label>
+                            <label id="aoi_lbl">{{aoi.name}}</label>
+                            <input type="hidden" name="aoi_id" id="aoi_id" value="{{aoi.id}}">
                             <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
                                 data-bs-target="#aoiModal">
                                 <i class="fa fa-edit"></i> Change Region</button>
@@ -296,7 +297,8 @@
                         to compute annual integrals of NDVI (computed as the mean annual NDVI for simplicity of
                         interpretation of results). These annual integrals of NDVI are then used to compute each of the
                         productivity indicators explained below.
-                        <a href="https://trends.earth/docs/en/background/understanding_indicators15.html#productivity">
+                        <a target="_blank"
+                            href="https://trends.earth/docs/en/background/understanding_indicators15.html#productivity">
                             More information on the Productivity SDG 15.3.1 sub-indicator
                         </a>
                     </p>
@@ -317,7 +319,7 @@
                         then applied, considering only significant changes those that show a p-value ≤ 0.05. Positive
                         significant trends in NDVI would indicate potential improvement in land condition, and negative
                         significant trends potential degradation.
-                        <a
+                        <a target="_blank"
                             href="https://trends.earth/docs/en/background/understanding_indicators15.html#productivity-trajectory">
                             More information on Productivity Trajectory
                         </a>
@@ -364,7 +366,7 @@
                             stable.
                         </li>
                     </ol>
-                    <a
+                    <a target="_blank"
                         href="https://trends.earth/docs/en/background/understanding_indicators15.html#productivity-state">More
                         information on Productivity State</a>
                     </p>
@@ -408,7 +410,7 @@
                             potentially degraded for this indicator.
                         </li>
                     </ol>
-                    <a
+                    <a target="_blank"
                         href="https://trends.earth/docs/en/background/understanding_indicators15.html#productivity-performance">
                         More information on Productivity Performance
                     </a>
@@ -425,7 +427,9 @@
         $("input[name=radio_lpd_jrc]").on("change", function () {
             if ($(this).val() == "TE") {
                 $("#advanced_panel").show();
+                $("#ndvi_dataset_panel").show();
             } else {
+                $("#ndvi_dataset_panel").hide();
                 $("#advanced_panel").hide();
             }
         });
@@ -490,6 +494,7 @@
             formData.append("runmode", "REMOTE");
             formData.append("task_name", $("#execution_name").val());
             formData.append("task_notes", $("#task_notes").val());
+            formData.append("aoi_id", +$("#aoi_id").val());
             $.ajax({
                 url: "/ajax/run/job",
                 type: "POST",

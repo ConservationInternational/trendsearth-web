@@ -4,14 +4,15 @@ from datetime import (
     datetime,
     timedelta
 )
+from tkinter.messagebox import NO
 from django.db.backends.base import features
-from django.db.models import query
 
 from django.http import (
     HttpResponse,
     HttpResponseRedirect,
     JsonResponse
 )
+from django.contrib.gis.geos import Point, Polygon
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -33,6 +34,8 @@ from django.views.generic.edit import FormView
 from django.contrib import messages
 from django.conf import settings
 from django.db import connection
+
+from osgeo import ogr
 
 from account import models
 from job.models import (Job, Status)
@@ -128,7 +131,7 @@ class LoginView(FormView):
                     region = models.Region.objects.filter(
                         country=country).first()
                     profile.region = region
-                    profile.update(update_fields=["region"])
+                    profile.save(update_fields=["region"])
 
             except Exception as e:
                 print(e)
@@ -141,10 +144,10 @@ class LoginView(FormView):
             if models.Settings.objects.filter(user=user).count() == 0:
                 models.Settings.objects.update_or_create(
                     in_mail_list=False, user=user)
-
-            startdate = today - \
-                timedelta(days=models.Settings.objects.get(
-                    user=user).data_age_limit)
+            age_limits = models.Settings.objects.get(
+                user=user).data_age_limit
+            age_limits = 150
+            startdate = today - timedelta(days=age_limits)
             executions = api.get_user_execution(
                 id=user.profile.uid, date=startdate)
             for execution in executions:
@@ -376,6 +379,7 @@ def view_profile(request):
 
     context = {
         'user': request.user,
+        'this_user': request.user,
         "parents": get_algorithms()
     }
     return HttpResponse(template.render(context, request))
@@ -589,7 +593,7 @@ def ajax_register_user(request):
 def ajax_get_regions(request):
     regions = models.Region.objects.filter(
         country_id=request.GET.get("country_id")).order_by("name")
-    options = ""
+    options = '<option value="0" data-rel="All regions">All regions</option>'
     for region in regions:
         options += "<option value='{}'>{}</option>".format(
             region.id, region.name)
@@ -600,7 +604,7 @@ def ajax_get_regions(request):
 def ajax_get_cities(request):
     cities = models.City.objects.filter(
         country_id=request.GET.get("country_id")).order_by("name_en")
-    options = ""
+    options = '<option value="0" data-rel="All cities">All cities</option>'
     for city in cities:
         options += "<option value='{}'>{}</option>".format(
             city.id, city.name_en)
@@ -615,56 +619,77 @@ def ajax_change_aoi(request):
         lat, lon = None, None
         buffer_size = None
         file, uploaded_file_path = None, None
-        if request.POST.get("city") != "null":
-            city = models.City.objects.get(id=request.POST.get("city"))
-        if request.POST.get("region") != "null":
-            region = models.Region.objects.get(id=request.POST.get("region"))
-        if request.POST.get("country") != "null":
-            country = models.Country.objects.get(
-                id=request.POST.get("country"))
-
-        if request.POST.get("lat") != "null":
-            lat = request.POST.get("lat")
-            lon = request.POST.get("lon")
-        if request.POST.get("buffer_size") != "null":
-            buffer_size = float(request.POST.get("buffer_size"))
-
-        if request.POST.get("file") != "null":
-            file = request.FILES["file"]
-            fs = FileSystemStorage()
-            filename = fs.save(file.name, file)
-            uploaded_file_path = fs.path(filename)
+        aoi_id, geom = None, None
 
         area_name = request.POST.get("name")
 
-        if uploaded_file_path is not None:
-            fs.delete(uploaded_file_path)
+        if request.POST.get("aoi_id") != "null":
+            aoi = models.Aoi.objects.get(
+                id=int(request.POST.get("aoi_id")))
+        else:
+            aoi = models.Aoi()
+            aoi.name = area_name
+            aoi.user = request.user
 
-        try:
-            aoi = models.Aoi.objects.get(user=request.user)
-            aoi.delete()
-        except Exception as e:
-            pass
-        aoi = models.Aoi()
-        aoi.name = area_name
-        aoi.user = request.user
+            if request.POST.get("country") != "null":
+                country = models.Country.objects.get(
+                    id=request.POST.get("country"))
+                aoi.country = country
+                geom = country.geom
+                geom = geom.envelope
 
-        if country is not None:
-            aoi.country = country
-            if city is not None:
-                geom = city.geom
-                if buffer_size is not None:
-                    distance = buffer_size * 1000
-                    buffer_width = distance / 40000000.0 * 360.0
-                    geom = geom.buffer(buffer_width).envelope
-                    aoi.buffer_size = buffer_size
+            if request.POST.get("city") != "null":
+                city_id = int(request.POST.get("city"))
+                if city_id > 0:
+                    city = models.City.objects.get(id=city_id)
+                    aoi.city = city
+                    geom = city.geom
+
+            if request.POST.get("region") != "null":
+                region_id = int(request.POST.get("region"))
+                if region_id > 0:
+                    region = models.Region.objects.get(
+                        id=region_id)
+                    aoi.region = region
+                    geom = region.geom
+
+            if request.POST.get("lat") != "null":
+                lat = float(request.POST.get("lat"))
+                lon = float(request.POST.get("lon"))
+                geom = Point(lon, lat, srid=4326)
+
+            if request.POST.get("file") != "null":
+                file = request.FILES["file"]
+                fs = FileSystemStorage()
+                filename = fs.save(file.name, file)
+                uploaded_file_path = fs.path(filename)
+
+                ds = ogr.Open(uploaded_file_path)
+                layer = ds.GetLayer()
+                extent = layer.GetExtent()
+                geom = Polygon.from_bbox(extent)
+
+                layer = None
+                ds = None
+
+                if uploaded_file_path is not None:
+                    fs.delete(uploaded_file_path)
+
+            if request.POST.get("buffer_size") != "null":
+                buffer_size = float(request.POST.get("buffer_size"))
+                distance = buffer_size * 1000
+                buffer_width = distance / 40000000.0 * 360.0
+                geom = geom.buffer(buffer_width)
+
+                aoi.buffer_size = buffer_size
+            if geom.area < 3000:
                 aoi.geom = geom
-                aoi.city = city
                 aoi.save()
-            if region is not None:
-                pass
+            else:
+                print(geom.area)
+                return JsonResponse({"msg": "Selected area of interest larger than the threshold of 20 million sq.km !"}, status=400)
 
-        return JsonResponse({"msg": "Region of interest updated!"}, status=200)
+        return JsonResponse({"msg": "Region of interest updated!", "id": aoi.id, "name": aoi.name}, status=200)
 
 
 @ login_required
@@ -719,43 +744,42 @@ def ajax_update_algorithms_visibility(request):
             "msg": "Settings not updated!"}, status=400)
 
 
-@login_required
-def ajax_load_aoi(request):
-    try:
-        aoi = models.Aoi.objects.get(user=request.user)
-
-        srid = 3857
-
-        if request.GET.get("srid"):
-            srid = request.GET.get("srid")
-        features = []
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT st_asgeojson(st_transform(geom, {})) as geom
+def get_user_aoi(user, srid=3857):
+    features = []
+    with connection.cursor() as cursor:
+        cursor.execute("""
+                SELECT name, st_asgeojson(st_transform(geom, {})) as geom
                 FROM area_of_interest
                 WHERE user_id = {}
-                """.format(srid, request.user.id))
-            geoms = dictfetchall(cursor)
+                """.format(srid, user.id))
+        geoms = dictfetchall(cursor)
 
-            features = []
-            for geom in geoms:
-                features.append(
-                    {
-                        "type": "Feature",
-                        "geometry": json.loads(geom["geom"])
-                    })
+        features = []
+        for geom in geoms:
+            features.append(
+                {
+                    "type": "Feature",
+                    "geometry": json.loads(geom["geom"]),
+                    "properties": {"name": geom["name"]}
+                })
 
-        geojson = {
-            "type": "FeatureCollection",
-            "features": features,
-            "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::3857"}}
-        }
-        return JsonResponse(
-            geojson,
-            safe=False)
-    except Exception as e:
-        print(e)
-        return JsonResponse({"type": "Polygon", "coordinates": []}, safe=False)
+    return {
+        "type": "FeatureCollection",
+        "features": features,
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::" + str(srid)}}
+    }
+
+
+@login_required
+def ajax_load_aoi(request):
+    srid = 3857
+    if request.GET.get("srid"):
+        srid = request.GET.get("srid")
+
+    geojson = get_user_aoi(request.user, srid)
+    return JsonResponse(
+        geojson,
+        safe=False)
 
 
 def get_chart_data(user=None):

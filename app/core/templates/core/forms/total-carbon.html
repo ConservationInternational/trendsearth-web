@@ -69,7 +69,8 @@
                         </div>
                         <div class="col-md-6">
                             <h3>Current region</h3>
-                            <label>{{aoi.name}}</label>
+                            <label id="aoi_lbl">{{aoi.name}}</label>
+                            <input type="hidden" name="aoi_id" id="aoi_id" value="{{aoi.id}}">
                             <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
                                 data-bs-target="#aoiModal">
                                 <i class="fa fa-edit"></i> Change Region</button>
@@ -205,7 +206,7 @@
             formData.append("task_notes", $("#task_notes").val());
             formData.append("year_initial", +$("#year_initial").val());
             formData.append("year_final", +$("#year_final").val());
-
+            formData.append("aoi_id", +$("#aoi_id").val());
             formData.append("fc_threshold", +$("#fc_threshold").val());
             formData.append("method", $("input[name=method]").val());
             formData.append("biomass_data", $("input[name=biomass_data]").val());

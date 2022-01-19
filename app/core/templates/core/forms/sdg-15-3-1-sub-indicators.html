@@ -140,7 +140,8 @@
                     <div class="row">
                         <div class="col-md-12">
                             <h3>Current region</h3>
-                            <label>{{aoi.name}}</label>
+                            <label id="aoi_lbl">{{aoi.name}}</label>
+                            <input type="hidden" name="aoi_id" id="aoi_id" value="{{aoi.id}}">
                             <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
                                 data-bs-target="#aoiModal">
                                 <i class="fa fa-edit"></i> Change Region</button>
@@ -300,7 +301,7 @@
                         </div>
                     </blockquote>
                     <p>As the custodian agency for SDG 15.3, the United Nations Convention to Combat
-                        Desertification (UNCCD) has developed a <a class="reference external"
+                        Desertification (UNCCD) has developed a <a class="reference external" target="_blank"
                             href="http://www2.unccd.int/sites/default/files/relevant-links/2017-10/Good%20Practice%20Guidance_SDG%20Indicator%2015.3.1_Version%201.0.pdf">Good
                             Practice Guidance (GPG)</a>.
                         providing recommendations on how to calculate SDG Indicator 15.3.1.</p>
@@ -315,8 +316,14 @@
 <script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
 <script>
     $(document).ready(function () {
+        $("#aggregation_definition_tbl").DataTable();
+
         $(".lc-input").on("keyup", function () {
             var inputVal = $(this).val();
+            if (inputVal.length > 1) {
+                inputVal = inputVal[0];
+                $(this).val(inputVal);
+            }
             if (! /[-0+]/.test(inputVal)) {
                 $(this).val("");
             } else {
@@ -422,6 +429,7 @@
             formData.append("task_notes", $("#task_notes").val());
             formData.append("cb_jrc_baseline", $("#cb_jrc_baseline").val());
             formData.append("cb_jrc_progress", $("#cb_jrc_progress").val());
+            formData.append("aoi_id", +$("#aoi_id").val());
             $.ajax({
                 url: "/ajax/run/job",
                 type: "POST",
