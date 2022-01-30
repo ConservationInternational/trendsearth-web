@@ -13,7 +13,47 @@ VALUES
 (8, False, 'local-land-cover', '1.0.9', 'Calculate land cover change', 'Land cover change', 'null', null, 'local', null), 
 (9, False, 'local-soil-organic-carbon', '1.99.6', 'Calculate change in soil organic carbon', 'Soil organic carbon change', 'null', null, 'local', null), 
 (10, False, 'local-total-carbon', '1.99.6', 'Calculate emissions due to deforestation', 'Total carbon change', 'null', null, 'local', null), 
-(11, False, 'productivity', '1.99.6', 'Calculate productivity state, performance, and/or trajectory indicators', 'Land productivity', '{"trajectory functions": {"NDVI trends": {"climate types": ,"description": "Calculate trend of annually integrated NDVI.","params": {"trajectory_method": "ndvi_trend"}},"Pixel RESTREND": {"climate types": "Precipitation","Soil moisture","Evapotranspiration","description": "Calculate pixel residual trend (RESTREND of annually integrated NDVI, after removing trend associated with a climate indicator.","params": {"trajectory_method": "p_restrend"}},"Rain Use Efficiency (RUE)": {"climate types": "Precipitation","description": "Calculate rain use efficiency (precipitation divided by NDVI).","params": {"trajectory_method": "ue"}},"Water Use Efficiency (WUE)": {"climate types": "Evapotranspiration","description": "Calculate water use efficiency (evapotranspiration divided by NDVI).","params": {"trajectory_method": "ue"}}}}', null, 'remote', '132b2e54-b345-421b-acc3-8fd8f0d09cb7'), 
+(11, False, 'productivity', '1.99.6', 'Calculate productivity state, performance, and/or trajectory indicators', 'Land productivity', 
+'{
+            "trajectory functions": {
+                "NDVI trends": {
+                    "climate types": [],
+                    "description": "Calculate trend of annually integrated NDVI.",
+                    "params": {
+                        "trajectory_method": "ndvi_trend"
+                    }
+                },
+                "Pixel RESTREND": {
+                    "climate types": [
+                        "Precipitation",
+                        "Soil moisture",
+                        "Evapotranspiration"
+                    ],
+                    "description": "Calculate pixel residual trend (RESTREND of annually integrated NDVI, after removing trend associated with a climate indicator.",
+                    "params": {
+                        "trajectory_method": "p_restrend"
+                    }
+                },
+                "Rain Use Efficiency (RUE)": {
+                    "climate types": [
+                        "Precipitation"
+                    ],
+                    "description": "Calculate rain use efficiency (precipitation divided by NDVI).",
+                    "params": {
+                        "trajectory_method": "ue"
+                    }
+                },
+                "Water Use Efficiency (WUE)": {
+                    "climate types": [
+                        "Evapotranspiration"
+                    ],
+                    "description": "Calculate water use efficiency (evapotranspiration divided by NDVI).",
+                    "params": {
+                        "trajectory_method": "ue"
+                    }
+                }
+            }
+        }' , null, 'remote', '132b2e54-b345-421b-acc3-8fd8f0d09cb7'), 
 (12, False, 'restoration-biomass', '1.99.6', 'Calculate potential change in biomass with restoration', 'Biomass change', 'null', null, 'remote', 'a1cce137-e03d-4f42-aa4a-24ac8a503196'), 
 (13, False, 'sdg-15-3-1-sub-indicators', '1.99.6', 'Calculate all three SDG 15.3.1 sub-indicators in one step', 'SDG 15.3.1 sub-indicators', 'null', null, 'remote', 'fae0b73f-549d-49a8-b2f6-0769e449332a'), 
 (14, False, 'sdg-15-3-1-summary', '1.0.9', 'Calculate change in SDG 15.3.1', 'SDG 15.3.1', 'null', null, 'local', null), 
