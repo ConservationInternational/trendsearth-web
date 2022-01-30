@@ -12,15 +12,19 @@ from django.http import (
 from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse_lazy
+from numpy import matrix
 from account import models as accountmodels
 from job.models import Job, Layer
 from utils.api import Api
 
 from . import models
-from utils.util import matrix_to_table
+from utils.util import matrix_to_table, table_to_matrix
 from utils import conf
 from account.views import get_chart_data, get_algorithms, get_user_aoi
 from job.views import getjobs
+from te_schemas.land_cover import (
+    LCTransitionDefinitionDeg
+)
 
 
 @login_required
@@ -33,7 +37,7 @@ def dashboard(request):
     except Exception as e:
         print(e)
 
-    line_chart_data, pie_chart_data = get_chart_data()
+    line_chart_data, pie_chart_data = get_chart_data(request.user)
     context = {
         "parents": get_algorithms(),
         'line_chart_data': line_chart_data,
@@ -47,8 +51,6 @@ def dashboard(request):
 @login_required
 def view_algorithm(request, algo_id):
     template = loader.get_template('core/algorithm.html')
-    parents = accountmodels.Algorithm.objects.filter(
-        parent_id=None, deleted=False).values().order_by("id")
 
     countries = accountmodels.Country.objects.all().order_by('name')
     regions = accountmodels.Region.objects.filter(
@@ -67,12 +69,20 @@ def view_algorithm(request, algo_id):
     else:
         aoi = None
 
+    matrix = accountmodels.Matrix.objects.filter(user=request.user)
+    if matrix.count() == 0:
+        matrix = accountmodels.Matrix.objects.filter(user=None)
+    matrix = matrix.first().content
+    matrix = LCTransitionDefinitionDeg.Schema().loads(
+        matrix
+    )
     context = {
         "parents":  get_algorithms(),
         "children":  accountmodels.Algorithm.objects.filter(
-            parent_id=algo_id, deleted=False).order_by("id"),
+            parent_id=algo_id,
+            script__run_mode="remote", deleted=False).order_by("id"),
         "id": algo_id,
-        "table": matrix_to_table(),
+        "table": matrix_to_table(matrix),
         "agg_table": create_aggregation_table(request),
         "jrc_lpd_datasets": list(
             conf.REMOTE_DATASETS["Land Productivity Dynamics (JRC)"].keys()),
@@ -81,6 +91,8 @@ def view_algorithm(request, algo_id):
         "cities": cities,
         "aois": aois,
         "aoi": aoi,
+        "current_year": datetime.now().year,
+        "years": [year for year in range(2001, datetime.now().year + 1)],
         "conf": conf.REMOTE_DATASETS
 
     }
@@ -159,32 +171,11 @@ def create_aggregation_table(request):
 
 
 @login_required
-def ajax_get_runmode(request, id):
-    scripts = accountmodels.Algorithm.objects.get(
-        id=id, deleted=False).scripts.all()
-    runmodes = []
-    options = ""
-    for script in scripts:
-        runmode = script.execution_script.run_mode
-        runmodes.append({"id": runmode.id, "value":  runmode.value})
-        options += "<option value='{}'>{}</option>".format(
-            runmode.id, runmode.value)
-    return JsonResponse({"runmodes": runmodes, "options": options})
-
-
-@login_required
-def ajax_get_algorithm_view(request, id, runmode):
-    if runmode < 1:
-        script = accountmodels.ExecutionScript.objects.filter(
-            deleted=False,
-            script__in=[obj.id for obj in accountmodels.Script.objects.filter(
-                algorithm__id=id)])
-    else:
-        script = accountmodels.ExecutionScript.objects.filter(
-            deleted=False,
-            run_mode_id=runmode,
-            script__in=[obj.id for obj in accountmodels.Script.objects.filter(
-                algorithm__id=id)])
+def ajax_get_algorithm_view(request, id):
+    script = accountmodels.Script.objects.filter(
+        deleted=False,
+        run_mode="remote",
+        algorithm__id=id)
 
     countries = accountmodels.Country.objects.all().order_by('name')
     regions = accountmodels.Region.objects.filter(
@@ -204,8 +195,15 @@ def ajax_get_algorithm_view(request, id, runmode):
     else:
         aoi = None
 
+    matrix = accountmodels.Matrix.objects.filter(user=request.user)
+    if matrix.count() == 0:
+        matrix = accountmodels.Matrix.objects.filter(user=None)
+    matrix = matrix.first().content
+    matrix = LCTransitionDefinitionDeg.Schema().loads(
+        matrix
+    )
     context = {
-        "table": matrix_to_table(),
+        "table": matrix_to_table(matrix),
         "jrc_lpd_datasets": list(
             conf.REMOTE_DATASETS["Land Productivity Dynamics (JRC)"]
             .keys()),
@@ -217,16 +215,33 @@ def ajax_get_algorithm_view(request, id, runmode):
         "aoi": aoi,
         "id": id,
         "conf": conf.REMOTE_DATASETS,
+        "current_year": datetime.now().year,
+        "years": [year for year in range(2001, datetime.now().year + 1)],
         "jobs": getjobs(request, script.first().id)
     }
 
     if script.first().name == "productivity":
-        trajectory_functions = {'NDVI trends': {'climate types': [],
-                                                'description': 'Calculate trend of annually integrated NDVI.',
-                                                'params': {'trajectory_method': 'ndvi_trend'}},
-                                'Pixel RESTREND': {'climate types': ['Precipitation', 'Soil moisture',
-                                                                     'Evapotranspiration'], 'description': 'Calculate pixel residual trend (RESTREND of annually integrated NDVI, after removing trend associated with a climate indicator.', 'params': {
-                                    'trajectory_method': 'p_restrend'}}, 'Rain Use Efficiency (RUE)': {'climate types': ['Precipitation'], 'description': 'Calculate rain use efficiency (precipitation divided by NDVI).', 'params': {'trajectory_method': 'ue'}}, 'Water Use Efficiency (WUE)': {'climate types': ['Evapotranspiration'], 'description': 'Calculate water use efficiency (evapotranspiration divided by NDVI).', 'params': {'trajectory_method': 'ue'}}}
+        trajectory_functions = {
+            'NDVI trends': {
+                'climate types': [],
+                'description': 'Calculate trend of annually integrated NDVI.',
+                'params': {
+                    'trajectory_method': 'ndvi_trend'
+                }
+            },
+            'Pixel RESTREND': {
+                'climate types': [
+                    'Precipitation', 'Soil moisture',
+                    'Evapotranspiration'
+                ],
+                'description': 'Calculate pixel residual trend (RESTREND of annually integrated NDVI, after removing trend associated with a climate indicator.', 'params': {
+                    'trajectory_method': 'p_restrend'
+                }
+            },
+            'Rain Use Efficiency (RUE)': {
+                'climate types': ['Precipitation'],
+                'description': 'Calculate rain use efficiency (precipitation divided by NDVI).',
+                'params': {'trajectory_method': 'ue'}}, 'Water Use Efficiency (WUE)': {'climate types': ['Evapotranspiration'], 'description': 'Calculate water use efficiency (evapotranspiration divided by NDVI).', 'params': {'trajectory_method': 'ue'}}}
         # trajectory_functions = json.loads(additional_configuration)
         context["trajectory_functions"] = list(trajectory_functions.keys())
         climate_datasets = []
@@ -241,7 +256,14 @@ def ajax_get_algorithm_view(request, id, runmode):
 
 
 def ajax_get_matrix_table(request):
-    return HttpResponse(matrix_to_table(), status=200)
+    matrix = accountmodels.Matrix.objects.filter(user=request.user)
+    if matrix.count() == 0:
+        matrix = accountmodels.Matrix.objects.filter(user=None)
+    matrix = matrix.first().content
+    matrix = LCTransitionDefinitionDeg.Schema().loads(
+        matrix
+    )
+    return HttpResponse(matrix_to_table(matrix), status=200)
 
 
 def ajax_reset_aggregation_table(request):
@@ -258,12 +280,13 @@ def ajax_reset_aggregation_table(request):
 
 @login_required
 def ajax_load_climate_dataset(request):
-    script = accountmodels.ExecutionScript.objects.get(
+    script = accountmodels.Script.objects.get(
         name=request.GET.get("algo"), deleted=False)
     if script.name == "productivity":
         additional_configuration = script.additional_configuration
         additional_configuration = additional_configuration.replace("'", '"')
-        trajectory_functions = json.loads(additional_configuration)
+        trajectory_functions = json.loads(
+            additional_configuration).get("trajectory functions")
         climate_datasets = []
         climate_types = trajectory_functions[request.GET.get(
             "indicator")]["climate types"]
@@ -297,3 +320,18 @@ def add_layer_to_map(request):
 
 def ajax_proxy_results(request):
     pass
+
+
+@login_required
+def ajax_save_matrix(request):
+    tdata = request.POST.get("tdata")
+    tdata = json.loads(tdata).get("tdata")
+    tbl = table_to_matrix(tdata)
+    try:
+        accountmodels.Matrix.objects.update_or_create(
+            user=request.user,
+            defaults={'name': 'Degradation Matrix', 'content': tbl.dumps()}
+        )
+        return JsonResponse({"msg": "Degradation matrix saved successfully!"}, status=200)
+    except Exception as e:
+        return JsonResponse({"msg": "Error saving the matrix!"}, status=400)

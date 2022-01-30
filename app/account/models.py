@@ -100,41 +100,17 @@ class Settings(models.Model):
         db_table = "settings"
 
 
-class AlgorithmNodeType(models.Model):
-    code = models.CharField(max_length=5,  blank=True, null=True)
-    value = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        db_table = "algorigthm_nodetype"
-
-
-class AlgorithmRunMode(models.Model):
-    code = models.CharField(max_length=10,  blank=True, null=True)
-    value = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        db_table = "algorithm_runmode"
-
-
-class ExecutionScript(models.Model):
+class Script(models.Model):
     uid = models.CharField(max_length=150, null=True, blank=True)
     name = models.CharField(max_length=150,  blank=True, null=True)
-    run_mode = models.ForeignKey(
-        AlgorithmRunMode, on_delete=models.DO_NOTHING, default=1)
     version = models.CharField(max_length=150, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     name_readable = models.CharField(max_length=150, null=True, blank=True)
     additional_configuration = models.TextField(null=True, blank=True)
-    deleted = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = "execution_script"
-
-
-class Script(models.Model):
-    execution_script = models.ForeignKey(
-        ExecutionScript, on_delete=models.DO_NOTHING)
-    parametrization_dialogue = models.TextField(default=None)
+    parametrization_dialogue = models.TextField(
+        default=None, null=True, blank=True)
+    deleted = models.BooleanField(default=False, null=False, blank=False)
+    run_mode = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         db_table = "script"
@@ -148,14 +124,22 @@ class Algorithm(models.Model):
     description = models.TextField(default=None,  blank=True, null=True)
     parent = models.ForeignKey(
         'self', null=True, blank=True,  on_delete=models.DO_NOTHING)
-    item_type = models.ForeignKey(
-        AlgorithmNodeType, on_delete=models.DO_NOTHING, default=2)
-    scripts = models.ManyToManyField(Script)
+    script = models.ManyToManyField(Script)
 
     deleted = models.BooleanField(default=False)
 
     class Meta:
         db_table = "algorithm"
+
+
+class Matrix(models.Model):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    user = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, null=True, blank=True)
+    content = models.TextField(null=True, blank=False)
+
+    class Meta:
+        db_table = "lc_matrix"
 
 
 class Feedback(models.Model):

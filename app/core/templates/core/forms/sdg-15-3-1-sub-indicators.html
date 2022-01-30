@@ -28,18 +28,19 @@
                         <div class="col-md-12">
                             <h3>Land productivity dataset</h3>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio_lpd_jrc"
-                                    checked>
+                                <input class="form-check-input" type="radio" value="lpd_jrc" name="rb_productivity"
+                                    id="radio_lpd_jrc" checked>
                                 <label class="form-check-label" for="radio_lpd_jrc">
                                     Trends.Earth land productivity
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio_te_prod">
+                                <input class="form-check-input" type="radio" value="te_prod" name="rb_productivity"
+                                    id="radio_te_prod">
                                 <label class="form-check-label" for="radio_te_prod">
-                                    UNCCD default data (Land Productivity Dynamics (LPD) Product 1999-2013 from Join
+                                    UNCCD default data (Land Productivity Dynamics (LPD) Product 1999-2013 from Joint
                                     Research
-                                    Commission)
+                                    Center)
                                 </label>
                             </div>
                         </div>
@@ -62,8 +63,8 @@
                             <label for="year_initial_baseline" class="form-label">Initial Year</label>
                             <select class="form-select form-select-sm" name="year_initial_baseline"
                                 id="year_initial_baseline">
-                                {% for tr in 2001|range:2022 %}
-                                <option value="{{tr}}">{{tr}}</option>
+                                {% for year in years %}
+                                <option value="{{year}}">{{year}}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -71,13 +72,17 @@
                             <label for="year_final_baseline" class="form-label">Final Year</label>
                             <select class="form-select form-select-sm" name="year_final_baseline"
                                 id="year_final_baseline">
-                                {% for tr in 2001|range:2022 %}
-                                <option value="{{tr}}">{{tr}}</option>
+                                {% for year in years %}
+                                {% if year == current_year %}
+                                <option value="{{year}}" selected>{{year}}</option>
+                                {% else %}
+                                <option value="{{year}}">{{year}}</option>
+                                {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row" style="display: none;" id="jrc_panel">
                         <div class="col-md-12">
                             <label for="cb_jrc_baseline" class="form-label">JRC JPD dataset for baseline
                                 period</label>
@@ -86,9 +91,10 @@
                                 <option value="{{tr}}">{{tr}}</option>
                                 {% endfor %}
                             </select>
+                            <br />
                         </div>
                     </div>
-                    <br />
+
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-check">
@@ -105,8 +111,12 @@
                                 <label for="year_initial_progress" class="form-label">Initial Year</label>
                                 <select class="form-select form-select-sm" name="year_initial_progress"
                                     id="year_initial_progress">
-                                    {% for tr in 2001|range:2022 %}
-                                    <option value="{{tr}}">{{tr}}</option>
+                                    {% for year in years %}
+                                    {% if year == current_year %}
+                                    <option value="{{year}}" selected>{{year}}</option>
+                                    {% else %}
+                                    <option value="{{year}}">{{year}}</option>
+                                    {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
@@ -114,8 +124,12 @@
                                 <label for="year_final_progress" class="form-label">Final Year</label>
                                 <select class="form-select form-select-sm" id="year_final_progress"
                                     name="year_final_progress">
-                                    {% for tr in 2001|range:2022 %}
-                                    <option value="{{tr}}">{{tr}}</option>
+                                    {% for year in years %}
+                                    {% if year == current_year %}
+                                    <option value="{{year}}" selected>{{year}}</option>
+                                    {% else %}
+                                    <option value="{{year}}">{{year}}</option>
+                                    {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
@@ -226,10 +240,11 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <button type="button" class="btn btn-outline-primary"
+                                        <button type="button" class="btn btn-outline-secondary"
                                             id="btn_reset_matrix_tbl">Reset
                                             matrix</button>
-                                        <button type="button" class="btn btn-outline-secondary">Save matrix</button>
+                                        <button type="button" class="btn btn-outline-success" id="btn_save_matrix">Save
+                                            matrix</button>
                                     </div>
                                 </div>
                             </div>
@@ -302,7 +317,7 @@
                     </blockquote>
                     <p>As the custodian agency for SDG 15.3, the United Nations Convention to Combat
                         Desertification (UNCCD) has developed a <a class="reference external" target="_blank"
-                            href="http://www2.unccd.int/sites/default/files/relevant-links/2017-10/Good%20Practice%20Guidance_SDG%20Indicator%2015.3.1_Version%201.0.pdf">Good
+                            href="https://www.unccd.int/sites/default/files/relevant-links/2021-03/Indicator_15.3.1_GPG_v2_29Mar_Advanced-version.pdf">Good
                             Practice Guidance (GPG)</a>.
                         providing recommendations on how to calculate SDG Indicator 15.3.1.</p>
                 </div>
@@ -338,6 +353,14 @@
                 } else {
                     $(this).addClass("improvement");
                 }
+            }
+        });
+
+        $("input[name=rb_productivity]").on("change", function () {
+            if ($(this).val() === "lpd_jrc") {
+                $("#jrc_panel").hide();
+            } else {
+                $("#jrc_panel").show();
             }
         });
 
@@ -381,6 +404,50 @@
                     scrollCollapse: true,
                     paging: false,
                 });
+            });
+        });
+
+        $("#btn_save_matrix").on("click", function () {
+            let tbody = $("#matrix_table tbody");
+            let tdata = [];
+            tbody.find("tr").each(function (i, el) {
+                var cols_data = [];
+                $(this).find("td").each(function (j, elj) {
+                    var input = $(this)
+                        .find("input")
+                        .eq(0)
+                        .val();
+                    cols_data.push(input);
+                });
+                if (cols_data.length > 0) {
+                    tdata.push(cols_data);
+                }
+
+            });
+
+            let formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("tdata", JSON.stringify({ "tdata": tdata }));
+            $.ajax({
+                url: "/ajax/save_matrix",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $("#messages-list").removeClass("msg-white");
+                    $("#messages-list").addClass("msg-dark");
+                    const messages = document.getElementById("messages-list");
+                    messages.innerHTML = response.msg;
+
+                    $("#messages-list").fadeOut(2000, "swing", function () {
+                        messages.innerHTML = "";
+                        $("#messages-list").show();
+                        $("#messages-list").removeClass("msg-black");
+                        $("#messages-list").addClass("msg-white");
+                    });
+                }
             });
         });
 

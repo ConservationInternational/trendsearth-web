@@ -4,7 +4,7 @@ from datetime import (
     datetime,
     timedelta
 )
-from tkinter.messagebox import NO
+
 from django.db import connection
 from django.http import (
     HttpResponse,
@@ -746,14 +746,14 @@ def ajax_update_algorithms_visibility(request):
                     id=data['id'])
             else:
                 algos = models.Algorithm.objects.filter(
-                    scripts__in=[models.Script.objects.get(id=data['id'])])
+                    script__in=[models.Script.objects.get(id=data['id'])])
             for algo in algos:
                 algo.deleted = not data["checked"]
                 algo.save(update_fields=["deleted"])
-                scripts = algo.scripts.all()
+                scripts = algo.script.all()
                 for script in scripts:
-                    script.execution_script.version = data["version"]
-                    script.execution_script.save(update_fields=["version"])
+                    script.version = data["version"]
+                    script.save(update_fields=["version"])
 
         return JsonResponse({
             "msg": "Settings updated!"}, status=200)
@@ -818,7 +818,7 @@ def get_chart_data(user=None):
         cursor.execute("""
             SELECT distinct b.id, b.name_readable as name
             FROM jobs AS a
-                JOIN execution_script AS b ON a.script_id = b.id
+                JOIN script AS b ON a.script_id = b.id
             {}
             ORDER BY 2;
         """.format(where))
@@ -835,7 +835,7 @@ def get_chart_data(user=None):
                 query = """
                     SELECT count(*), 1000 * EXTRACT(EPOCH FROM DATE(a.start_date)) AS date, b.name_readable AS name, b.id as code
                     FROM jobs AS a
-                        JOIN execution_script AS b ON a.script_id = b.id
+                        JOIN script AS b ON a.script_id = b.id
                     {}
                     GROUP BY 2, 3, 4
                     ORDER BY 3,2;""".format(where)
@@ -855,7 +855,7 @@ def get_chart_data(user=None):
             user.id) if user is not None else ""
         cursor.execute("""
                 SELECT count(*) as value, b.name_readable as name, b.id as code  FROM jobs AS a
-                JOIN execution_script AS b ON a.script_id = b.id
+                JOIN script AS b ON a.script_id = b.id
                 {}
                 GROUP BY 2, 3
                 ORDER BY 2;

@@ -1,5 +1,5 @@
 from datetime import datetime
-from tkinter.messagebox import NO
+
 import urllib.request
 import json
 import os
@@ -450,7 +450,7 @@ def process_sub_indicators(request, script):
                     'execution_callable': '',
                     'description': script.description,
                     'additional_configuration': {},
-                    'run_mode': script.run_mode.code,
+                    'run_mode': "remote",
                     'name': script.name,
                     'name_readable': script.name_readable,
                     'slug': script.name
@@ -469,10 +469,9 @@ def process_sub_indicators(request, script):
 def ajax_run_job(request):
     if request.POST:
         algo_name = request.POST.get("algo")
-        script = accountmodels.ExecutionScript.objects.get(
+        script = accountmodels.Script.objects.get(
             name=algo_name,
-            run_mode=accountmodels.AlgorithmRunMode.objects.get(
-                value=request.POST.get("runmode")))
+            run_mode="remote")
         if algo_name == "productivity":
             payloads = process_land_productivity(request, script)
         elif algo_name == "sdg-15-3-1-sub-indicators":
@@ -597,7 +596,10 @@ def ajax_download_job(request, id):
         return JsonResponse({"url": "/media/" + filename,
                              "fname": filename}, status=200)
     else:
-        return JsonResponse({"msg": "Cannot download the results for this job"}, status=400)
+        return JsonResponse(
+            {
+                "msg": "Cannot download the results for this job"},
+            status=400)
 
 
 @login_required
@@ -633,7 +635,8 @@ def ajax_delete_job(request, id):
 
 def getjobs(request, script_id):
     jobs = Job.objects.filter(
-        user=request.user, script_id=script_id, deleted=False).order_by("-start_date")
+        user=request.user, script_id=script_id,
+        deleted=False).order_by("-start_date")
 
     if not request.session.get('bearer_token'):
         views.signout(request)
@@ -643,11 +646,12 @@ def getjobs(request, script_id):
     for job in jobs:
         if job.status.value in ("PENDING", "RUNNING", "READY"):
             currentjob = api.get_execution(job.uid)
-            job.progress = currentjob["progress"]
-            job.end_date = currentjob["end_date"]
-            job.status = Status.objects.get(code=currentjob["status"])
-            job.results = currentjob["results"]
-            job.save(update_fields=["progress",
-                                    "end_date", "status", "results"])
+            if currentjob is not None:
+                job.progress = currentjob["progress"]
+                job.end_date = currentjob["end_date"]
+                job.status = Status.objects.get(code=currentjob["status"])
+                job.results = currentjob["results"]
+                job.save(update_fields=["progress",
+                                        "end_date", "status", "results"])
         job_result.append(job)
     return job_result

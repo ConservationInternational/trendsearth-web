@@ -42,16 +42,20 @@
 
                             <label for="year_initial" class="form-label">Initial Year</label>
                             <select class="form-select form-select-sm" name="year_initial" id="year_initial">
-                                {% for tr in 2001|range:2022 %}
-                                <option value="{{tr}}">{{tr}}</option>
+                                {% for year in years %}
+                                <option value="{{year}}">{{year}}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="year_final" class="form-label">Target Year</label>
                             <select class="form-select form-select-sm" name="year_final" id="year_final">
-                                {% for tr in 2001|range:2022 %}
-                                <option value="{{tr}}">{{tr}}</option>
+                                {% for year in years %}
+                                {% if year == current_year %}
+                                <option value="{{year}}" selected>{{year}}</option>
+                                {% else %}
+                                <option value="{{year}}">{{year}}</option>
+                                {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
@@ -61,7 +65,7 @@
                         <div class="col-md-6">
                             <label class="form-label" for="fc_threshold">Percentage tree cover considered forest</label>
                             <div class="input-group">
-                                <input type="number" value="1" class="form-control" id="fc_threshold"
+                                <input type="number" value="1" class="form-control validate-num-input" id="fc_threshold"
                                     name="fc_threshold">
                                 <span class="input-group-text" style="height: 36px;">%</span>
                             </div>
@@ -125,7 +129,7 @@
                                                         GEOCARBON (1 km resolution, global)
                                                     </label>
                                                 </div>
-                                                <div class="form-check">
+                                                <div class="form-check" style="display: none;">
                                                     <input class="form-check-input" type="radio" name="biomass_data"
                                                         id="radioButton_carbon_custom" value="custom">
                                                     <label class="form-check-label" for="radioButton_carbon_custom">
@@ -199,6 +203,19 @@
 <script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
 <script>
     $(document).ready(function () {
+        $("input[type=number]").on("keyup", function () {
+            var inputVal = +$(this).val();
+            if ($(this).hasClass("validate-num-input")) {
+                if (inputVal <= 0) {
+                    $(this).val(0);
+                } else if (inputVal > 100) {
+                    $(this).val(100);
+                } else {
+                    $(this).val(parseFloat($(this).val()));
+                }
+
+            }
+        });
         $("#btn_execute").on("click", function () {
             let formData = new FormData();
             formData.append("csrfmiddlewaretoken", "{{csrf_token}}");

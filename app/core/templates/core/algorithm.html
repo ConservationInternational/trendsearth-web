@@ -40,8 +40,7 @@
         var clicks = 0;
 
         let algorithm_id = +$("#algorithm_children").val();
-        let runmode = +$("#run_mode").val();
-        $.get("/ajax/algorithm/" + algorithm_id + "/runmode/" + runmode, function (response, status) {
+        $.get("/ajax/algorithm/" + algorithm_id, function (response, status) {
             $("#algorithm_body").empty();
             $("#algorithm_body").append(response);
             clicks = 0;
@@ -49,30 +48,13 @@
 
         $("#algorithm_children").on("change", function () {
             algorithm_id = +$("#algorithm_children").val();
-            $.get("/ajax/algorithm/" + algorithm_id + "/runmode", function (response, status) {
-                let runmodes = response.runmodes;
-                runmode = 0;
-                if (runmodes.length > 0) {
-                    runmode = runmodes[0].id;
-                }
-                $("#run_mode").empty();
-                $("#run_mode").append(response.options);
-                $.get("/ajax/algorithm/" + algorithm_id + "/runmode/" + runmode, function (response, status) {
-                    $("#algorithm_body").empty();
-                    $("#algorithm_body").append(response);
-                    clicks = 0;
-                });
-            });
-        });
-        $("#run_mode").on("change", function () {
-            let runmode = +$(this).val();
-            let algorithm_id = +$("#algorithm_children").val();
-            $.get("/ajax/algorithm/" + algorithm_id + "/runmode/" + runmode, function (response, status) {
+            $.get("/ajax/algorithm/" + algorithm_id, function (response, status) {
                 $("#algorithm_body").empty();
                 $("#algorithm_body").append(response);
                 clicks = 0;
             });
         });
+
 
         $("#btn_editAggregation").on("click", function () {
             if (clicks < 1)
@@ -117,7 +99,7 @@
                     $("#messages-list").removeClass("msg-white");
                     $("#messages-list").addClass("msg-dark");
                     const messages = document.getElementById("messages-list");
-                    messages.innerHTML += response.msg;
+                    messages.innerHTML = response.msg;
 
                     $("#messages-list").fadeOut(2000, "swing", function () {
                         messages.innerHTML = "";
@@ -128,6 +110,8 @@
                 }
             });
         });
+
+
 
 
         $(".active").removeClass("active");

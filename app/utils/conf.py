@@ -131,13 +131,13 @@ class SettingsManager:
 
 def _load_script_config(
         script_config: typing.Dict
-) -> typing.Dict[str, algorithm_models.ExecutionScript]:
+) -> typing.Dict[str, algorithm_models.Script]:
     result = {}
 
     for name, raw_config in script_config.items():
         try:
             raw = dict(raw_config)
-            algo = algorithm_models.ExecutionScript()
+            algo = algorithm_models.Script()
             algo.name = name
             algo.uid = raw.pop("id", None)
             algo.version = raw.pop("version", "")

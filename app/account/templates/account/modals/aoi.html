@@ -7,11 +7,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                {% if aois %}
                 <div class="form-check">
-                    <input {% if aois %} checked {% endif %} class="form-check-input" value="select" type="radio"
-                        name="aoi_select" id="aoi_select">
+                    <input class="form-check-input" value="select" type="radio" name="aoi_select" id="aoi_select">
                     <label for="country" class="form-label">Select Area of Interest</label>
-                    <div {% if not aois %} style="display: none;" {% endif %} class="row" id="aoi_select_panel">
+                    <div style="display: none;" class="row" id="aoi_select_panel">
                         <div class="col-md-11">
                             <select class="form-select form-select-sm" name="aoi_option" id="aoi_option">
                                 {% for aoi in aois %}
@@ -22,129 +22,129 @@
                     </div>
                 </div>
                 <div class="form-check">
-                    <input {% if not aois %} checked {% endif %} class="form-check-input" value="define" type="radio"
-                        name="aoi_select" id="aoi_define">
+                    <input checked class="form-check-input" value="define" type="radio" name="aoi_select"
+                        id="aoi_define">
                     <label for="country" class="form-label">Define new Area of Interest</label>
+                </div>
+                {% endif %}
+                <div class="row" id="aoi_define_panel">
+                    <div class="col-md-12">
+                        <div class="form-check">
+                            <input class="form-check-input" value="country" type="radio" name="aoi" id="aoi_country"
+                                checked>
+                            <label class="form-check-label" for="aoi_country">
+                                Administrative Level
+                            </label>
 
-                    <div {% if aois %} style="display: none;" {% endif %} class="row" id="aoi_define_panel">
-                        <div class="col-md-12">
-                            <div class="form-check">
-                                <input class="form-check-input" value="country" type="radio" name="aoi" id="aoi_country"
-                                    checked>
-                                <label class="form-check-label" for="aoi_country">
-                                    Administrative Level
-                                </label>
+                            <div class="row" id="country_panel">
+                                <div class="col-md-12">
+                                    <label for="country" class="form-label">First Level (Country)</label>
+                                    <span class="required">*</span>
 
-                                <div class="row" id="country_panel">
-                                    <div class="col-md-12">
-                                        <label for="country" class="form-label">First Level (Country)</label>
-                                        <span class="required">*</span>
+                                    <select class="form-select form-select-sm" name="country" id="country">
+                                        {% for country in countries %}
+                                        {% if aoi.country.id == country.id %}
+                                        <option value="{{country.id}}" selected>{{country.name}}</option>
+                                        {% else %}
+                                        <option value="{{country.id}}">{{country.name}}</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
 
-                                        <select class="form-select form-select-sm" name="country" id="country">
-                                            {% for country in countries %}
-                                            {% if aoi.country.id == country.id %}
-                                            <option value="{{country.id}}" selected>{{country.name}}</option>
-                                            {% else %}
-                                            <option value="{{country.id}}">{{country.name}}</option>
-                                            {% endif %}
-                                            {% endfor %}
-                                        </select>
+                                <div class="col-md-12">
+                                    <label for="region" class="form-label">Second Level</label>
+                                    <span class="required">*</span>
+                                    <div class="form-check">
+                                        <input class="form-check-input" value="region" type="radio" name="second_level"
+                                            id="second_level_region" checked>
+                                        <label class="form-check-label" for="second_level">
+                                            Region
+                                        </label>
+
                                     </div>
-
-                                    <div class="col-md-12">
-                                        <label for="region" class="form-label">Second Level</label>
-                                        <span class="required">*</span>
-                                        <div class="form-check">
-                                            <input class="form-check-input" value="region" type="radio"
-                                                name="second_level" id="second_level_region" checked>
-                                            <label class="form-check-label" for="second_level">
-                                                Region
-                                            </label>
-
-                                        </div>
-                                        <select class="form-select form-select-sm" name="region" id="region">
-                                            <option value="0" data-rel="All regions">All regions</option>
-                                            {% for region in regions %}
-                                            <option value="{{region.id}}" data-rel="{{region.name}}">{{region.name}}
-                                            </option>
-                                            {% endfor %}
-                                        </select>
-                                        <label class="form-label">Third Level</label>
-                                        <div class="form-check">
-                                            <input class="form-check-input" value="city" type="radio"
-                                                name="second_level" id="second_level_city">
-                                            <label class="form-check-label" for="second_level">
-                                                City
-                                            </label>
-                                        </div>
-                                        <select style="display: none;" class="form-select form-select-sm" name="city"
-                                            id="city">
-                                            <option value="0" data-rel="All cities">All cities</option>
-                                            {% for city in cities %}
-                                            <option value="{{city.id}}" data-rel="{{city.name_en}}">{{city.name_en}}
-                                            </option>
-                                            {% endfor %}
-                                        </select>
+                                    <select class="form-select form-select-sm" name="region" id="region">
+                                        <option value="0" data-rel="All regions">All regions</option>
+                                        {% for region in regions %}
+                                        <option value="{{region.id}}" data-rel="{{region.name}}">{{region.name}}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label class="form-label">Third Level</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" value="city" type="radio" name="second_level"
+                                            id="second_level_city">
+                                        <label class="form-check-label" for="second_level">
+                                            City
+                                        </label>
                                     </div>
-                                    <span>
-                                        Disclaimer: The provided boundaries are
-                                        from <a href="http://www.naturalearthdata.com/"
-                                            style="text-decoration: underline; color:#0000ff;">Natural
-                                            Earth</a> and are in the <a href="http://creativecommons.org/publicdomain"
-                                            style="
-                        text-decoration: underline; color:#0000ff;">public
-                                            domain</a>. The boundaries and names used, and the designations
-                                        used,
-                                        in Trends.Earth do not imply official endorsement or acceptance by
-                                        Conservation
-                                        International Foundation, or by its partner organizations and
-                                        contributors.
-                                    </span>
+                                    <select style="display: none;" class="form-select form-select-sm" name="city"
+                                        id="city">
+                                        <option value="0" data-rel="All cities">All cities</option>
+                                        {% for city in cities %}
+                                        <option value="{{city.id}}" data-rel="{{city.name_en}}">{{city.name_en}}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
+                                <span>
+                                    Disclaimer: The provided boundaries are
+                                    from <a href="http://www.naturalearthdata.com/"
+                                        style="text-decoration: underline; color:#0000ff;">Natural
+                                        Earth</a> and are in the <a href="http://creativecommons.org/publicdomain"
+                                        style="
+                    text-decoration: underline; color:#0000ff;">public
+                                        domain</a>. The boundaries and names used, and the designations
+                                    used,
+                                    in Trends.Earth do not imply official endorsement or acceptance by
+                                    Conservation
+                                    International Foundation, or by its partner organizations and
+                                    contributors.
+                                </span>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" value="point" type="radio" name="aoi" id="aoi_point">
-                                <label class="form-check-label" for="aoi_point">
-                                    Point
-                                </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" value="point" type="radio" name="aoi" id="aoi_point">
+                            <label class="form-check-label" for="aoi_point">
+                                Point
+                            </label>
+                        </div>
+                        <div class="row" id="point_panel" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label for="longitude" class="form-label">Longitude</label>
+                                <input type="number" class="form-control" name="longitude" id="longitude"
+                                    placeholder="0.0" value="0.0">
                             </div>
-                            <div class="row" id="point_panel" style="display: none;">
-                                <div class="col-md-6 mb-3">
-                                    <label for="longitude" class="form-label">Longitude</label>
-                                    <input type="number" class="form-control" name="longitude" id="longitude"
-                                        placeholder="0.0" value="0.0">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="latitude" class="form-label">Latitude</label>
-                                    <input type="number" class="form-control" name="latitude" id="latitude"
-                                        placeholder="0.0" value="0.0">
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="latitude" class="form-label">Latitude</label>
+                                <input type="number" class="form-control" name="latitude" id="latitude"
+                                    placeholder="0.0" value="0.0">
                             </div>
-                            <!-- <div class="form-check">
-                                <input class="form-check-input" value="file" type="radio" name="aoi" id="aoi_file">
-                                <label class="form-check-label" for="aoi_file">
-                                    Area from file
-                                </label>
-                            </div>
-                            <div class="mb-3" id="file_panel" style="display: none;">
-                                <input class="form-control" type="file" id="data_file"
-                                    accept=".wkt,.zip,.kml,.txt,.json,.geojson">
-                            </div> -->
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="chbox_buffer">
-                                <label class="form-check-label" for="chbox_buffer">
-                                    Apply a buffer to the chosen area
-                                </label>
-                            </div>
-                            <div class="mb-3" id="buffer_panel" style="display: none;">
-                                <label for="buffer_size" class="form-label">Buffer size (kilometers)</label>
-                                <input type="number" class="form-control" name="buffer_size" id="buffer_size"
-                                    placeholder="10.0" value="10.0" min="0.1">
-                            </div>
-                            <div class="mb-3">
-                                <label for="area_name" class="form-label">Area Name</label>
-                                <input type="text" class="form-control" name="area_name" id="area_name" value="">
-                            </div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" value="file" type="radio" name="aoi" id="aoi_file">
+                            <label class="form-check-label" for="aoi_file">
+                                Area from file
+                            </label>
+                        </div>
+                        <div class="mb-3" id="file_panel" style="display: none;">
+                            <input class="form-control" type="file" id="data_file"
+                                accept=".wkt,.zip,.kml,.txt,.json,.geojson">
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="chbox_buffer">
+                            <label class="form-check-label" for="chbox_buffer">
+                                Apply a buffer to the chosen area
+                            </label>
+                        </div>
+                        <div class="mb-3" id="buffer_panel" style="display: none;">
+                            <label for="buffer_size" class="form-label">Buffer size (kilometers)</label>
+                            <input type="number" class="form-control" name="buffer_size" id="buffer_size"
+                                placeholder="10.0" value="10.0" min="0.1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="area_name" class="form-label">Area Name</label>
+                            <input type="text" class="form-control" name="area_name" id="area_name" value="">
                         </div>
                     </div>
                 </div>

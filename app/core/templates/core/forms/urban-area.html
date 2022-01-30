@@ -38,24 +38,24 @@
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Impervious Surface Index (0-100)</label>
                             <span>(lower values will include low density areas)</span>
-                            <input type="number" class="form-control" value="31" min="0" max="100" name="isi_thr"
-                                id="isi_thr" style="max-width: 200px;">
+                            <input type="number" class="form-control validate-num-input" value="31" min="0" max="100"
+                                name="isi_thr" id="isi_thr" style="max-width: 200px;">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Night Time Lights Index (0-100)</label>
                             <span>(lower values will include low light areas)</span>
-                            <input type="number" class="form-control" value="10" min="0" max="100" name="ntl_thr"
-                                id="ntl_thr" style="max-width: 200px;">
+                            <input type="number" class="form-control validate-num-input" value="10" min="0" max="100"
+                                name="ntl_thr" id="ntl_thr" style="max-width: 200px;">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Water Frequency (0-100)</label>
                             <span>(lower values will include low frequency waters)</span>
-                            <input type="number" class="form-control" value="25" min="0" max="100" name="wat_thr"
-                                id="wat_thr" style="max-width: 200px;">
+                            <input type="number" class="form-control validate-num-input" value="25" min="0" max="100"
+                                name="wat_thr" id="wat_thr" style="max-width: 200px;">
                         </div>
                     </div>
                 </div>
@@ -115,7 +115,8 @@
                                                 </label>
                                                 <span>(values below this will be considered rural</span>
                                                 <div class="input-group">
-                                                    <input type="number" value="30" class="form-control" aria-label=""
+                                                    <input type="number" value="30"
+                                                        class="form-control validate-num-input" aria-label=""
                                                         id="pct_suburban" name="pct_suburban" style="max-width: 200px;">
                                                     <span class="input-group-text" style="height: 36px;">%</span>
                                                 </div>
@@ -128,7 +129,8 @@
                                                 </label>
                                                 <span>(values below this will be considered suburban</span>
                                                 <div class="input-group">
-                                                    <input type="number" value="30" class="form-control" aria-label=""
+                                                    <input type="number" value="30"
+                                                        class="form-control validate-num-input" aria-label=""
                                                         id="pct_urban" name="pct_urban" style="max-width: 200px;">
                                                     <span class="input-group-text" style="height: 36px;">%</span>
                                                 </div>
@@ -212,6 +214,19 @@
 <script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
 <script>
     $(document).ready(function () {
+        $("input[type=number]").on("keyup", function () {
+            var inputVal = +$(this).val();
+            if ($(this).hasClass("validate-num-input")) {
+                if (inputVal <= 0) {
+                    $(this).val(0);
+                } else if (inputVal > 100) {
+                    $(this).val(100);
+                } else {
+                    $(this).val(parseFloat($(this).val()));
+                }
+
+            }
+        });
         $("#btn_execute").on("click", function () {
             let formData = new FormData();
             formData.append("csrfmiddlewaretoken", "{{csrf_token}}");

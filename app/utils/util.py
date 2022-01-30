@@ -75,7 +75,6 @@ def matrix_to_table(matrix=None):
 
 
 def table_to_matrix(tdata, matrix=None, nesting=None):
-    # Extract trans_matrix from the QTableWidget
     if nesting is None:
         nesting = get_lc_nesting()
     if matrix is None:
@@ -87,8 +86,6 @@ def table_to_matrix(tdata, matrix=None, nesting=None):
     for row in range(0, rows):
         for col in range(0, cols):
             val = tdata[row][col]
-            val = "1"
-            val = "0"
             if val == "" or val == "0":
                 meaning = "stable"
             elif val == "-":

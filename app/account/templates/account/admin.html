@@ -114,20 +114,20 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="row">
-                                    {% for script in item.scripts.all %}
+                                    {% for script in item.script.all %}
                                     <div class="col-sm-6">
                                         <div class="form-check">
                                             <input class="form-check-input algorithm-check" type="checkbox"
                                                 typeof="script" id="id-{{script.id}}" {% if not script.deleted %}
                                                 checked {% endif %}>
                                             <label class="form-check-label" for="flexCheckChecked">
-                                                {{script.execution_script.run_mode.value}}
+                                                {{script.run_mode}}
                                             </label>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
-                                        <input class="form-control" value="{{script.execution_script.version}}"
-                                            type="text" id="version-{{script.id}}">
+                                        <input class="form-control" value="{{script.version}}" type="text"
+                                            id="version-{{script.id}}">
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -158,18 +158,18 @@
                     </div>
                     <div class="col-md-6">
                         <div class="row">
-                            {% for script in child.scripts.all %}
+                            {% for script in child.script.all %}
                             <div class="col-md-6">
                                 <div class="form-check">
                                     <input class="form-check-input algorithm-check" type="checkbox" typeof="script"
                                         id="id-{{script.id}}" {% if not script.deleted %} checked {% endif %}>
                                     <label class="form-check-label" for="id-{{script.id}}">
-                                        {{script.execution_script.run_mode.value}}
+                                        {{script.run_mode}}
                                     </label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <input class="form-control" type="text" value="{{script.execution_script.version}}"
+                                <input class="form-control" type="text" value="{{script.version}}"
                                     id="version-{{script.id}}">
                             </div>
                             {% endfor %}

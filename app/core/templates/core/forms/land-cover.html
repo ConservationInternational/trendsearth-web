@@ -27,16 +27,20 @@
                     <div class="col-md-6 mb-3">
                         <label for="initial_year_de" class="form-label">Initial Year</label>
                         <select class="form-select form-select-sm" name="initial_year_de" id="initial_year_de">
-                            {% for tr in 2001|range:2022 %}
-                            <option value="{{tr}}">{{tr}}</option>
+                            {% for year in years %}
+                            <option value="{{year}}">{{year}}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="target_year_de" class="form-label">Target Year</label>
                         <select class="form-select form-select-sm" name="target_year_de" id="target_year_de">
-                            {% for tr in 2001|range:2022 %}
-                            <option value="{{tr}}">{{tr}}</option>
+                            {% for year in years %}
+                            {% if year == current_year %}
+                            <option value="{{year}}" selected>{{year}}</option>
+                            {% else %}
+                            <option value="{{year}}">{{year}}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                     </div>
@@ -132,10 +136,11 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <button type="button" class="btn btn-outline-primary"
+                                                <button type="button" class="btn btn-outline-secondary"
                                                     id="btn_reset_matrix_tbl">Reset
                                                     matrix</button>
-                                                <button type="button" class="btn btn-outline-secondary">Save
+                                                <button type="button" class="btn btn-outline-success"
+                                                    id="btn_save_matrix">Save
                                                     matrix</button>
                                             </div>
                                         </div>
@@ -254,6 +259,50 @@
                     scrollCollapse: true,
                     paging: false,
                 });
+            });
+        });
+
+        $("#btn_save_matrix").on("click", function () {
+            let tbody = $("#matrix_table tbody");
+            let tdata = [];
+            tbody.find("tr").each(function (i, el) {
+                var cols_data = [];
+                $(this).find("td").each(function (j, elj) {
+                    var input = $(this)
+                        .find("input")
+                        .eq(0)
+                        .val();
+                    cols_data.push(input);
+                });
+                if (cols_data.length > 0) {
+                    tdata.push(cols_data);
+                }
+
+            });
+
+            let formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("tdata", JSON.stringify({ "tdata": tdata }));
+            $.ajax({
+                url: "/ajax/save_matrix",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $("#messages-list").removeClass("msg-white");
+                    $("#messages-list").addClass("msg-dark");
+                    const messages = document.getElementById("messages-list");
+                    messages.innerHTML = response.msg;
+
+                    $("#messages-list").fadeOut(2000, "swing", function () {
+                        messages.innerHTML = "";
+                        $("#messages-list").show();
+                        $("#messages-list").removeClass("msg-black");
+                        $("#messages-list").addClass("msg-white");
+                    });
+                }
             });
         });
 

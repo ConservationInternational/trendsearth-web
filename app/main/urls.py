@@ -27,10 +27,8 @@ urlpatterns = [path('', include('account.urls')),
                path('', include('job.urls')), ]
 
 urlpatterns += [
-    path('ajax/algorithm/<int:id>/runmode/<int:runmode>',
+    path('ajax/algorithm/<int:id>',
          core_views.ajax_get_algorithm_view, name='ajax_get_algo_view'),
-    path('ajax/algorithm/<int:id>/runmode',
-         core_views.ajax_get_runmode, name='ajax_get_runmode'),
     path('ajax/get/climate_dataset',
          core_views.ajax_load_climate_dataset, name='ajax_get_climate_dataset'),
     path('ajax/regions',
@@ -79,7 +77,11 @@ urlpatterns += [
          name='ajax_delete_job'),
     path('ajax/add_layer',
          core_views.add_layer_to_map,
-         name='add_layer_to_map')]
+         name='add_layer_to_map'),
+    path('ajax/save_matrix',
+         core_views.ajax_save_matrix,
+         name='save_matrix')
+]
 
 urlpatterns += staticfiles_urlpatterns()
 

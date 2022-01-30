@@ -179,7 +179,7 @@ class Api(object):
                 return resp.json()
             else:
                 desc, status = self.get_error_status(resp)
-                # print("Error", u"Error: {} (status {}).".format(desc, status))
+                print("Error", u"Error: {} (status {}).".format(desc, status))
 
     def _make_request(self, description, **kwargs):
         api_task = RequestTask(description, **kwargs)

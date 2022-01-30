@@ -4,25 +4,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
 from django.utils import tree
 from django.utils.timezone import now
-from requests.sessions import default_headers
 
-from account.models import Aoi, ExecutionScript
-# Create your models here.
-
-
-class SortField(enum.Enum):
-    NAME = 'name'
-    DATE = 'date'
-    ALGORITHM = 'algorithm'
-    STATUS = 'status'
-
-
-class ScriptStatus(models.Model):
-    code = models.CharField(max_length=20)
-    value = models.CharField(max_length=50, blank=False, null=False)
-
-    class Meta:
-        db_table = "script_status"
+from account.models import Aoi, Script
 
 
 class Status(models.Model):
@@ -36,7 +19,7 @@ class Status(models.Model):
 class Job(models.Model):
     progress = models.IntegerField()
     script = models.ForeignKey(
-        ExecutionScript, on_delete=models.CASCADE, null=True)
+        Script, on_delete=models.CASCADE, null=True)
     status = models.ForeignKey(Status, on_delete=models.CASCADE)
     start_date = models.DateTimeField(null=True, blank=True, default=now)
     end_date = models.DateTimeField(null=True, blank=True)

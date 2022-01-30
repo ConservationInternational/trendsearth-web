@@ -15,7 +15,7 @@ class AccountConfig(AppConfig):
 
         try:
             with connection.cursor() as cursor:
-                cursor.execute("select * from script_status")
+                cursor.execute("select * from script")
                 records = dictfetchall(cursor)
                 if len(records) < 1:
                     cursor.execute(open(os.path.dirname(

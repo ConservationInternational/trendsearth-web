@@ -27,16 +27,20 @@
                     <div class="col-md-6 mb-3">
                         <label for="initial_year_de" class="form-label">Initial Year</label>
                         <select class="form-select form-select-sm" name="initial_year_de" id="initial_year_de">
-                            {% for tr in 2001|range:2022 %}
-                            <option value="{{tr}}">{{tr}}</option>
+                            {% for year in years %}
+                            <option value="{{year}}">{{year}}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="target_year_de" class="form-label">Target Year</label>
                         <select class="form-select form-select-sm" name="target_year_de" id="target_year_de">
-                            {% for tr in 2001|range:2022 %}
-                            <option value="{{tr}}">{{tr}}</option>
+                            {% for year in years %}
+                            {% if year == current_year %}
+                            <option value="{{year}}" selected>{{year}}</option>
+                            {% else %}
+                            <option value="{{year}}">{{year}}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                     </div>
