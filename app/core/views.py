@@ -115,6 +115,7 @@ def ajax_update_aggregation_method(request):
                             status=200)
 
 
+@login_required
 def create_aggregation_table(request):
     agg_classes = models.UserAggregationClass.objects.filter(user=request.user)
     if agg_classes.count() == 0:
@@ -255,10 +256,9 @@ def ajax_get_algorithm_view(request, id):
         )
 
 
+@login_required
 def ajax_get_matrix_table(request):
-    matrix = accountmodels.Matrix.objects.filter(user=request.user)
-    if matrix.count() == 0:
-        matrix = accountmodels.Matrix.objects.filter(user=None)
+    matrix = accountmodels.Matrix.objects.filter(user=None)
     matrix = matrix.first().content
     matrix = LCTransitionDefinitionDeg.Schema().loads(
         matrix
@@ -266,6 +266,7 @@ def ajax_get_matrix_table(request):
     return HttpResponse(matrix_to_table(matrix), status=200)
 
 
+@login_required
 def ajax_reset_aggregation_table(request):
     models.UserAggregationClass.objects.filter(user=request.user).delete()
     defaults = models.UserAggregationClass.objects.filter(
