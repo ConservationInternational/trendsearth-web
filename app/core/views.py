@@ -260,9 +260,7 @@ def ajax_get_algorithm_view(request, id):
 def ajax_get_matrix_table(request):
     matrix = accountmodels.Matrix.objects.filter(user=None)
     matrix = matrix.first().content
-    matrix = LCTransitionDefinitionDeg.Schema().loads(
-        matrix
-    )
+    matrix = LCTransitionDefinitionDeg.Schema().loads(matrix)
     return HttpResponse(matrix_to_table(matrix), status=200)
 
 

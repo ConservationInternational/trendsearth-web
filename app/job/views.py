@@ -294,7 +294,8 @@ def process_land_productivity(request, script):
         additional_configuration = script.additional_configuration
         additional_configuration = additional_configuration.replace(
             "'", '"')
-        trajectory_functions = json.loads(additional_configuration)
+        trajectory_functions = json.loads(
+            additional_configuration).get("trajectory functions")
 
         climate_gee_dataset = None
         if request.POST.get("traj_climate") != 'null':
