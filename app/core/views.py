@@ -1,18 +1,14 @@
 from datetime import datetime
-import urllib.request
 import json
-import os
 from django import urls
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
-    JsonResponse,
-    HttpResponseRedirect
+    JsonResponse
 )
 from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse_lazy
-from numpy import matrix
 from account import models as accountmodels
 from job.models import Job, Layer
 from utils.api import Api
@@ -20,7 +16,11 @@ from utils.api import Api
 from . import models
 from utils.util import matrix_to_table, table_to_matrix
 from utils import conf
-from account.views import get_chart_data, get_algorithms, get_user_aoi
+from account.views import (
+    get_chart_data,
+    get_charts_data,
+    get_algorithms,
+    get_user_aoi)
 from job.views import getjobs
 from te_schemas.land_cover import (
     LCTransitionDefinitionDeg
@@ -32,12 +32,19 @@ def dashboard(request):
     template = loader.get_template('core/index.html')
     center = [0, 0]
     try:
-        aoi = accountmodels.Aoi.objects.get(user=request.user)
-        center = json.loads(aoi.geom.centroid.json)["coordinates"]
+        aoi = accountmodels.Aoi.objects.filter(user=request.user)
+        if aoi.count() > 0:
+            center = json.loads(aoi.first().geom.centroid.json)["coordinates"]
     except Exception as e:
+        center = [0, 0]
         print(e)
 
-    line_chart_data, pie_chart_data = get_chart_data(request.user)
+    # line_chart_data, pie_chart_data = get_chart_data(user=None)
+
+    line_chart_data, pie_chart_data = get_charts_data(
+        start_date='2021-01-01', end_date=datetime.now(),
+        frequency='month',
+        user_id=None)
     context = {
         "parents": get_algorithms(),
         'line_chart_data': line_chart_data,

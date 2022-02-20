@@ -1,9 +1,11 @@
 import os
 import json
+import numpy as np
 from datetime import (
     datetime,
     timedelta
 )
+from urllib import request
 
 from django.db import connection
 from django.http import (
@@ -12,6 +14,7 @@ from django.http import (
     JsonResponse
 )
 from django.contrib.gis.geos import Point, Polygon
+# from django.contrib.gis.geos import fromfile
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -34,14 +37,14 @@ from django.contrib import messages
 from django.conf import settings
 from django.db import connection
 
-# from osgeo import ogr
+from osgeo import ogr
 
 from account import models
 from job.models import (Job, Status)
 from . import forms
 
 from utils.api import (Api)
-from utils.util import dictfetchall
+from utils.util import (dictfetchall, extract_zipped_file, get_file_extension)
 
 
 def signout(request):
@@ -182,8 +185,8 @@ class LoginView(FormView):
 
                 results = execution.get("results")
                 if results:
-                    job.results = {"urls": results["urls"]}
-
+                    if results.get("urls"):
+                        job.results = {"urls": results.get("urls")}
                 try:
                     job.script = models.ExecutionScript.objects.get(
                         uid=execution.get("script_id"))
@@ -199,7 +202,12 @@ class LoginView(FormView):
             if 'next' in self.request.POST:
                 return HttpResponseRedirect(self.request.POST['next'])
             else:
-                return HttpResponseRedirect(self.success_url)
+                if user.is_superuser:
+                    return HttpResponseRedirect(self.success_url)
+                else:
+                    algo = models.Algorithm.objects.filter(
+                        parent_id=None, deleted=False).first()
+                    return HttpResponseRedirect("/algorithm/{}".format(algo.id))
         else:
             messages.add_message(self.request, messages.ERROR,
                                  'Wrong credentials please try again')
@@ -682,30 +690,49 @@ def ajax_change_aoi(request):
                 filename = fs.save(file.name, file)
                 uploaded_file_path = fs.path(filename)
 
-                # ds = ogr.Open(uploaded_file_path)
-                # layer = ds.GetLayer()
-                # extent = layer.GetExtent()
-                # geom = Polygon.from_bbox(extent)
+                data_file = uploaded_file_path
+                file_type = request.POST.get("file_type")
+                if file_type == "shp":
+                    file_list = extract_zipped_file(uploaded_file_path)
+                    for file in file_list:
+                        if get_file_extension(file) == "shp":
+                            data_file = file
 
-                # layer = None
-                # ds = None
+                print(data_file)
+                try:
+                    ds = ogr.Open(data_file)
+                    layer = ds.GetLayer()
+                    extent = layer.GetExtent()
+                    geom = Polygon.from_bbox(extent)
+                    layer = None
+                    ds = None
+                    # geom = fromfile(data_file)
 
-                # if uploaded_file_path is not None:
-                #     fs.delete(uploaded_file_path)
+                    if uploaded_file_path is not None:
+                        fs.delete(uploaded_file_path)
+                except Exception as e:
+                    print(e)
+                    return JsonResponse({"msg": "Error adding your area of interest!"}, status=400)
 
             if request.POST.get("buffer_size") != "null":
                 buffer_size = float(request.POST.get("buffer_size"))
                 distance = buffer_size * 1000
                 buffer_width = distance / 40000000.0 * 360.0
                 geom = geom.buffer(buffer_width)
+                # geom = geom.envelope
 
                 aoi.buffer_size = buffer_size
-            if geom.area < 3000:
-                aoi.geom = geom
-                aoi.save()
+            if geom is not None:
+                if geom.area < 3000:
+                    aoi.geom = geom
+                    aoi.save()
+                else:
+                    print(geom.area)
+                    return JsonResponse({
+                        "msg": "Selected area of interest larger than the threshold of 20 million sq.km !"
+                    }, status=400)
             else:
-                print(geom.area)
-                return JsonResponse({"msg": "Selected area of interest larger than the threshold of 20 million sq.km !"}, status=400)
+                return JsonResponse({"msg": "Error adding your area of interest!"}, status=400)
 
         return JsonResponse({"msg": "Region of interest updated!", "id": aoi.id, "name": aoi.name}, status=200)
 
@@ -851,8 +878,9 @@ def get_chart_data(user=None):
                         "code": script["id"]
                     })
 
-        where = " WHERE user_id ={}".format(
-            user.id) if user is not None else ""
+        where = ""
+        if user is not None:
+            where = " WHERE user_id ={}".format(user.id)
         cursor.execute("""
                 SELECT count(*) as value, b.name_readable as name, b.id as code  FROM jobs AS a
                 JOIN script AS b ON a.script_id = b.id
@@ -862,6 +890,81 @@ def get_chart_data(user=None):
             """.format(where))
         pie_chart_data = dictfetchall(cursor)
     return line_chart_data, pie_chart_data
+
+
+def get_charts_data(start_date, end_date, frequency='month', user_id=None):
+    if user_id is None:
+        where = ""
+    else:
+        where = " AND user_id = " + str(user_id)
+
+    with connection.cursor() as cursor:
+        query = """
+            WITH q AS(
+                SELECT min(start_date::date) as low, max(start_date::date) as high
+                FROM jobs
+                WHERE deleted = False AND start_date BETWEEN '{0}' AND '{1}' {2}
+            )
+            SELECT row_number () over() -1 as rownr, series AS a,
+                series + interval '1 {3}' as b
+                FROM (SELECT generate_series( low, high, '1 {3}') as series FROM q) as r;
+        """.format(start_date, end_date, where, frequency)
+        cursor.execute(query)
+        dates = dictfetchall(cursor)
+
+        query = """
+            SELECT distinct b.id, b.name_readable as name
+            FROM jobs AS a
+                JOIN script AS b ON a.script_id = b.id  AND a.deleted = False AND a.start_date BETWEEN '{0}' AND '{1}' {2}
+            ORDER BY 2;
+        """.format(start_date, end_date, where)
+        cursor.execute(query)
+
+        scripts = dictfetchall(cursor)
+
+        line_chart_data = []
+        for script in scripts:
+            for date in dates:
+                if user_id is None:
+                    where = ""
+                else:
+                    where = " AND user_id = " + str(user_id)
+                where += " AND a.script_id = {0} AND a.start_date BETWEEN '{1}' AND '{2}' ".format(
+                    script["id"], date["a"], date["b"])
+
+                query = """
+                    SELECT count(*), 1000 * EXTRACT(EPOCH FROM DATE(a.start_date)) AS date, 
+                    b.name_readable AS name, b.id as code
+                    FROM jobs AS a
+                        JOIN script AS b ON a.script_id = b.id
+                    {}
+                    GROUP BY start_date, name_readable, b.id
+                    ORDER BY 3,2;""".format(where)
+                cursor.execute(query)
+                result = dictfetchall(cursor)
+                if len(result) > 0:
+                    line_chart_data.append(result[0])
+                else:
+                    line_chart_data.append({
+                        "count": 0,
+                        "date": int(date["a"].timestamp()) * 1000,
+                        "name": script["name"],
+                        "code": script["id"]
+                    })
+
+        where = ""
+        if user_id is not None:
+            where = " WHERE user_id ={}".format(user_id)
+        query = """
+                SELECT count(*) as value, b.name_readable as name, b.id as code  FROM jobs AS a
+                JOIN script AS b ON a.script_id = b.id
+                {}
+                GROUP BY 2, 3
+                ORDER BY 2;
+            """.format(where)
+        cursor.execute(query)
+        pie_chart_data = dictfetchall(cursor)
+        return line_chart_data, pie_chart_data
 
 
 def get_algorithms(include_deleted=False):
@@ -874,7 +977,7 @@ def get_algorithms(include_deleted=False):
     algorithms = []
     for parent in parents:
         children = models.Algorithm.objects.filter(
-            parent_id=parent['id'], uid=None)
+            parent_id=parent['id'], uid=None).order_by("id")
         if children.count() > 0:
             parent["children"] = children
         algorithms.append(parent)

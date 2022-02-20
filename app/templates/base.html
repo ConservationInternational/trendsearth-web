@@ -44,11 +44,13 @@
                 </div>
             </div>
             <hr>
-
+            {% if user.is_superuser %}
             <a href="/home" style="padding-left: 0px;" class="item active" id="dashboard_item">
                 <h3 class="menu-items"><i class="fa fa-home"></i> &nbsp;DASHBOARD</h3>
             </a>
             <hr>
+            {% endif %}
+
             <div class="row">
                 <div class="col-md-10" style="padding-left: 0px;">
                     <h3 class="menu-items"><i class="fa fa-random"></i> &nbsp;ALGORITHMS</h3>

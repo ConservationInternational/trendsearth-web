@@ -60,11 +60,12 @@
         y: (d) => d.count,
         z: (d) => d.name,
         code: (d) => d.code,
-        yLabel: "",
+        yLabel: "Number of Jobs",
         width: $("#line_chart_div").width(),
         height: 300,
         color: color,
         voronoi: false,
+        xFormat: '%Y-%m',
         targetPanel: "line_chart_div"
     });
 

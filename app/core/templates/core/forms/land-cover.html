@@ -217,36 +217,15 @@
 <script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/events.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/validation.js' %}"></script>
 <script>
     $(document).ready(function () {
-        $(".lc-input").on("keyup", function () {
-            var inputVal = $(this).val();
-            if (inputVal.length > 1) {
-                inputVal = inputVal[0];
-                $(this).val(inputVal);
-            }
-            if (! /[-0+]/.test(inputVal)) {
-                $(this).val("");
-            } else {
-                $(this).removeClass("stable");
-                $(this).removeClass("degradation");
-                $(this).removeClass("improvement");
-
-                if (inputVal == "0") {
-                    $(this).addClass("stable");
-                } else if (inputVal == "-") {
-                    $(this).addClass("degradation");
-                } else {
-                    $(this).addClass("improvement");
-                }
-            }
-
-        });
-
+        validateMatrixTable();
         $("#btn_reset_matrix_tbl").on("click", function () {
             $.get("/ajax/matrix_table", function (response, status) {
                 $("#matrix_table").empty();
                 $("#matrix_table").append(response);
+                validateMatrixTable();
             });
         });
 

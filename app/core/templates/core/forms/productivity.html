@@ -52,6 +52,15 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="col-md-6 mb-3" style="display: none;" id="jrc_panel">
+                        <label for="cb_jrc_baseline" class="form-label">JRC JPD Dataset
+                            period</label>
+                        <select class="form-select form-select-sm" name="cb_jrc_baseline" id="cb_jrc_baseline">
+                            {% for tr in jrc_lpd_datasets %}
+                            <option value="{{tr}}">{{tr}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
 
                 <div class="border">
@@ -446,9 +455,11 @@
             if ($(this).val() == "TE") {
                 $("#advanced_panel").show();
                 $("#ndvi_dataset_panel").show();
+                $("#jrc_panel").hide();
             } else {
                 $("#ndvi_dataset_panel").hide();
                 $("#advanced_panel").hide();
+                $("#jrc_panel").show();
             }
         });
         $("#trajectory_indicator").on("change", function () {
@@ -488,12 +499,8 @@
         $("#btn_execute").on("click", function () {
             let formData = new FormData();
             formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
-            if ($("#radio_lpd_te").is(":checked")) {
-                formData.append("prod_mode", 'Trends.Earth productivity');
 
-            } else {
-                formData.append("prod_mode", 'JRC LPD');
-            }
+            formData.append("prod_mode", $("#radio_lpd_te").is(":checked") ? 1 : 0);
             formData.append("trajectory_indicator", $("#trajectory_indicator").val());
             formData.append("traj_climate", $("#traj_climate").val());
             formData.append("calc_traj", $("#groupBox_traj").is(":checked"));
@@ -513,6 +520,7 @@
             formData.append("task_name", $("#execution_name").val());
             formData.append("task_notes", $("#task_notes").val());
             formData.append("aoi_id", +$("#aoi_id").val());
+            formData.append("cb_jrc_baseline", $("#cb_jrc_baseline").val());
             $.ajax({
                 url: "/ajax/run/job",
                 type: "POST",

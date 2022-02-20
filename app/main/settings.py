@@ -18,7 +18,9 @@ SECRET_KEY = 'django-insecure-!sxg#_zjx^3jcg*0twy^@(04^()_mu59lj4&^s1zr4a+6-io19
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'localhost:8000', 'api-staging.trends.earth']
+ALLOWED_HOSTS = [
+    'localhost', 'localhost:8000',
+    'api-staging.trends.earth', '107.22.214.234']
 
 
 # Application definition

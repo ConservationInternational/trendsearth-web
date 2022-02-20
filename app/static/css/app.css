@@ -703,3 +703,22 @@ iframe{
     margin-left: 0px;
   }
 }
+
+.accordion-item h2 {
+  font-weight: 500 !important;
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.accordion-item .accordion-button {
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  color: #000 !important;
+}
+
+.accordion-button {
+  background-color: #fff !important;
+  color: #000 !important
+}

@@ -10,7 +10,7 @@ from django.http import (
     JsonResponse
 )
 from django.template import loader
-
+from te_schemas.productivity import ProductivityMode
 from te_schemas.land_cover import LCTransitionDefinitionDeg, LCLegendNesting
 from job.models import Job, Status
 
@@ -313,8 +313,11 @@ def process_land_productivity(request, script):
         aoi = accountmodels.Aoi.objects.get(id=aoi_id)
         geom = aoi.geom
 
+        prod_mode = ProductivityMode.TRENDS_EARTH_5_CLASS_LPD.value if request.POST.get(
+            "prod_mode") == 1 else ProductivityMode.JRC_5_CLASS_LPD.value
+
         payload = {
-            'prod_mode': request.POST.get("prod_mode"),
+            'prod_mode': prod_mode,
             'calc_traj': request.POST.get("calc_traj"),
             'calc_perf': request.POST.get("calc_perf"),
             'calc_state': request.POST.get("calc_state"),
@@ -355,6 +358,8 @@ def process_sub_indicators(request, script):
         matrix = table_to_matrix(form_data)
         matrix = LCTransitionDefinitionDeg.Schema().dumps(matrix)
         periods = json.loads(request.POST.get("periods"))
+        prod_mode = ProductivityMode.TRENDS_EARTH_5_CLASS_LPD.value if request.POST.get(
+            "prod_mode") == 1 else ProductivityMode.JRC_5_CLASS_LPD.value
 
         payloads = []
         for period, values in periods.items():
@@ -363,10 +368,10 @@ def process_sub_indicators(request, script):
             year_final = values['period_year_final']
 
             payload['productivity'] = {
-                'mode': request.POST.get("prod_mode")
+                'mode': prod_mode
             }
 
-            if request.POST.get("prod_mode") == 'Trends.Earth productivity':
+            if prod_mode == ProductivityMode.TRENDS_EARTH_5_CLASS_LPD.value:
                 prod_state_year_bl_start = year_initial
                 prod_state_year_bl_end = year_final - 3
                 prod_state_year_tg_start = prod_state_year_bl_end + 1
@@ -505,7 +510,6 @@ def ajax_run_job(request):
                 try:
                     out = response["data"]
                     out["params"] = ""
-
                     job = Job()
                     job.start_date = out.get("start_date", "")
                     job.end_date = out.get("end_date", "")

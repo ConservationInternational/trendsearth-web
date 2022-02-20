@@ -10,7 +10,7 @@
                 {% if aois %}
                 <div class="form-check">
                     <input class="form-check-input" value="select" type="radio" name="aoi_select" id="aoi_select">
-                    <label for="country" class="form-label">Select Area of Interest</label>
+                    <label for="country" class="form-label">Select area of interest from a predefined list</label>
                     <div style="display: none;" class="row" id="aoi_select_panel">
                         <div class="col-md-11">
                             <select class="form-select form-select-sm" name="aoi_option" id="aoi_option">
@@ -24,7 +24,7 @@
                 <div class="form-check">
                     <input checked class="form-check-input" value="define" type="radio" name="aoi_select"
                         id="aoi_define">
-                    <label for="country" class="form-label">Define new Area of Interest</label>
+                    <label for="country" class="form-label">Define a new area of interest</label>
                 </div>
                 {% endif %}
                 <div class="row" id="aoi_define_panel">
@@ -61,7 +61,6 @@
                                         <label class="form-check-label" for="second_level">
                                             Region
                                         </label>
-
                                     </div>
                                     <select class="form-select form-select-sm" name="region" id="region">
                                         <option value="0" data-rel="All regions">All regions</option>
@@ -124,12 +123,35 @@
                         <div class="form-check">
                             <input class="form-check-input" value="file" type="radio" name="aoi" id="aoi_file">
                             <label class="form-check-label" for="aoi_file">
-                                Area from file
+                                Upload area from file
                             </label>
                         </div>
                         <div class="mb-3" id="file_panel" style="display: none;">
-                            <input class="form-control" type="file" id="data_file"
-                                accept=".wkt,.zip,.kml,.txt,.json,.geojson">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <select class="form-select form-control" name="file-type" id="file_type">
+                                        <option value="shp">ESRI Shapefile</option>
+                                        <option value="kml">KML File</option>
+                                        <option value="wkt">WKT File</option>
+                                        <option value="json">GeoJSON File</option>
+                                    </select>
+
+                                </div>
+                                <div class="col-md-8">
+                                    <input class="form-control" type="file" id="data_file"
+                                        style="margin: 0px; max-height: 35px;" accept=".zip">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <i id="file_ext_message">Please upload a zipped
+                                        shapefile folder containing
+                                        mandatory .shp,
+                                        .shx, .dbf and .prj. The coordinates <b>MUST</b> be in World Geodetic System
+                                        1984 (WGS84)</i>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="" id="chbox_buffer">
@@ -140,10 +162,11 @@
                         <div class="mb-3" id="buffer_panel" style="display: none;">
                             <label for="buffer_size" class="form-label">Buffer size (kilometers)</label>
                             <input type="number" class="form-control" name="buffer_size" id="buffer_size"
-                                placeholder="10.0" value="10.0" min="0.1">
+                                placeholder="10.0" min="0.1">
+
                         </div>
                         <div class="mb-3">
-                            <label for="area_name" class="form-label">Area Name</label>
+                            <label for="area_name" class="form-label">Specify the name of your area of interest</label>
                             <input type="text" class="form-control" name="area_name" id="area_name" value="">
                         </div>
                     </div>
@@ -169,7 +192,7 @@
             }
         });
 
-        $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#region option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
+        $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#region option:selected").text().toLowerCase() + "-buffer");
         $("input[name=aoi").on("change", function () {
             $("#country_panel").hide();
             $("#point_panel").hide();
@@ -227,6 +250,24 @@
             $("#area_name").val($("#country option:selected").text().toLowerCase() + "-" + $("#city option:selected").text().toLowerCase() + "-buffer-" + $("#buffer_size").val());
         });
 
+        $("#file_type").on("change", function () {
+            if ($(this).val() === "shp") {
+                $("#data_file").attr("accept", ".zip");
+                $("#file_ext_message").html("Please upload a zipped shapefile folder containing mandatory .shp, .shx, .dbf and .prj. The coordinates <b>MUST</b> be in World Geodetic System 1984 (WGS84)");
+            }
+            else if ($(this).val() === "wkt") {
+                $("#data_file").attr("accept", ".wkt,.txt");
+                $("#file_ext_message").html("Please upload a valid Well-Known Text file format. The coordinates <b>MUST</b> be in World Geodetic System 1984 (WGS84)");
+            }
+            else if ($(this).val() === "kml") {
+                $("#data_file").attr("accept", ".kml");
+                $("#file_ext_message").html("Please upload a valid KML file format. The coordinates <b>MUST</b> be in World Geodetic System 1984 (WGS84)");
+            } else {
+                $("#data_file").attr("accept", ".json,.geojson");
+                $("#file_ext_message").html("Please upload a valid GeoJSON file format. The coordinates <b>MUST</b> be in World Geodetic System 1984 (WGS84)");
+            }
+        });
+
         $("#btn_save_aoi").on("click", function () {
             var country = null, region = null, city = null,
                 lat = null, lon = null, file = null,
@@ -270,6 +311,7 @@
             formData.append("name", area_name);
             formData.append("aoi_id", aoi_id);
             formData.append("file", data_file);
+            formData.append("file_type", $("#file_type").val());
             $.ajax({
                 url: "/ajax/change/aoi",
                 type: "POST",

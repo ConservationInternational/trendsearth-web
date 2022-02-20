@@ -67,9 +67,10 @@ const drawLineChart = function (
   const yScale = yType(yDomain, yRange);
   const xAxis = d3
     .axisBottom(xScale)
-    .ticks(width / 80)
-    .tickSizeOuter(0);
-  const yAxis = d3.axisLeft(yScale).ticks(height / 60, yFormat);
+    .ticks(width / 100)
+    .tickSizeOuter(0)
+    .tickFormat(d3.timeFormat("%b %Y"));
+  const yAxis = d3.axisLeft(yScale).ticks(d3.max(Y), yFormat);
 
   // Compute titles.
   const T =
@@ -122,7 +123,7 @@ const drawLineChart = function (
     .append("g")
     .attr("transform", `translate(${marginLeft},0)`)
     .call(yAxis)
-    .call((g) => g.select(".domain").remove())
+    // .call((g) => g.select(".domain").remove())
     .call(
       voronoi
         ? () => {}
@@ -312,7 +313,7 @@ const drawPieChart = function (data, color, targetpanel, height) {
     .attr("y", 147)
     .style("font-size", "13px")
     .style("text-anchor", "middle")
-    .text("Summary of usage");
+    .text("");
 
   /* Labels for the various pie slices */
   pc.labelArc = d3

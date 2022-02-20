@@ -1,6 +1,7 @@
 import os
 import requests
 import json
+import zipfile
 
 from marshmallow.exceptions import ValidationError
 from te_schemas.land_cover import (
@@ -166,3 +167,22 @@ def get_styles():
         styles = json.load(script_file)
 
     return styles
+
+
+def get_file_extension(file_path):
+    split_path = os.path.basename(file_path).split(".")
+    if len(split_path) > 1:
+        return (split_path[-1]).lower()
+
+
+def extract_zipped_file(file_path):
+    filelist = []
+    if os.path.exists(file_path):
+        try:
+            zipped_dir = file_path.split(".")[0]
+            with zipfile.ZipFile(file_path, "r") as z:
+                filelist = [f.filename for f in z.filelist]
+                z.extractall()
+        except Exception as e:
+            print(e)
+    return filelist
