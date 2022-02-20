@@ -12,6 +12,7 @@ from te_schemas.land_cover import (
     LCTransitionDefinitionDeg,
     LCTransitionMatrixDeg
 )
+from django.conf import settings
 
 from .logger import log
 
@@ -176,13 +177,15 @@ def get_file_extension(file_path):
 
 
 def extract_zipped_file(file_path):
+    archive_path = settings.MEDIA_ROOT
     filelist = []
     if os.path.exists(file_path):
         try:
             zipped_dir = file_path.split(".")[0]
             with zipfile.ZipFile(file_path, "r") as z:
-                filelist = [f.filename for f in z.filelist]
-                z.extractall()
+                filelist = [settings.MEDIA_ROOT +
+                            os.sep + f.filename for f in z.filelist]
+                z.extractall(archive_path)
         except Exception as e:
             print(e)
     return filelist

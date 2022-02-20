@@ -698,15 +698,18 @@ def ajax_change_aoi(request):
                         if get_file_extension(file) == "shp":
                             data_file = file
 
-                print(data_file)
                 try:
                     ds = ogr.Open(data_file)
                     layer = ds.GetLayer()
                     extent = layer.GetExtent()
+                    crs = layer.GetSpatialRef()
+                    srid = crs.GetAttrValue("AUTHORITY", 1)
                     geom = Polygon.from_bbox(extent)
+
+                    if int(srid) != 4326:
+                        geom = geom.transform(ct=crs)
                     layer = None
                     ds = None
-                    # geom = fromfile(data_file)
 
                     if uploaded_file_path is not None:
                         fs.delete(uploaded_file_path)
@@ -762,7 +765,7 @@ def ajax_upload_profile_image(request):
                 {"msg": "Profile photo not uploaded!"}, status=400)
 
 
-@login_required
+@ login_required
 def ajax_update_algorithms_visibility(request):
     if request.POST:
         form_data = request.POST.get("data")
@@ -815,7 +818,7 @@ def get_user_aoi(user, srid=3857):
     }
 
 
-@login_required
+@ login_required
 def ajax_load_aoi(request):
     srid = 3857
     if request.GET.get("srid"):
@@ -933,7 +936,7 @@ def get_charts_data(start_date, end_date, frequency='month', user_id=None):
                     script["id"], date["a"], date["b"])
 
                 query = """
-                    SELECT count(*), 1000 * EXTRACT(EPOCH FROM DATE(a.start_date)) AS date, 
+                    SELECT count(*), 1000 * EXTRACT(EPOCH FROM DATE(a.start_date)) AS date,
                     b.name_readable AS name, b.id as code
                     FROM jobs AS a
                         JOIN script AS b ON a.script_id = b.id
