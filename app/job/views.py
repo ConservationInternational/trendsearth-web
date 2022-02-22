@@ -24,6 +24,10 @@ from utils.api import Api
 from utils.logger import log
 from utils.util import url_exists, get_styles
 
+CRS = 'GEOGCS[unknown,DATUM[WGS_1984,SPHEROID[WGS 84,6378137,298.257223563,'\
+    'AUTHORITY[EPSG,7030]],AUTHORITY[EPSG,6326]],PRIMEM[Greenwich,0,'\
+    'AUTHORITY[EPSG,8901]],UNIT[degree,0.0174532925199433,AUTHORITY[EPSG,9122]]]'
+
 
 def index(request):
     pass
@@ -501,7 +505,7 @@ def ajax_run_job(request):
 
         for payload in payloads:
             if payload["crs"] == 'None':
-                payload["crs"] = "GEOGCS[\"unknown\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]]"
+                payload["crs"] = CRS
             url_fragment = f"/api/v1/script/{script.uid}/run"
             response = api.call_api(url_fragment, "post",
                                     payload, use_token=True)

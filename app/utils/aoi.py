@@ -28,7 +28,9 @@ class AOI(object):
 
     @property
     def crs(self):
-        return ogr.Open(json.dumps(self.geojson)).GetSpatialReference().ExportToWkt()
+        return ogr.Open(
+            json.dumps(
+                self.geojson)).GetSpatialReference().ExportToWkt()
 
     def _get_unary_union(self):
         logging.debug('getting unary union')
@@ -149,7 +151,11 @@ class AOI(object):
     def get_crs_wkt(self):
         # TODO fix this
         # return self.geojson.GetSpatialReference().ExportToWkt()
-        return 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
+        return '''GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",
+        6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],
+        PRIMEM["Greenwich",0,
+        AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,
+        AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'''
 
     def bounding_box_gee_geojson(self):
         '''

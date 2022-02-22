@@ -23,17 +23,20 @@ class AccountConfig(AppConfig):
                         + "/configs/populate.sql").read())
 
                     # countries
-                    filepath = os.path.dirname(os.path.abspath(
-                        __file__)) + "/configs/admin_bounds/admin_bounds_key.json"
+                    filepath = os.path.dirname(
+                        os.path.abspath(
+                            __file__)) + "/configs/admin_bounds/admin_bounds_key.json"
                     countries = json.load(open(filepath))
                     for key, country in countries.items():
-                        querystr = "INSERT INTO country(code, name, crs, wrap) VALUES (%s, %s, %s, %s) RETURNING id;"
+                        querystr = """INSERT INTO country(code, name, crs, wrap)
+                         VALUES (%s, %s, %s, %s) RETURNING id;"""
                         values = (country.get("code"), key, int(
                             country.get("crs").split(":")[1]), country.get("wrap"))
                         cursor.execute(querystr, values)
                         countryid = dictfetchall(cursor)[0]["id"]
                         for key, province in country.get("admin1").items():
-                            querystr = "INSERT INTO region(code, name, country_id) VALUES (%s, %s, %s);"
+                            querystr = """INSERT INTO region(code, name, 
+                            country_id) VALUES (%s, %s, %s);"""
                             values = (province.get("code"), key, countryid)
                             cursor.execute(querystr, values)
 
@@ -42,8 +45,8 @@ class AccountConfig(AppConfig):
                         __file__)) + "/configs/admin_bounds/cities.json"
                     countries = json.load(open(filepath))
                     for abbrev, val in countries.items():
-                        querystr = "SELECT id FROM country WHERE code = '{}'".format(
-                            abbrev)
+                        querystr = "SELECT id FROM country WHERE code = '{}'"\
+                            .format(abbrev)
                         cursor.execute(querystr)
                         record = dictfetchall(cursor)[0]
                         countryid = record.get("id")
@@ -76,17 +79,25 @@ class AccountConfig(AppConfig):
                     cursor.execute(querystr)
                     records = dictfetchall(cursor)
                     for record in records:
-                        filepath = os.path.dirname(os.path.abspath(__file__))
-                        + "/configs/admin_bounds/admin_bounds_polys_{country}.json/admin_bounds_polys_{country}.json".format(
-                            country=record.get("code"))
+                        filepath = os.path.dirname(
+                            os.path.abspath(__file__))
+                        + "/configs/admin_bounds/admin_bounds_polys_{country}"\
+                            ".json/admin_bounds_polys_{country}.json".format(
+                                country=record.get("code"))
                         country = json.load(open(filepath))
-                        querystr = "UPDATE country SET geom = ST_GeomFromGeoJSON('{}') WHERE id={}".format(
-                            json.dumps(country.get("geojson").get("geometry")), record.get("id"))
+                        querystr = "UPDATE country SET geom = ST_GeomFromGeoJSON('{}') "\
+                            "WHERE id={}".format(
+                                json.dumps(country.get(
+                                    "geojson").get("geometry")),
+                                record.get("id"))
                         cursor.execute(querystr)
                         print(querystr)
                         for key, value in country.get("admin1").items():
-                            querystr = "UPDATE region SET geom = ST_GeomFromGeoJSON('{}') WHERE code='{}' AND country_id={}".format(
-                                json.dumps(value.get("geojson").get("geometry")), key, record.get("id"))
+                            querystr = "UPDATE region SET geom = ST_GeomFromGeoJSON('{}')"\
+                                " WHERE code='{}' AND country_id={}".format(
+                                    json.dumps(
+                                        value.get("geojson").get("geometry")),
+                                    key, record.get("id"))
                             cursor.execute(querystr)
         except Exception as e:
             log.warn(e)

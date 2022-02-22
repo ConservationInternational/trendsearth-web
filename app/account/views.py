@@ -14,7 +14,6 @@ from django.http import (
     JsonResponse
 )
 from django.contrib.gis.geos import Point, Polygon
-# from django.contrib.gis.geos import fromfile
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -143,23 +142,6 @@ class LoginView(FormView):
         if user is not None and not user.profile.deleted:
             login(self.request, user)
 
-            """if user.is_superuser:
-                with connection.cursor() as cursor:
-                    querystr = "SELECT id, code FROM country"
-                    cursor.execute(querystr)
-                    records = dictfetchall(cursor)
-                    for record in records:
-                        filepath = os.path.dirname(os.path.abspath(__file__)) + "/configs/admin_bounds/admin_bounds_polys_{country}.json/admin_bounds_polys_{country}.json".format(
-                            country=record.get("code"))
-                        country = json.load(open(filepath))
-                        querystr = "UPDATE country SET geom = ST_GeomFromGeoJSON('{}') WHERE id={}".format(
-                            json.dumps(country.get("geojson").get("geometry")), record.get("id"))
-                        cursor.execute(querystr)
-                        print(querystr)
-                        for key, value in country.get("admin1").items():
-                            querystr = "UPDATE region SET geom = ST_GeomFromGeoJSON('{}') WHERE code='{}' AND country_id={}".format(
-                                json.dumps(value.get("geojson").get("geometry")), key, record.get("id"))
-                            cursor.execute(querystr)"""
             today = datetime.now()
             if models.Settings.objects.filter(user=user).count() == 0:
                 models.Settings.objects.update_or_create(
@@ -250,8 +232,9 @@ class RegisterView(FormView):
                   password=credentials['password1'])
 
         if api.token is not None:
-            messages.add_message(self.request, messages.ERROR,
-                                 'User with this credentials already exists!')
+            messages.add_message(
+                self.request, messages.ERROR,
+                'User with this credentials already exists!')
             return HttpResponseRedirect(reverse_lazy('login'))
         else:
             user = form.save(commit=False)
@@ -278,8 +261,9 @@ class RegisterView(FormView):
                          organization=user.profile.organization,
                          country=user.profile.country.name)
 
-            user = authenticate(username=user.email,
-                                password=self.request.POST.get("password1"))
+            user = authenticate(
+                username=user.email,
+                password=self.request.POST.get("password1"))
 
             if user is not None:
                 login(self.request, user)
@@ -339,21 +323,24 @@ def update_user_details(request):
             user.profile.region_id = int(request.POST.get('region'))
 
             user.profile.save(
-                update_fields=['organization', 'country_id', 'region_id',
-                               'role_id'])
+                update_fields=[
+                    'organization', 'country_id', 'region_id',
+                    'role_id'])
 
             api.update_user(email=user.email,
                             name=user.first_name + " " + user.last_name,
                             organization=user.profile.organization,
                             country=user.profile.country.name)
 
-            return JsonResponse({"msg": "User details updated successfully!"},
-                                status=200)
+            return JsonResponse({
+                "msg": "User details updated successfully!"},
+                status=200)
 
         else:
             print(form.error_messages)
-            return JsonResponse({"msg": "Error updating user details"},
-                                status=200)
+            return JsonResponse({
+                "msg": "Error updating user details"},
+                status=200)
 
 
 def password_reset_view(request):
@@ -384,8 +371,9 @@ def password_reset_view(request):
             email = render_to_string(email_template_name, content)
             try:
                 print(settings.DEFAULT_FROM_EMAIL)
-                ret = send_mail(subject, email, from_email=settings.DEFAULT_FROM_EMAIL,
-                                recipient_list=[user.email], fail_silently=False)
+                ret = send_mail(
+                    subject, email, from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email], fail_silently=False)
                 print(ret, settings.EMAIL_USE_TLS, settings.EMAIL_ENABLE)
             except BadHeaderError as e:
                 print(e)
@@ -537,8 +525,10 @@ def view_feedback(request):
             }
             email = render_to_string(email_template_name, content)
             try:
-                ret = send_mail(subject, html_message=email, message=email, from_email=settings.DEFAULT_FROM_EMAIL,
-                                recipient_list=[settings.MAIL_TO_ADMIN], fail_silently=False)
+                ret = send_mail(
+                    subject, html_message=email, message=email,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.MAIL_TO_ADMIN], fail_silently=False)
             except BadHeaderError as e:
                 print(e)
 
@@ -553,8 +543,10 @@ def view_feedback(request):
             }
             email = render_to_string(email_template_name, content)
             try:
-                ret = send_mail(subject, html_message=email, message=email, from_email=settings.DEFAULT_FROM_EMAIL,
-                                recipient_list=[user.email], fail_silently=False)
+                ret = send_mail(
+                    subject, html_message=email, message=email,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email], fail_silently=False)
             except BadHeaderError as e:
                 print(e)
 
@@ -562,7 +554,8 @@ def view_feedback(request):
         else:
             messages.add_message(
                 request, messages.ERROR,
-                "Error occured while sending your message! Required fields cannot be empty.",
+                """Error occured while sending your message! 
+                Required fields cannot be empty.""",
                 fail_silently=True)
             return HttpResponseRedirect(reverse_lazy('feedback'))
 
@@ -715,7 +708,9 @@ def ajax_change_aoi(request):
                         fs.delete(uploaded_file_path)
                 except Exception as e:
                     print(e)
-                    return JsonResponse({"msg": "Error adding your area of interest!"}, status=400)
+                    return JsonResponse({
+                        "msg": "Error adding your area of interest!"},
+                        status=400)
 
             if request.POST.get("buffer_size") != "null":
                 buffer_size = float(request.POST.get("buffer_size"))
@@ -732,12 +727,17 @@ def ajax_change_aoi(request):
                 else:
                     print(geom.area)
                     return JsonResponse({
-                        "msg": "Selected area of interest larger than the threshold of 20 million sq.km !"
+                        "msg": """Selected area of interest larger 
+                        than the threshold of 20 million sq.km !"""
                     }, status=400)
             else:
-                return JsonResponse({"msg": "Error adding your area of interest!"}, status=400)
+                return JsonResponse(
+                    {
+                        "msg": "Error adding your area of interest!"}, status=400)
 
-        return JsonResponse({"msg": "Region of interest updated!", "id": aoi.id, "name": aoi.name}, status=200)
+        return JsonResponse({
+            "msg": "Region of interest updated!", "id": aoi.id, "name": aoi.name},
+            status=200)
 
 
 @ login_required
@@ -758,8 +758,9 @@ def ajax_upload_profile_image(request):
             profile.photo = filename
             profile.save(update_fields=['photo'])
             print(uploaded_file_path)
-            return JsonResponse({"image": filename,
-                                "msg": "Profile photo updated!"}, status=200)
+            return JsonResponse({
+                "image": filename,
+                "msg": "Profile photo updated!"}, status=200)
         else:
             return JsonResponse(
                 {"msg": "Profile photo not uploaded!"}, status=400)
@@ -860,10 +861,14 @@ def get_chart_data(user=None):
                 where = " AND user_id ={} ".format(
                     user.id) if user is not None else ""
 
-                where += " AND a.script_id = {} AND (1000 * EXTRACT(EPOCH FROM DATE(a.start_date)))::bigint = {}::bigint".format(
+                where += """ AND a.script_id = {} AND 
+                (1000 * EXTRACT(EPOCH FROM DATE(a.start_date)))::bigint 
+                = {}::bigint""".format(
                     script["id"], date["date"])
                 query = """
-                    SELECT count(*), 1000 * EXTRACT(EPOCH FROM DATE(a.start_date)) AS date, b.name_readable AS name, b.id as code
+                    SELECT count(*), 1000 * EXTRACT(EPOCH 
+                    FROM DATE(a.start_date)) AS date,
+                    b.name_readable AS name, b.id as code
                     FROM jobs AS a
                         JOIN script AS b ON a.script_id = b.id
                     {}
@@ -885,7 +890,8 @@ def get_chart_data(user=None):
         if user is not None:
             where = " WHERE user_id ={}".format(user.id)
         cursor.execute("""
-                SELECT count(*) as value, b.name_readable as name, b.id as code  FROM jobs AS a
+                SELECT count(*) as value, b.name_readable as name,
+                b.id as code  FROM jobs AS a
                 JOIN script AS b ON a.script_id = b.id
                 {}
                 GROUP BY 2, 3
@@ -904,13 +910,16 @@ def get_charts_data(start_date, end_date, frequency='month', user_id=None):
     with connection.cursor() as cursor:
         query = """
             WITH q AS(
-                SELECT min(start_date::date) as low, max(start_date::date) as high
+                SELECT min(start_date::date) as low,
+                max(start_date::date) as high
                 FROM jobs
-                WHERE deleted = False AND start_date BETWEEN '{0}' AND '{1}' {2}
+                WHERE deleted = False AND start_date BETWEEN '{0}'
+                 AND '{1}' {2}
             )
             SELECT row_number () over() -1 as rownr, series AS a,
                 series + interval '1 {3}' as b
-                FROM (SELECT generate_series( low, high, '1 {3}') as series FROM q) as r;
+                FROM (SELECT generate_series( low, high, '1 {3}') 
+                as series FROM q) as r;
         """.format(start_date, end_date, where, frequency)
         cursor.execute(query)
         dates = dictfetchall(cursor)
@@ -918,7 +927,9 @@ def get_charts_data(start_date, end_date, frequency='month', user_id=None):
         query = """
             SELECT distinct b.id, b.name_readable as name
             FROM jobs AS a
-                JOIN script AS b ON a.script_id = b.id  AND a.deleted = False AND a.start_date BETWEEN '{0}' AND '{1}' {2}
+                JOIN script AS b ON a.script_id = b.id
+                 AND a.deleted = False AND a.start_date BETWEEN '{0}'
+                  AND '{1}' {2}
             ORDER BY 2;
         """.format(start_date, end_date, where)
         cursor.execute(query)
@@ -932,11 +943,13 @@ def get_charts_data(start_date, end_date, frequency='month', user_id=None):
                     where = ""
                 else:
                     where = " AND user_id = " + str(user_id)
-                where += " AND a.script_id = {0} AND a.start_date BETWEEN '{1}' AND '{2}' ".format(
+                where += """ AND a.script_id = {0}
+                 AND a.start_date BETWEEN '{1}' AND '{2}' """.format(
                     script["id"], date["a"], date["b"])
 
                 query = """
-                    SELECT count(*), 1000 * EXTRACT(EPOCH FROM DATE(a.start_date)) AS date,
+                    SELECT count(*), 1000 * EXTRACT(EPOCH 
+                    FROM DATE(a.start_date)) AS date,
                     b.name_readable AS name, b.id as code
                     FROM jobs AS a
                         JOIN script AS b ON a.script_id = b.id
@@ -959,7 +972,8 @@ def get_charts_data(start_date, end_date, frequency='month', user_id=None):
         if user_id is not None:
             where = " WHERE user_id ={}".format(user_id)
         query = """
-                SELECT count(*) as value, b.name_readable as name, b.id as code  FROM jobs AS a
+                SELECT count(*) as value, b.name_readable as name,
+                b.id as code  FROM jobs AS a
                 JOIN script AS b ON a.script_id = b.id
                 {}
                 GROUP BY 2, 3

@@ -242,14 +242,21 @@ def ajax_get_algorithm_view(request, id):
                     'Precipitation', 'Soil moisture',
                     'Evapotranspiration'
                 ],
-                'description': 'Calculate pixel residual trend (RESTREND of annually integrated NDVI, after removing trend associated with a climate indicator.', 'params': {
+                'description': '''Calculate pixel residual trend (RESTREND of
+                 annually integrated NDVI, 
+                after removing trend associated with a climate indicator.''',
+                'params': {
                     'trajectory_method': 'p_restrend'
                 }
             },
             'Rain Use Efficiency (RUE)': {
                 'climate types': ['Precipitation'],
                 'description': 'Calculate rain use efficiency (precipitation divided by NDVI).',
-                'params': {'trajectory_method': 'ue'}}, 'Water Use Efficiency (WUE)': {'climate types': ['Evapotranspiration'], 'description': 'Calculate water use efficiency (evapotranspiration divided by NDVI).', 'params': {'trajectory_method': 'ue'}}}
+                'params': {'trajectory_method': 'ue'}},
+            'Water Use Efficiency (WUE)': {
+                'climate types': ['Evapotranspiration'],
+                'description': 'Calculate water use efficiency (evapotranspiration divided by NDVI).',
+                'params': {'trajectory_method': 'ue'}}}
         # trajectory_functions = json.loads(additional_configuration)
         context["trajectory_functions"] = list(trajectory_functions.keys())
         climate_datasets = []
@@ -318,7 +325,10 @@ def add_layer_to_map(request):
                 "url": "",
                 "is_visible": int(checked) == 1
             })
-        return JsonResponse({"msg": "Result for this task added to the Map" if int(checked) else "Results for this task removed from the Map"}, status=200)
+        return JsonResponse({
+            "msg": "Result for this task added to the Map"
+            if int(checked) else "Results for this task removed from the Map"
+        }, status=200)
     except Exception as e:
         print(e)
         return JsonResponse({"msg": "Job not found"}, status=400)
@@ -338,6 +348,7 @@ def ajax_save_matrix(request):
             user=request.user,
             defaults={'name': 'Degradation Matrix', 'content': tbl.dumps()}
         )
-        return JsonResponse({"msg": "Degradation matrix saved successfully!"}, status=200)
+        return JsonResponse({
+            "msg": "Degradation matrix saved successfully!"}, status=200)
     except Exception as e:
         return JsonResponse({"msg": "Error saving the matrix!"}, status=400)

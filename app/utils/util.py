@@ -181,7 +181,6 @@ def extract_zipped_file(file_path):
     filelist = []
     if os.path.exists(file_path):
         try:
-            zipped_dir = file_path.split(".")[0]
             with zipfile.ZipFile(file_path, "r") as z:
                 filelist = [settings.MEDIA_ROOT +
                             os.sep + f.filename for f in z.filelist]
