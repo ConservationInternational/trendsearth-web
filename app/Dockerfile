@@ -19,6 +19,13 @@ RUN apt-get update && apt-get install -y \
 	gdal-bin \
 	postgresql-client
 
+RUN apt-get install libgdal-dev -y
+
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
+
+RUN pip install GDAL==$(ogrinfo --version | cut -d' ' -f2 | cut -d',' -f1)
+
 RUN pip install https://github.com/ConservationInternational/trends.earth-schemas/archive/refs/heads/master.zip
 
 COPY ./requirements.txt $APP_HOME
