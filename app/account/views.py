@@ -554,8 +554,8 @@ def view_feedback(request):
         else:
             messages.add_message(
                 request, messages.ERROR,
-                """Error occured while sending your message! 
-                Required fields cannot be empty.""",
+                """Error occured while sending your message!
+                 Required fields cannot be empty.""",
                 fail_silently=True)
             return HttpResponseRedirect(reverse_lazy('feedback'))
 
@@ -727,16 +727,17 @@ def ajax_change_aoi(request):
                 else:
                     print(geom.area)
                     return JsonResponse({
-                        "msg": """Selected area of interest larger 
-                        than the threshold of 20 million sq.km !"""
+                        "msg": "Selected area of interest larger\
+                             than the threshold of 20 million sq.km !"
                     }, status=400)
             else:
                 return JsonResponse(
-                    {
-                        "msg": "Error adding your area of interest!"}, status=400)
+                    {"msg": "Error adding your area of interest!"},
+                    status=400)
 
         return JsonResponse({
-            "msg": "Region of interest updated!", "id": aoi.id, "name": aoi.name},
+            "msg": "Region of interest updated!",
+            "id": aoi.id, "name": aoi.name},
             status=200)
 
 
@@ -815,7 +816,9 @@ def get_user_aoi(user, srid=3857):
     return {
         "type": "FeatureCollection",
         "features": features,
-        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::" + str(srid)}}
+        "crs": {"type": "name",
+                "properties": {
+                    "name": "urn:ogc:def:crs:EPSG::" + str(srid)}}
     }
 
 
@@ -861,13 +864,13 @@ def get_chart_data(user=None):
                 where = " AND user_id ={} ".format(
                     user.id) if user is not None else ""
 
-                where += """ AND a.script_id = {} AND 
-                (1000 * EXTRACT(EPOCH FROM DATE(a.start_date)))::bigint 
+                where += """ AND a.script_id = {} AND
+                 (1000 * EXTRACT(EPOCH FROM DATE(a.start_date)))::bigint
                 = {}::bigint""".format(
                     script["id"], date["date"])
                 query = """
-                    SELECT count(*), 1000 * EXTRACT(EPOCH 
-                    FROM DATE(a.start_date)) AS date,
+                    SELECT count(*), 1000 * EXTRACT(EPOCH
+                     FROM DATE(a.start_date)) AS date,
                     b.name_readable AS name, b.id as code
                     FROM jobs AS a
                         JOIN script AS b ON a.script_id = b.id
@@ -901,7 +904,8 @@ def get_chart_data(user=None):
     return line_chart_data, pie_chart_data
 
 
-def get_charts_data(start_date, end_date, frequency='month', user_id=None):
+def get_charts_data(start_date, end_date,
+                    frequency='month', user_id=None):
     if user_id is None:
         where = ""
     else:
@@ -918,8 +922,8 @@ def get_charts_data(start_date, end_date, frequency='month', user_id=None):
             )
             SELECT row_number () over() -1 as rownr, series AS a,
                 series + interval '1 {3}' as b
-                FROM (SELECT generate_series( low, high, '1 {3}') 
-                as series FROM q) as r;
+                FROM (SELECT generate_series( low, high, '1 {3}')
+                 as series FROM q) as r;
         """.format(start_date, end_date, where, frequency)
         cursor.execute(query)
         dates = dictfetchall(cursor)
@@ -948,8 +952,8 @@ def get_charts_data(start_date, end_date, frequency='month', user_id=None):
                     script["id"], date["a"], date["b"])
 
                 query = """
-                    SELECT count(*), 1000 * EXTRACT(EPOCH 
-                    FROM DATE(a.start_date)) AS date,
+                    SELECT count(*), 1000 * EXTRACT(EPOCH
+                     FROM DATE(a.start_date)) AS date,
                     b.name_readable AS name, b.id as code
                     FROM jobs AS a
                         JOIN script AS b ON a.script_id = b.id

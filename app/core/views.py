@@ -242,20 +242,24 @@ def ajax_get_algorithm_view(request, id):
                     'Precipitation', 'Soil moisture',
                     'Evapotranspiration'
                 ],
-                'description': '''Calculate pixel residual trend (RESTREND of
-                 annually integrated NDVI, 
-                after removing trend associated with a climate indicator.''',
+                'description': '''Calculate pixel residual trend
+                 (RESTREND of
+                 annually integrated NDVI,
+                  after removing trend associated with a climate
+                 indicator.''',
                 'params': {
                     'trajectory_method': 'p_restrend'
                 }
             },
             'Rain Use Efficiency (RUE)': {
                 'climate types': ['Precipitation'],
-                'description': 'Calculate rain use efficiency (precipitation divided by NDVI).',
+                'description': 'Calculate rain use efficiency\
+                (precipitation divided by NDVI).',
                 'params': {'trajectory_method': 'ue'}},
             'Water Use Efficiency (WUE)': {
                 'climate types': ['Evapotranspiration'],
-                'description': 'Calculate water use efficiency (evapotranspiration divided by NDVI).',
+                'description': 'Calculate water use efficiency\
+                 (evapotranspiration divided by NDVI).',
                 'params': {'trajectory_method': 'ue'}}}
         # trajectory_functions = json.loads(additional_configuration)
         context["trajectory_functions"] = list(trajectory_functions.keys())

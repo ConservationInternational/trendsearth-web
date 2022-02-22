@@ -35,7 +35,7 @@ class AccountConfig(AppConfig):
                         cursor.execute(querystr, values)
                         countryid = dictfetchall(cursor)[0]["id"]
                         for key, province in country.get("admin1").items():
-                            querystr = """INSERT INTO region(code, name, 
+                            querystr = """INSERT INTO region(code, name,
                             country_id) VALUES (%s, %s, %s);"""
                             values = (province.get("code"), key, countryid)
                             cursor.execute(querystr, values)
