@@ -218,7 +218,7 @@ SITENAME = os.getenv('SITENAME', "Trends.Earth")
 
 
 # API Settings
-API_URL = os.getenv('API_URL', 'https://api.trends.earth')
+API_URL = os.getenv('API_URL', 'https://api-staging.trends.earth')
 TIMEOUT = 200
 
 # Colors

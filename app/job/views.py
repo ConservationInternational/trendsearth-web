@@ -427,8 +427,8 @@ def process_sub_indicators(request, script):
 
             payload['population'] = {
                 'year': year_final,
-                'population_asset': "users/geflanddegradation/toolbox_datasets/worldpop_ppp_2000_2020_1km_global",
-                'population_source_name': "WorldPop"
+                'asset': "users/geflanddegradation/toolbox_datasets/worldpop_mf_v1_300m",
+                'source': "WorldPop (gender breakdown)"
             }
 
             task_name = request.POST.get("task_name")
@@ -511,26 +511,22 @@ def ajax_run_job(request):
                                     payload, use_token=True)
 
             if response is not None:
-                try:
-                    out = response["data"]
-                    out["params"] = ""
-                    job = Job()
-                    job.start_date = out.get("start_date", "")
-                    job.end_date = out.get("end_date", "")
-                    job.progress = out.get("progress", 0)
-                    job.script = script
-                    job.status = Status.objects.get(code=out.get("status"))
-                    job.uid = out.get("id", "")
-                    job.task_name = payload.get("task_name")
-                    job.task_notes = payload.get("task_notes")
-                    job.user = request.user
-                    job.user.profile.uid = out.get("user_id", "")
+                out = response["data"]
+                out["params"] = ""
+                job = Job()
+                job.start_date = out.get("start_date", "")
+                job.end_date = out.get("end_date", "")
+                job.progress = out.get("progress", 0)
+                job.script = script
+                job.status = Status.objects.get(code=out.get("status"))
+                job.uid = out.get("id", "")
+                job.task_name = payload.get("task_name")
+                job.task_notes = payload.get("task_notes")
+                job.user = request.user
+                job.user.profile.uid = out.get("user_id", "")
 
-                    job.save()
-                    job.user.profile.save(update_fields=["uid"])
-
-                except Exception as e:
-                    print(e)
+                job.save()
+                job.user.profile.save(update_fields=["uid"])
         return JsonResponse({"msg": "Submitted Successfully!"}, status=200)
     pass
 
