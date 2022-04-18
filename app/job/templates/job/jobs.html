@@ -1,26 +1,8 @@
 {% load static %}
 
-{% block messages %}
-<ul class="messages" id="messages-list">
-    {% if messages %}
-    {% for message in messages %}
-    <li>
-        {% if message.tags %}
-        <div class="alert alert-{{ message.tags }} msg fade show" role="alert">{{ message }}</div>
-        {% else %}
-        <div class="alert alert-info msg fade show" role="alert">{{ message }}</div>
-        {% endif %}
-    </li>
-    {% endfor %}
-    {% endif %}
-</ul>
-{% endblock %}
 <div class="row">
-    <div class="col-md-12" style="padding: 10px 0px;">
-        <table id="task_tbl" class="table table-bordered" style="width:100%">
-            {% include 'job/task_tbl.html' %}
-        </table>
-
+    <div class="col-md-12" style="padding: 10px 0px;" id="tasks_panel">
+        {% include 'job/task_tbl.html' %}
     </div>
 </div>
 
@@ -29,84 +11,6 @@
 <script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
 <script>
     $(document).ready(function () {
-        $("#task_tbl").DataTable({
-            "order": [],
-            "columnDefs": [{
-                "targets": 'no-sort',
-                "orderable": false,
-            }],
-            "columns": [
-                { "width": "40%" },
-                { "width": "15%" },
-                { "width": "25%" },
-                { "width": "20%" },
-            ],
-        });
 
-
-        $('#task_tbl').on('click', 'button.download-job', function (e) {
-            let uid = $(this).attr("job-id");
-            $.get({
-                url: "/ajax/download/" + uid,
-                success: function (response) {
-                    const link = document.createElement("a");
-                    link.href = response.url;
-                    link.download = response.fname;
-                    link.click();
-                    delete link;
-                },
-                error: function (response) {
-                    showMessage(response.responseJSON.msg, 2000);
-                }
-            });
-        });
-
-        $('#task_tbl').on('click', 'button.cancel-job', function (e) {
-            let uid = $(this).attr("job-id");
-            $.get({
-                url: "/ajax/cancel/" + uid,
-                success: function (response) {
-                    $("#task_tbl").empty();
-                    $("#task_tbl").append(response);
-                },
-            });
-        });
-
-        $('#task_tbl').on('click', 'button.delete-job', function (e) {
-            let uid = $(this).attr("job-id");
-            $.get({
-                url: "/ajax/delete/" + uid,
-                success: function (response) {
-                    $("#task_tbl").empty();
-                    $("#task_tbl").append(response);
-                },
-                error: function (response) {
-                    showMessage(response.responseJSON.msg, 2000);
-                }
-            });
-        });
-
-        $('#task_tbl').on('click', 'input.chkbox-add-to-map', function (e) {
-            let uid = $(this).attr("job-id");
-            console.log(uid);
-            let formData = new FormData();
-            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
-            formData.append("uid", uid);
-            formData.append("checked", $(this).val() == "Yes" ? 1 : 0);
-            $.ajax({
-                url: "/ajax/add_layer",
-                type: "POST",
-                dataType: "json",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    showMessage(response.msg, 2000);
-                },
-                error: function (response) {
-                    showMessage(response.responseJSON.msg, 2000);
-                }
-            });
-        });
     });
 </script>
