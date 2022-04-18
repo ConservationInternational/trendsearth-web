@@ -322,10 +322,10 @@
                 success: function (response) {
                     $("#aoi_lbl").html(response.name);
                     $("aoi_id").val(response.id);
-                    showMessage(response.msg, 3000);
+                    showMessage(response.msg, "success");
                 },
                 error: function (response) {
-                    showMessage(response.responseJSON.msg, 3000);
+                    showMessage(response.responseJSON.msg, "danger");
                 }
             });
         });

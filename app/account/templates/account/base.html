@@ -18,6 +18,17 @@
         <div class="container">
             <div class="row">
                 <div class="main" id="main">
+                    {% block messages %}
+                    <div id="messages-panel">
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert {{ message.tags }} m-2" id="msg" role="alert">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endblock %}
                     {% block content %}
 
                     {% endblock %}
@@ -36,14 +47,17 @@
 
     <script>
         $(document).ready(function () {
+            setTimeout(function () {
+                if ($('#msg').length > 0) {
+                    $('#msg').remove();
+                }
+            }, 2000);
             $("#country").on("change", function () {
                 $.get("/ajax/regions?country_id=" + $(this).val(), function (response, status) {
                     $("#region").empty();
                     $("#region").append(response);
                 });
             });
-
-
         });
     </script>
     {% endblock %}

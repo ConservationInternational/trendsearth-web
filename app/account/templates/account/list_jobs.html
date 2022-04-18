@@ -95,7 +95,7 @@
                     $("#jobs_tbl").append(response);
                 },
                 error: function (response) {
-                    showMessage(response.responseJSON.msg, 2000);
+                    showMessage(response.responseJSON.msg, "danger");
                 }
             });
         });

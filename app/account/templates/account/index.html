@@ -17,19 +17,15 @@
 
 <body>
     {% block messages %}
-    <ul class="messages" id="messages-list">
+    <div id="messages-panel">
         {% if messages %}
         {% for message in messages %}
-        <li>
-            {% if message.tags %}
-            <div class="alert alert-{{ message.tags }} msg fade show" role="alert">{{ message }}</div>
-            {% else %}
-            <div class="alert alert-info msg fade show" role="alert">{{ message }}</div>
-            {% endif %}
-        </li>
+        <div class="alert {{ message.tags }} m-2" id="msg" role="alert">
+            {{ message }}
+        </div>
         {% endfor %}
         {% endif %}
-    </ul>
+    </div>
     {% endblock %}
     {% include 'header.html' %}
     <div class="content">
@@ -89,6 +85,11 @@
 
     <script>
         $(document).ready(function () {
+            setTimeout(function () {
+                if ($('#msg').length > 0) {
+                    $('#msg').remove();
+                }
+            }, 2000);
 
             $("#country").on("change", function () {
                 $.get("/ajax/regions?country_id=" + $(this).val(), function (response, status) {
@@ -110,24 +111,10 @@
                     processData: false,
                     contentType: false,
                     success: function (response) {
-                        $("#messages-list").removeClass("msg-white");
-                        $("#messages-list").addClass("msg-dark");
-                        const messages = document.getElementById("messages-list");
-                        messages.innerHTML += response.msg;
-
-                        $("#messages-list").fadeOut(2000, "swing", function () {
-                            messages.innerHTML = "";
-                            $("#messages-list").show();
-                            $("#messages-list").removeClass("msg-black");
-                            $("#messages-list").addClass("msg-white");
-                            window.location = response.url;
-                        });
+                        showMessage(response.msg, "success");
                     },
                     error: function (response) {
-                        $("#alert_error").show();
-                        $("#alert_error").empty();
-                        $("#alert_error").html(response.responseText);
-                        $("#alert_error").fadeOut(2000, "swing", function () { });
+                        showMessage(response.responseJSON.msg, "danger");
                     }
                 });
 

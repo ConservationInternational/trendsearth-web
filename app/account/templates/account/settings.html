@@ -86,8 +86,11 @@
                 processData: false,
                 contentType: false,
                 success: function (response) {
-                    showMessage(response.msg, 10000);
+                    showMessage(response.msg, "success");
                 },
+                error: function (response) {
+                    showMessage(response.responseJSON.msg, "danger");
+                }
             });
         });
         $("#btn_upload_profile_photo").on("click", function () {
@@ -109,10 +112,10 @@
                     contentType: false,
                     success: function (response) {
                         $("#profile_photo").attr("src", "/media/" + response.image)
-                        showMessage(response.msg, 10000);
+                        showMessage(response.msg, "success");
                     },
                     error: function (response) {
-                        showMessage(response.responseJSON.msg, 10000);
+                        showMessage(response.responseJSON.msg, "danger");
                     },
 
                 });

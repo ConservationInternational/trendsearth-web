@@ -217,7 +217,7 @@
                     location.reload();
                 },
                 error: function (response) {
-                    // showMessage(response.responseJSON.msg, 10000);
+                    showMessage(response.responseJSON.msg, "danger");
                 },
             });
         });
