@@ -96,13 +96,6 @@
             {% endif %}
             {% endfor %}
             <hr>
-            {% if user.is_superuser %}
-            <a href="/admin" style="padding-left: 0px;" class="item" id="admin_item">
-                <h3 class="menu-items"><i class="fa fa-users"></i> &nbsp;Admin</h3>
-            </a>
-            <hr>
-            {% endif %}
-
             <div class="footer">
                 &copy; {% now 'Y' %} Trends.Earth &nbsp;&nbsp; | &nbsp;&nbsp; {{version}} &nbsp;&nbsp;
             </div>
@@ -120,12 +113,12 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <a href="https://trends.earth/docs/en/" target="_blank"
                                     style="margin-right: 10px; color: #fff;">
                                     <i class="fa fa-info-circle"></i> USER GUIDE</a>
                             </li>
-                            <li class="nav-item" style="margin-right: 10px; color: #fff;">|</li>
+                            <li class="nav-item" style="margin-right: 10px; color: #fff;">|</li> -->
                             <li class="nav-item">
                                 <a href="{% url 'feedback' %}" style="color: #fff; ">
                                     <i class="fa fa-question-circle"></i> SEND FEEDBACK</a>
@@ -159,12 +152,12 @@
                                         <a class="dropdown-item" href="{% url 'settings' %}">
                                             <i class="fa fa-cog"></i> Settings</a>
                                     </li>
-                                    <!-- {% if user.is_superuser %}
+                                    {% if user.is_superuser %}
                                     <li>
                                         <a class="dropdown-item" href="{% url 'admin' %}">
                                             <i class="fa fa-users"></i> Admin</a>
                                     </li>
-                                    {% endif %} -->
+                                    {% endif %}
                                     <li><a class="dropdown-item" href="{% url 'logout' %}"><i
                                                 class="fa fa-power-off"></i> Log out</a></li>
                                 </ul>
@@ -179,19 +172,15 @@
             <div class="main" id="main">
                 {% if user.is_authenticated %}
                 {% block messages %}
-                <ul class="messages" id="messages-list">
+                <div id="messages-panel">
                     {% if messages %}
                     {% for message in messages %}
-                    <li>
-                        {% if message.tags %}
-                        <div class="alert alert-{{ message.tags }} msg fade show" role="alert">{{ message }}</div>
-                        {% else %}
-                        <div class="alert alert-info msg fade show" role="alert">{{ message }}</div>
-                        {% endif %}
-                    </li>
+                    <div class="alert {{ message.tags }} m-2" id="msg" role="alert">
+                        {{ message }}
+                    </div>
                     {% endfor %}
                     {% endif %}
-                </ul>
+                </div>
                 {% endblock %}
                 {% endif %}
                 {% block content %}
@@ -220,6 +209,11 @@
 </body>
 <script>
     $(document).ready(function () {
+        setTimeout(function () {
+            if ($('#msg').length > 0) {
+                $('#msg').remove();
+            }
+        }, 2000);
         $(".div-item .haschild").on("click", function () {
             var id = $(this).attr('id').split("_")[1];
             if ($("#icon_" + id).hasClass("fa-chevron-right")) {
