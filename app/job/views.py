@@ -3,10 +3,10 @@ from datetime import datetime
 import urllib.request
 import json
 import os
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
+    HttpResponseRedirect,
     JsonResponse
 )
 from django.template import loader
@@ -14,9 +14,8 @@ from te_schemas.productivity import ProductivityMode
 from te_schemas.land_cover import LCTransitionDefinitionDeg, LCLegendNesting
 from job.models import Job, Status
 
-from utils.util import table_to_matrix, get_lc_nesting, get_trans_matrix
+from utils.util import table_to_matrix, get_trans_matrix
 from account import models as accountmodels
-from account.views import logout
 from core import models as coremodels
 from core import views
 from utils import conf
@@ -24,9 +23,7 @@ from utils.api import Api
 from utils.logger import log
 from utils.util import url_exists, get_styles
 
-CRS = 'GEOGCS[unknown,DATUM[WGS_1984,SPHEROID[WGS 84,6378137,298.257223563,'\
-    'AUTHORITY[EPSG,7030]],AUTHORITY[EPSG,6326]],PRIMEM[Greenwich,0,'\
-    'AUTHORITY[EPSG,8901]],UNIT[degree,0.0174532925199433,AUTHORITY[EPSG,9122]]]'
+CRS = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
 
 
 def index(request):
@@ -122,7 +119,7 @@ def process_land_cover(request):
         "year_initial": int(request.POST.get("initial_year_de")),
         "year_final": int(request.POST.get("target_year_de")),
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'legend_nesting': get_nestings(request),
         'trans_matrix': json.loads(matrix),
@@ -145,7 +142,7 @@ def process_soc(request):
         'fl': request.POST.get("climate_regime"),
         'download_annual_lc': request.POST.get("download_annual_lc") == "true",
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'legend_nesting': get_nestings(request),
         'trans_matrix': json.loads(matrix),
@@ -179,8 +176,8 @@ def process_drought_vulnerability(request):
     }
 
     payload.update({
-        'geojsons': [json.loads(geom.json)],
-        'crs': str(geom.crs),
+        'geojsons': json.dumps([json.loads(geom.json)]),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
@@ -214,8 +211,8 @@ def process_unccd_reporting(request):
     }
 
     payload.update({
-        'geojsons': [json.loads(geom.json)],
-        'crs': str(geom.crs),
+        'geojsons': json.dumps([json.loads(geom.json)]),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
@@ -240,7 +237,7 @@ def process_urban_change(request):
         'pct_suburban': request.POST.get("pct_suburban"),
         'pct_urban': request.POST.get("pct_urban"),
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
@@ -258,7 +255,7 @@ def process_restoration_biomass(request):
         'length_yr': request.POST.get("length_yr"),
         'rest_type': request.POST.get("rest_type"),
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
@@ -279,14 +276,11 @@ def process_total_carbon(request):
         'method': request.POST.get("method"),
         'biomass_data': request.POST.get("biomass_data"),
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
     }
-
-    print(payload)
-
     return [payload]
 
 
