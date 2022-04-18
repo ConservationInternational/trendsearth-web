@@ -250,19 +250,10 @@
                 processData: false,
                 contentType: false,
                 success: function (response) {
-                    $("#messages-list").removeClass("msg-white");
-                    $("#messages-list").addClass("msg-dark");
-                    const messages = document.getElementById("messages-list");
-                    messages.innerHTML += response.msg;
-
-                    $("#messages-list").fadeOut(2000, "swing", function () {
-                        messages.innerHTML = "";
-                        $("#messages-list").show();
-                        $("#messages-list").removeClass("msg-black");
-                        $("#messages-list").addClass("msg-white");
-                    });
-                    $('#iframe').attr('src', function (i, val) { return val; });
-                    $("#aggregationDefinitionModal .btn-close").click()
+                    showMessage(response.msg, "success");
+                },
+                error: function (response) {
+                    showMessage(response.responseJSON.msg, "danger");
                 }
             });
         });
