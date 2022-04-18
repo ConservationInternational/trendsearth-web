@@ -1,3 +1,4 @@
+import email
 import os
 import json
 import numpy as np
@@ -5,8 +6,7 @@ from datetime import (
     datetime,
     timedelta
 )
-from urllib import request
-
+from django.shortcuts import redirect
 from django.db import connection
 from django.http import (
     HttpResponse,
@@ -64,16 +64,17 @@ def signout(request):
 
 
 def home_view(request):
-    """Load logged in user profile view
-    """
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse_lazy('dashboard'))
-
-    template = loader.get_template('account/index.html')
-    context = {
-        'user': request.user
-    }
-    return HttpResponse(template.render(context, request))
+        if request.user.profile.role.code == "ADMIN":
+            return HttpResponseRedirect(reverse_lazy('dashboard'))
+        else:
+            return redirect("/algorithm/2")
+    else:
+        template = loader.get_template('account/index.html')
+        context = {
+            'user': request.user
+        }
+        return HttpResponse(template.render(context, request))
 
 
 class LoginView(FormView):
@@ -231,7 +232,9 @@ class RegisterView(FormView):
         api = Api(email=credentials['email'],
                   password=credentials['password1'])
 
-        if api.token is not None:
+        if api.token is not None or models.Profile.objects.filter(
+                user__email=credentials["email"],
+                deleted=False).count() > 1:
             messages.add_message(
                 self.request, messages.ERROR,
                 'User with this credentials already exists!')
@@ -240,7 +243,6 @@ class RegisterView(FormView):
             user = form.save(commit=False)
             user.username = credentials['email']
             user.is_active = True
-
             user.save()
 
             user.profile.country_id = int(self.request.POST.get('country'))
@@ -370,11 +372,9 @@ def password_reset_view(request):
             }
             email = render_to_string(email_template_name, content)
             try:
-                print(settings.DEFAULT_FROM_EMAIL)
                 ret = send_mail(
                     subject, email, from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email], fail_silently=False)
-                print(ret, settings.EMAIL_USE_TLS, settings.EMAIL_ENABLE)
             except BadHeaderError as e:
                 print(e)
                 return HttpResponse('Invalid header found.')
@@ -444,6 +444,31 @@ def view_user(request, user_id):
         'pie_chart_data': pie_chart_data
     }
     return HttpResponse(template.render(context, request))
+
+
+@login_required
+def delete_user(request):
+    if request.method == 'POST':
+        user = User.objects.get(id=int(request.POST.get("user_id")))
+        uid = user.profile.uid
+        user.delete()
+        api = Api(token=request.session['bearer_token'])
+        api.delete_user(uid)
+        template = loader.get_template('account/list_users.html')
+        context = {
+            "users_list": User.objects.all()
+        }
+        return HttpResponse(template.render(context, request))
+
+
+@login_required
+def delete_profile(request):
+    if request.method == 'POST':
+        api = Api(token=request.session['bearer_token'])
+        api.delete_profile()
+        request.user.delete()
+        logout(request)
+        return JsonResponse({"msg": "Account successfully deleted!"}, status=200)
 
 
 @ login_required

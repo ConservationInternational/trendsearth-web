@@ -216,6 +216,18 @@ class Api(object):
         if resp:
             return resp['data']
 
+    def delete_user(self, user):
+        resp = self.call_api(
+            u'/api/v1/user/' + user, method="delete", use_token=True)
+        if resp:
+            return resp['data']
+
+    def delete_profile(self):
+        resp = self.call_api(
+            u'/api/v1/user/me', method="delete", use_token=True)
+        if resp:
+            return resp['data']
+
     def get_execution(self, execution, exclude=""):
         """
                     Get all executions
@@ -340,7 +352,8 @@ class Api(object):
         else:
             return None
 
-    def register(self, email, password, name, organization, country, role,
+    def register(self, email, password, name, organization, country,
+                 role="USER",
                  first_name="",
                  last_name="",
                  is_in_mailing_list=False,

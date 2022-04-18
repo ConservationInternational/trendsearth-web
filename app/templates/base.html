@@ -44,7 +44,7 @@
                 </div>
             </div>
             <hr>
-            {% if user.is_superuser %}
+            {% if user.profile.role.code == "ADMIN" %}
             <a href="/home" style="padding-left: 0px;" class="item active" id="dashboard_item">
                 <h3 class="menu-items"><i class="fa fa-home"></i> &nbsp;DASHBOARD</h3>
             </a>
@@ -55,9 +55,6 @@
                 <div class="col-md-10" style="padding-left: 0px;">
                     <h3 class="menu-items"><i class="fa fa-random"></i> &nbsp;ALGORITHMS</h3>
                 </div>
-                <!-- <div class="col-md-2">
-                    <h3 class="menu-items"><i class="fa fa-chevron-right"></i></h3>
-                </div> -->
             </div>
 
             {% for algo in parents %}
@@ -72,9 +69,6 @@
                             {% endif %}</span>
                     </div>
                 </div>
-                <!-- <div class="col-md-2">
-                    <h3 style="padding: 0px 10px;"><i class="fa fa-chevron-right" id="icon_{{algo.id}}"></i></h3>
-                </div> -->
             </div>
 
             {% for child in algo.children %}
@@ -113,29 +107,18 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <!-- <li class="nav-item">
-                                <a href="https://trends.earth/docs/en/" target="_blank"
-                                    style="margin-right: 10px; color: #fff;">
-                                    <i class="fa fa-info-circle"></i> USER GUIDE</a>
-                            </li>
-                            <li class="nav-item" style="margin-right: 10px; color: #fff;">|</li> -->
                             <li class="nav-item">
                                 <a href="{% url 'feedback' %}" style="color: #fff; ">
                                     <i class="fa fa-question-circle"></i> SEND FEEDBACK</a>
                             </li>
                         </ul>
                         <ul class="navbar-nav ml-auto">
-                            <!-- <li class="nav-item">
-                                <i class="fa fa-bell"></i>
-                                <span class="badge badge-danger badge-pill"
-                                    style="position: absolute; margin-left: -5px;">4</span>
-                            </li> -->
                             <li class="nav-item dropdown">
                                 {% if user.profile.photo != '' %}
                                 <img src="/media/{{user.profile.photo}}" class="user-photo" data-placement="right"
                                     type="button" data-bs-toggle="dropdown" style="margin-left: 30px;">
                                 {% else %}
-                                <button type=" button" class="btn btn-success btn-circle btn-lg"
+                                <button type=" button" class="btn btn-danger btn-circle btn-lg"
                                     data-bs-toggle="dropdown"
                                     style="margin-left: 30px;">{{user.first_name|slice:"0:1"}}{{user.last_name|slice:"0:1"}}
                                 </button>
@@ -152,7 +135,7 @@
                                         <a class="dropdown-item" href="{% url 'settings' %}">
                                             <i class="fa fa-cog"></i> Settings</a>
                                     </li>
-                                    {% if user.is_superuser %}
+                                    {% if user.profile.role.code == "ADMIN" %}
                                     <li>
                                         <a class="dropdown-item" href="{% url 'admin' %}">
                                             <i class="fa fa-users"></i> Admin</a>
