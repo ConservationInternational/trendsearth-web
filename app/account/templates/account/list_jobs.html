@@ -1,5 +1,5 @@
 {% load static %}
-<table id="jobs_tbl" class="table table-bordered" style="width:100%">
+<table id="task_tbl" class="table table-bordered" style="width:100%">
     <thead>
         <tr>
             <th>#</th>
@@ -14,12 +14,12 @@
         {% for job in jobs %}
         <tr>
             <td>{{forloop.counter}}</td>
-            <td>{{job.params.task_name}}
-                {% if job.params.task_name %}
+            <td>{{job.task_name}}
+                {% if job.task_name %}
                 -
                 {% endif %}
-                {% if job.results.name %}
-                {{job.results.name}}
+                {% if job.uid %}
+                {{job.uid}}
                 {% endif %}
             </td>
             <td>{{job.script.name_readable}}</td>
@@ -27,26 +27,18 @@
             <td>{{job.start_date}}</td>
             <td>
                 {% if job.status.value == "FINISHED" %}
-                <button class="btn btn-danger download-job" job-id="{{job.id}}" title="Download"
-                    style="margin-right: 5px; line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
-                    <i class="fa fa-arrow-circle-down"></i>
+                <button class="btn btn-outline-success download-job" job-id="{{job.id}}" title="Download"
+                    style="padding: 0px 10px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-arrow-circle-down"></i> Download
                 </button>
                 <a class="btn btn-outline-primary view-job" role="button" job-id="{{job.id}}" title="View"
-                    href="/jobs/{{job.id}}/view"
-                    style="margin-right: 5px; line-height: 2px; min-width: 10px; width: 24px; height: 20px; padding: 2px; border-radius: 5px;">
-                    <i class="fa fa-eye"></i>
+                    href="/job/{{job.id}}/view" style="padding: 0px 10px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-eye"></i>View
                 </a>
                 {% endif %}
-
-                {% if job.status.value == "RUNNING" or job.status.value == "READY" %}
-                <button class="btn btn-danger cancel-job" role="button" job-id="{{job.id}}" title="Cancel"
-                    style="margin-right: 5px;line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
-                    <i class="fa fa-ban"></i>
-                </button>
-                {% endif %}
                 <button class="btn btn-outline-danger delete-job" role="button" job-id="{{job.id}}" title="Delete"
-                    style="line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
-                    <i class="fa fa-remove delete-job"></i>
+                    style="padding: 0px 10px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-trash delete-job"></i> Delete
                 </button>
             </td>
         </tr>
@@ -57,7 +49,8 @@
 <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
 <script>
     $(document).ready(function () {
-        $('#jobs_tbl').on('click', 'button.download-job', function (e) {
+        $("#task_tbl").DataTable();
+        $('#task_tbl').on('click', 'button.download-job', function (e) {
             let uid = $(this).attr("job-id");
             $.get({
                 url: "/ajax/download/" + uid,
@@ -69,33 +62,33 @@
                     delete link;
                 },
                 error: function (response) {
-                    showMessage(response.responseJSON.msg, 2000);
+                    showMessage(response.responseJSON.msg, "danger");
                 }
             });
         });
 
-        $('#jobs_tbl').on('click', 'button.cancel-job', function (e) {
+        $('#task_tbl').on('click', 'button.cancel-job', function (e) {
             let uid = $(this).attr("job-id");
             $.get({
                 url: "/ajax/cancel/" + uid,
                 success: function (response) {
-                    $("#jobs_tbl").empty();
-                    $("#jobs_tbl").append(response);
+                    $("#nav-job").empty();
+                    $("#nav-job").append(response);
                 },
             });
         });
 
-        $('#jobs_tbl').on('click', 'button.delete-job', function (e) {
+        $('#task_tbl').on('click', 'button.delete-job', function (e) {
             let uid = $(this).attr("job-id");
             console.log(uid);
             $.get({
                 url: "/ajax/delete/" + uid,
                 success: function (response) {
-                    $("#jobs_tbl").empty();
-                    $("#jobs_tbl").append(response);
+                    $("#nav-job").empty();
+                    $("#nav-job").append(response);
                 },
                 error: function (response) {
-                    showMessage(response.responseJSON.msg, 2000);
+                    showMessage(response.responseJSON.msg, "danger");
                 }
             });
         });

@@ -20,17 +20,60 @@
     </nav>
 </div>
 
-{% include 'account/user.html' %}
-
-
 <div class="row">
     <div class="col-md-12">
-        <div class="block-content">
-            <br />
-            <a class="btn btn-outline-danger" role="button" href="profile/edit">Edit Profile</a>
+        <div class="card">
+            <div class="card-body">
+                {% include 'account/user.html' %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <br />
+                        <a class="btn btn-outline-success" role="button" href="profile/edit">Edit Profile</a>
+                        <br />
+                    </div>
+                    <div class="col-md-6">
+                        <br />
+                        <button class="btn btn-outline-danger" id="btn_profile_delete" role="button"
+                            style="float: right;" data-bs-toggle="modal" data-bs-target="#confirmModal">Delete
+                            Profile</button>
+                        <br />
+                    </div>
+                </div>
+            </div>
         </div>
-        <br />
     </div>
 </div>
+{% include 'dialogs/confirm_dialog.html' %}
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('#confirmYes').on("click", function () {
+            var formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("user_id", "{{user.id}}");
+            $.ajax({
+                url: "/user/profile/delete",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#confirmModal').hide();
+                    window.location = "/";
+                },
+                error: function (response) {
+                    $('#confirmModal').hide();
+                    showMessage(response.responseJSON.msg, "danger");
+                }
+            });
+        });
+
+        $('#btn_profile_delete').on("click", function () {
+            document.getElementById("confirmModalLabel").innerText = "Confirm Dialog - Account Closure";
+            document.getElementById("confirmMessage").innerText = "Do you want to delete your account?";
+        });
+    });
+</script>
 
 {% endblock %}

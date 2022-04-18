@@ -5,6 +5,10 @@ body {
   min-height: 100vh;
 }
 
+body {
+  background: #f6f7fb !important;
+}
+
 #main{
   display: flex;
   flex-direction: column;
@@ -235,14 +239,43 @@ div.content {
   padding: 0px;
 }
 
+/*****
+ * Cards *
+*****/
+
 .card {
-  /* margin-bottom: 1rem !important; */
   cursor: pointer;
   border-radius: 5px;
+  box-shadow: 0 1px 2.94px 0.06px rgb(4 26 55 / 16%);
+    -webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+.card .card-header {
+  padding: 0px 10px;
+  margin-bottom: 0;
+  background-color: rgba(0,0,0,0);
+  border-bottom: 0 solid rgba(0,0,0,.125);
+}
+.card .card-header h5 {
+  margin-bottom: 0;
+  color: unset;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-block;
+  margin-right: 10px;
+  line-height: 1.1;
+  position: relative;
 }
 
-.card-body {
-  text-align: center;
+.card .card-header h5 {
+  margin-bottom: 0;
+  color: unset;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-block;
+  margin-right: 10px;
+  line-height: 1.1;
+  position: relative;
 }
 
 .card h1 {
@@ -262,20 +295,8 @@ div.content {
   margin-top: 0;
 }
 
-.card img {
-  width: 40%;
-  margin: 15%;
-}
 
-.card .col-md-4 {
-  background-color: rgba(25, 135, 84, 1);
-  border-radius: 5px 0px 0px 5px;
-}
-
-.card .col-md-8 {
-  background-color: rgba(25, 135, 84, 0.9);
-  border-radius: 0px 5px 5px 0px;
-}
+/****/
 
 .step-row-flex {
   flex-direction: row;

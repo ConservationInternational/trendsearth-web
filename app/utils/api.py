@@ -6,7 +6,8 @@ from dateutil import tz
 from django.conf import settings
 
 API_URL = settings.API_URL
-TIMEOUT = settings.TIMEOUT
+API_URL = 'https://api.trends.earth'
+TIMEOUT = 200
 
 
 class RequestTask(object):
@@ -88,10 +89,11 @@ class Api(object):
         if self.token is None:
             self.email = kwargs.pop('email', None)
             self.password = kwargs.pop('password', None)
+
             self.login()
 
     def clean_api_response(self, resp):
-        if resp is None:
+        if resp == None:
             # Return 'None' unmodified
             response = resp
         else:
@@ -141,6 +143,7 @@ class Api(object):
                 "password": self.password
             },
         )
+        print(resp)
 
         if resp:
             try:
@@ -160,7 +163,7 @@ class Api(object):
             headers = {}
 
         # Only continue if don't need token or if token load was successful
-        if (not use_token) or (self.token is not None):
+        if (not use_token) or (not self.token is None):
             if payload:
                 clean_payload = payload.copy()
                 if 'password' in clean_payload:
@@ -200,7 +203,7 @@ class Api(object):
                 return resp.headers
             else:
                 desc, status = self.get_error_status(resp)
-                # print("Error", u"Error: {} (status {}).".format(desc, status))
+                print("Error", u"Error: {} (status {}).".format(desc, status))
 
     def get_user(self, email='me'):
         resp = self.call_api(
@@ -208,45 +211,36 @@ class Api(object):
         if resp:
             return resp['data']
 
-    def recover_pwd(self, email):
-        return self.call_api(
-            u'/api/v1/user/{}/recover-password'.format(quote_plus(email)),
-            'post')
+    def get_users(self):
+        resp = self.call_api(u'/api/v1/user', use_token=True)
+        if resp:
+            return resp['data']
 
-    def delete_user(self, email='me'):
-        resp = self.call_api('/api/v1/user/me', 'delete', use_token=True)
+    def delete_user(self, user):
+        resp = self.call_api(
+            u'/api/v1/user/' + user, method="delete", use_token=True)
+        if resp:
+            return resp['data']
+
+    def delete_profile(self):
+        resp = self.call_api(
+            u'/api/v1/user/me', method="delete", use_token=True)
+        if resp:
+            return resp['data']
+
+    def get_execution(self, execution, exclude=""):
+        """
+                    Get all executions
+                    :param id: Script ID
+                    :return:
+                """
+        resp = self.call_api(u'/api/v1/execution/' +
+                             execution + exclude, 'get', use_token=True)
 
         if resp:
-            return True
-
-    def register(self, email, password, name, organization,
-                 country, role="USER"):
-        payload = {"email": email,
-                   "password": password,
-                   "name": name,
-                   "institution": organization,
-                   "country": country,
-                   "role": role}
-
-        return self.call_api('/api/v1/user', method='post', payload=payload)
-
-    def update_user(self, email, name, organization, country):
-        payload = {"email": email,
-                   "name": name,
-                   "institution": organization,
-                   "country": country}
-
-        return self.call_api('/api/v1/user/me', 'patch',
-                             payload, use_token=True)
-
-    def update_password(self, password, repeatPassword):
-        payload = {"password": password,
-                   "repeatPassword": repeatPassword}
-
-        return self.call_api(
-            u'/api/v1/user/me', 'patch',
-            payload,
-            use_token=True)
+            return resp['data']
+        else:
+            return None
 
     def get_user_execution(self, id=None, date=None):
         """
@@ -255,15 +249,15 @@ class Api(object):
         :param date:
         :return:
         """
-        # query = ['include=script']
+        query = ['include=script']
 
         query = []
 
         if id:
             query.append(u'user_id={}'.format(quote_plus(id)))
 
-        if date is not None:
-            query.append(u'updated_at={}'.format(date))
+        # if date:
+        #     query.append(u'updated_at={}'.format(date))
         query = "?" + "&".join(query)
 
         resp = self.call_api(
@@ -295,7 +289,7 @@ class Api(object):
 
     def get_execution_log(self, id):
         """
-            :param id: execution ID
+            :param id: Script ID
             :return:
         """
         resp = self.call_api(
@@ -306,30 +300,25 @@ class Api(object):
         else:
             return None
 
-    def get_execution(self, execution):
+    def get_executions(self, exclude=""):
         """
-                    Get all executions
-                    :param id: Script ID
-                    :return:
-                """
-        resp = self.call_api(u'/api/v1/execution/' +
-                             execution, 'get', use_token=True)
+            Get all executions
+            :param id: Script ID
+            :return:
+        """
+        resp = self.call_api(u'/api/v1/execution' +
+                             exclude, 'get', use_token=True)
 
         if resp:
             return resp['data']
         else:
             return None
 
-    def get_executions(self):
-        """
-            Get all executions
-            :param id: Script ID
-            :return:
-        """
-        resp = self.call_api(u'/api/v1/execution', 'get', use_token=True)
-
+    def get_execution_result(self, execution):
+        resp = self.call_api(u'/api/v1/execution/' + execution +
+                             "/download-results", 'get', use_token=True)
         if resp:
-            return resp['data']
+            return resp
         else:
             return None
 
@@ -341,8 +330,7 @@ class Api(object):
         """
         if id:
             resp = self.call_api(
-                u'/api/v1/script/{}'.format(quote_plus(id)), 'get',
-                use_token=True)
+                u'/api/v1/script/{}'.format(quote_plus(id)), 'get', use_token=True)
         else:
             resp = self.call_api(u'/api/v1/script', 'get', use_token=True)
 
@@ -350,6 +338,47 @@ class Api(object):
             return resp['data']
         else:
             return None
+
+    def get_script_log(self, id):
+        """
+            :param id: Script ID
+            :return:
+        """
+        resp = self.call_api(
+            u'/api/v1/script/{}/log?start=2021-01-17'.format(quote_plus(id)), 'get', use_token=True)
+
+        if resp:
+            return resp['data']
+        else:
+            return None
+
+    def register(self, email, password, name, organization, country,
+                 role="USER",
+                 first_name="",
+                 last_name="",
+                 is_in_mailing_list=False,
+                 is_plugin_user=False):
+        payload = {"email": email,
+                   "password": password,
+                   "name": name,
+                   "institution": organization,
+                   "country": country,
+                   "role": role,
+                   "first_name": first_name,
+                   "last_name": last_name,
+                   "is_in_mailing_list": is_in_mailing_list,
+                   "is_plugin_user": is_plugin_user
+                   }
+
+        return self.call_api('/api/v1/user', method='post', payload=payload)
+
+    def update_user(self, email, name, organization, country):
+        payload = {"email": email,
+                   "name": name,
+                   "institution": organization,
+                   "country": country}
+
+        return self.call_api('/api/v1/user/me', 'patch', payload, use_token=True)
 
     def send_mail(self, toemail, msg):
         payload = {"recipients": toemail,

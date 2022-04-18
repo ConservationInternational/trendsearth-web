@@ -1,3 +1,4 @@
+{% load static %}
 <table class="table table-hover" style="width:100%" id="users_tbl">
     <thead>
         <tr>
@@ -30,15 +31,17 @@
                 {% endif %}
             </td>
             <td>
-                <a class="btn btn-outline-primary" role="button" href="/admin/users/{{profile.user.id}}"
-                    style="margin-right: 5px; line-height: 2px; min-width: 10px; width: 24px; height: 20px; padding: 2px; border-radius: 5px;">
-                    <i class="fa fa-eye"></i>
+                <a class="btn btn-outline-success" role="button" href="/admin/users/{{profile.user.id}}"
+                    style="padding: 0px 10px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-eye"></i> View
                 </a>
+                {% if user.is_superuser %}
                 <button class="btn btn-outline-danger delete_user" data-bs-toggle="modal" data-bs-target="#confirmModal"
                     data-id="{{profile.user.id}}" data-name="{{profile.user.first_name}} {{profile.user.last_name}}"
-                    style="margin-right: 5px; line-height: 2px; min-width: 10px; width: 24px; height: 20px; padding: 2px; border-radius: 5px;">
-                    <i class="fa fa-remove"></i>
+                    style="padding: 0px 10px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-trash"></i> Delete
                 </button>
+                {% endif %}
             </td>
 
         </tr>
@@ -47,3 +50,42 @@
         {% endif %}
     </tbody>
 </table>
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $("#users_tbl").DataTable();
+
+        var id, name;
+        $('#confirmYes').on("click", function () {
+            var formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("user_id", id);
+            $.ajax({
+                url: "/admin/users/delete",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#confirmModal').hide();
+                    $("#nav-user").empty();
+                    $("#nav-user").append(response);
+                },
+                error: function (response) {
+                    $('#confirmModal').hide();
+                    showMessage(response.responseJSON.msg, "danger");
+                }
+            });
+        });
+
+        $('.delete_user').on("click", function () {
+            id = $(this).attr("data-id");
+            name = $(this).attr("data-name");
+            document.getElementById("confirmModalLabel").innerText = "Confirm Dialog - Account Closure";
+            document.getElementById("confirmMessage").innerText = "Do you want to remove " + name + " ?";
+        });
+    });
+</script>

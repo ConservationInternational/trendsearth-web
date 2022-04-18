@@ -2,7 +2,7 @@
 Django settings for ldmpweb project.
 """
 
-from pathlib import Path
+from django.contrib.messages import constants as messages
 import os
 import ast
 
@@ -152,6 +152,12 @@ LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 
+INACTIVE_TIME = 1000*60
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = INACTIVE_TIME
+SESSION_IDLE_TIMEOUT = INACTIVE_TIME
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 
@@ -218,10 +224,19 @@ SITENAME = os.getenv('SITENAME', "Trends.Earth")
 
 
 # API Settings
-API_URL = os.getenv('API_URL', 'https://api-staging.trends.earth')
+API_URL = os.getenv('API_URL', 'https://api.trends.earth')
 TIMEOUT = 200
 
 # Colors
 DEGRADED_HEX = '#9b2779'
 INCREASING_HEX = '#006500'
 STABLE_HEX = '#FFFFE0'
+
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
