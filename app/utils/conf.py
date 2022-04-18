@@ -134,11 +134,10 @@ def _load_script_config(
 ) -> typing.Dict[str, algorithm_models.Script]:
     result = {}
 
-    for name, raw_config in script_config.items():
+    for raw in script_config:
         try:
-            raw = dict(raw_config)
             algo = algorithm_models.Script()
-            algo.name = name
+            algo.name = raw.pop("name", None)
             algo.uid = raw.pop("id", None)
             algo.version = raw.pop("version", "")
             algo.description = raw.pop("description", "")
@@ -147,8 +146,7 @@ def _load_script_config(
                 code=raw.pop("run_mode"))
 
             algo.save()
-            script = algo
-            result[script.name] = script
+            result[algo.name] = algo
         except Exception:
             pass
 
