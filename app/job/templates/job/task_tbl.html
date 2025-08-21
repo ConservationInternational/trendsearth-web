@@ -1,57 +1,53 @@
 {% load static %}
-
-<thead>
-    <tr>
-        <th data-orderable="false">Task Reference</th>
-        <th>Status</th>
-        <th>Started</th>
-        <th>Actions</th>
-    </tr>
-</thead>
-<tbody>
-    {% for job in jobs %}
-    <tr>
-        <td>{{job.task_name}}
-            {% if job.task_name %}
-            -
-            {% endif %}
-            {% if job.uid %}
-            {{job.uid}}
-            {% endif %}
-        </td>
-        <td>{{job.status.value}}</td>
-        <td>{{job.start_date | date:"Y-m-d H:m:s" }}</td>
-        <td>
-            {% if job.status.value == "FINISHED" %}
-            <button class="btn btn-danger download-job" job-id="{{job.id}}" title="Download"
-                style="margin-right: 5px; line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
-                <i class="fa fa-arrow-circle-down"></i>
-            </button>
-            <a class="btn btn-outline-primary view-job" role="button" job-id="{{job.id}}" title="View"
-                href="/job/{{job.id}}/view"
-                style="margin-right: 5px; line-height: 2px; min-width: 10px; width: 24px; height: 20px; padding: 2px; border-radius: 5px;">
-                <i class="fa fa-eye"></i>
-            </a>
-            {% endif %}
-
-            {% if job.status.value == "RUNNING" or job.status.value == "READY" %}
-            <button class="btn btn-danger cancel-job" role="button" job-id="{{job.id}}" title="Cancel"
-                style="margin-right: 5px;line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
-                <i class="fa fa-ban"></i>
-            </button>
-            {% endif %}
-            <button class="btn btn-outline-danger delete-job" role="button" job-id="{{job.id}}" title="Delete"
-                style="line-height: 2px; min-width: 10px; width: 20px; height: 20px; padding: 2px; border-radius: 5px;">
-                <i class="fa fa-remove delete-job"></i>
-            </button>
-        </td>
-    </tr>
-    {% endfor %}
-</tbody>
-
+<table id="task_tbl" class="table table-bordered" style="width:100%">
+    <thead>
+        <tr>
+            <th style="width: 45%;" data-orderable="false">Task Reference</th>
+            <th style="width: 10%;">Status</th>
+            <th style="width: 15%;">Started</th>
+            <th style="width: 30%;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+        <tr>
+            <td>{{job.task_name}}
+                {% if job.task_name %}
+                -
+                {% endif %}
+                {% if job.uid %}
+                {{job.uid}}
+                {% endif %}
+            </td>
+            <td>{{job.status.value}}</td>
+            <td>{{job.start_date | date:"Y-m-d H:m:s" }}</td>
+            <td>
+                {% if job.status.value == "FINISHED" %}
+                <button class="btn btn-outline-success download-job" job-id="{{job.id}}" title="Download"
+                    style="padding: 0px 10px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-arrow-circle-down"></i> Download
+                </button>
+                <a class="btn btn-outline-primary view-job" role="button" job-id="{{job.id}}" title="View"
+                    href="/job/{{job.id}}/view" style="padding: 0px 10px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-eye"></i>View
+                </a>
+                {% endif %}
+                <button class="btn btn-outline-danger delete-job" role="button" job-id="{{job.id}}" title="Delete"
+                    style="padding: 0px 10px; min-width: 20px; border-radius: 5px;">
+                    <i class="fa fa-trash delete-job"></i> Delete
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/dataTables.bootstrap5.min.js' %}"></script>
 <script>
     $(document).ready(function () {
+        $("#task_tbl").DataTable();
+
         $('#task_tbl').on('click', 'button.download-job', function (e) {
             let uid = $(this).attr("job-id");
             $.get({
@@ -64,7 +60,7 @@
                     delete link;
                 },
                 error: function (response) {
-                    showMessage(response.responseJSON.msg, 5000);
+                    showMessage(response.responseJSON.msg, "danger");
                 }
             });
         });
@@ -74,8 +70,9 @@
             $.get({
                 url: "/ajax/cancel/" + uid,
                 success: function (response) {
-                    $("#task_tbl").empty();
-                    $("#task_tbl").append(response);
+                    $("#tasks_panel").empty();
+                    $("#tasks_panel").append(response);
+
                 },
             });
         });
@@ -85,16 +82,37 @@
             $.get({
                 url: "/ajax/delete/" + uid,
                 success: function (response) {
-                    $("#task_tbl").empty();
-                    $("#task_tbl").append(response);
+                    $("#tasks_panel").empty();
+                    $("#tasks_panel").append(response);
+
                 },
                 error: function (response) {
-                    showMessage(response.responseJSON.msg, 2000);
+                    showMessage(response.responseJSON.msg, "danger");
                 }
             });
         });
 
-
+        $('#task_tbl').on('click', 'input.chkbox-add-to-map', function (e) {
+            let uid = $(this).attr("job-id");
+            console.log(uid);
+            let formData = new FormData();
+            formData.append("csrfmiddlewaretoken", "{{csrf_token}}");
+            formData.append("uid", uid);
+            formData.append("checked", $(this).val() == "Yes" ? 1 : 0);
+            $.ajax({
+                url: "/ajax/add_layer",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    showMessage(response.msg, "success");
+                },
+                error: function (response) {
+                    showMessage(response.responseJSON.msg, "danger");
+                }
+            });
+        });
     });
-
 </script>

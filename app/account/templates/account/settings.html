@@ -35,29 +35,33 @@
 </div>
 
 <div class="container">
-    <div class="row border">
+    <div class="row">
         <div class="col-md-12">
-            <form id="settings_form" method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-11">
-
-                        <h3>Settings</h3>
+            <div class="card">
+                <div class="card-body">
+                    <form id="settings_form" method="post">
+                        {% csrf_token %}
                         <div class="row">
-                            <div class="col-sm-12 mb-3">
-                                {{ form|crispy }}
+                            <div class="col-md-11">
+
+                                <h3>Settings</h3>
+                                <div class="row">
+                                    <div class="col-sm-12 mb-3">
+                                        {{ form|crispy }}
+                                    </div>
+                                </div>
                             </div>
+                    </form>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-11 mb-3">
+                            <button class="btn btn-success" type="submit"
+                                style="width: 250px; border-radius: 5px;">UPDATE</button>
+
                         </div>
+
                     </div>
-            </form>
-            <br />
-            <div class="row">
-                <div class="col-md-11 mb-3">
-                    <button class="btn btn-danger" type="submit"
-                        style="width: 250px; border-radius: 5px;">UPDATE</button>
-
                 </div>
-
             </div>
         </div>
     </div>
@@ -86,8 +90,11 @@
                 processData: false,
                 contentType: false,
                 success: function (response) {
-                    showMessage(response.msg, 10000);
+                    showMessage(response.msg, "success");
                 },
+                error: function (response) {
+                    showMessage(response.responseJSON.msg, "danger");
+                }
             });
         });
         $("#btn_upload_profile_photo").on("click", function () {
@@ -109,10 +116,10 @@
                     contentType: false,
                     success: function (response) {
                         $("#profile_photo").attr("src", "/media/" + response.image)
-                        showMessage(response.msg, 10000);
+                        showMessage(response.msg, "success");
                     },
                     error: function (response) {
-                        showMessage(response.responseJSON.msg, 10000);
+                        showMessage(response.responseJSON.msg, "danger");
                     },
 
                 });

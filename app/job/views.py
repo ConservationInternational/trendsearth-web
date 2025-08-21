@@ -3,10 +3,10 @@ from datetime import datetime
 import urllib.request
 import json
 import os
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
+    HttpResponseRedirect,
     JsonResponse
 )
 from django.template import loader
@@ -14,9 +14,8 @@ from te_schemas.productivity import ProductivityMode
 from te_schemas.land_cover import LCTransitionDefinitionDeg, LCLegendNesting
 from job.models import Job, Status
 
-from utils.util import table_to_matrix, get_lc_nesting, get_trans_matrix
+from utils.util import table_to_matrix, get_trans_matrix
 from account import models as accountmodels
-from account.views import logout
 from core import models as coremodels
 from core import views
 from utils import conf
@@ -24,9 +23,7 @@ from utils.api import Api
 from utils.logger import log
 from utils.util import url_exists, get_styles
 
-CRS = 'GEOGCS[unknown,DATUM[WGS_1984,SPHEROID[WGS 84,6378137,298.257223563,'\
-    'AUTHORITY[EPSG,7030]],AUTHORITY[EPSG,6326]],PRIMEM[Greenwich,0,'\
-    'AUTHORITY[EPSG,8901]],UNIT[degree,0.0174532925199433,AUTHORITY[EPSG,9122]]]'
+CRS = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
 
 
 def index(request):
@@ -122,7 +119,7 @@ def process_land_cover(request):
         "year_initial": int(request.POST.get("initial_year_de")),
         "year_final": int(request.POST.get("target_year_de")),
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'legend_nesting': get_nestings(request),
         'trans_matrix': json.loads(matrix),
@@ -145,7 +142,7 @@ def process_soc(request):
         'fl': request.POST.get("climate_regime"),
         'download_annual_lc': request.POST.get("download_annual_lc") == "true",
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'legend_nesting': get_nestings(request),
         'trans_matrix': json.loads(matrix),
@@ -179,8 +176,8 @@ def process_drought_vulnerability(request):
     }
 
     payload.update({
-        'geojsons': [json.loads(geom.json)],
-        'crs': str(geom.crs),
+        'geojsons': json.dumps([json.loads(geom.json)]),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
@@ -214,8 +211,8 @@ def process_unccd_reporting(request):
     }
 
     payload.update({
-        'geojsons': [json.loads(geom.json)],
-        'crs': str(geom.crs),
+        'geojsons': json.dumps([json.loads(geom.json)]),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
@@ -240,7 +237,7 @@ def process_urban_change(request):
         'pct_suburban': request.POST.get("pct_suburban"),
         'pct_urban': request.POST.get("pct_urban"),
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
@@ -258,7 +255,7 @@ def process_restoration_biomass(request):
         'length_yr': request.POST.get("length_yr"),
         'rest_type': request.POST.get("rest_type"),
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
@@ -279,14 +276,11 @@ def process_total_carbon(request):
         'method': request.POST.get("method"),
         'biomass_data': request.POST.get("biomass_data"),
         'geojsons': json.dumps([json.loads(geom.json)]),
-        'crs': str(geom.crs),
+        'crs': CRS,
         'crosses_180th': False,
         'task_name': request.POST.get("task_name"),
         'task_notes': request.POST.get("task_notes"),
     }
-
-    print(payload)
-
     return [payload]
 
 
@@ -317,8 +311,8 @@ def process_land_productivity(request, script):
         aoi = accountmodels.Aoi.objects.get(id=aoi_id)
         geom = aoi.geom
 
-        prod_mode = ProductivityMode.TRENDS_EARTH_5_CLASS_LPD.value if request.POST.get(
-            "prod_mode") == 1 else ProductivityMode.JRC_5_CLASS_LPD.value
+        prod_mode = ProductivityMode.TRENDS_EARTH_5_CLASS_LPD.value if int(request.POST.get(
+            "prod_mode")) == 1 else ProductivityMode.JRC_5_CLASS_LPD.value
 
         payload = {
             'prod_mode': prod_mode,
@@ -340,7 +334,7 @@ def process_land_productivity(request, script):
             'prod_state_year_tg_end': request.POST.
             get("prod_state_year_tg_end"),
             'geojsons': json.dumps([json.loads(geom.json)]),
-            'crs': str(geom.crs),
+            'crs': CRS,
             'crosses_180th': False,
             'ndvi_gee_dataset': ndvi_dataset,
             'climate_gee_dataset': climate_gee_dataset,
@@ -362,8 +356,8 @@ def process_sub_indicators(request, script):
         matrix = table_to_matrix(form_data)
         matrix = LCTransitionDefinitionDeg.Schema().dumps(matrix)
         periods = json.loads(request.POST.get("periods"))
-        prod_mode = ProductivityMode.TRENDS_EARTH_5_CLASS_LPD.value if request.POST.get(
-            "prod_mode") == 1 else ProductivityMode.JRC_5_CLASS_LPD.value
+        prod_mode = ProductivityMode.TRENDS_EARTH_5_CLASS_LPD.value if int(request.POST.get(
+            "prod_mode")) == 1 else ProductivityMode.JRC_5_CLASS_LPD.value
 
         payloads = []
         for period, values in periods.items():
@@ -383,7 +377,7 @@ def process_sub_indicators(request, script):
                 assert prod_state_year_tg_end == year_final
 
                 payload['productivity'].update({
-                    'prod_asset': conf.REMOTE_DATASETS["NDVI"]["MODIS (MOD13Q1, annual)"]["GEE Dataset"],
+                    'asset_productivity': conf.REMOTE_DATASETS["NDVI"]["MODIS (MOD13Q1, annual)"]["GEE Dataset"],
                     'traj_method': 'ndvi_trend',
                     'traj_year_initial': year_initial,
                     'traj_year_final': year_final,
@@ -393,7 +387,7 @@ def process_sub_indicators(request, script):
                     'state_year_bl_end': prod_state_year_bl_end,
                     'state_year_tg_start': prod_state_year_tg_start,
                     'state_year_tg_end': prod_state_year_tg_end,
-                    'climate_asset': None,
+                    'asset_climate': None,
                 })
             else:
                 if period == 'baseline':
@@ -406,7 +400,7 @@ def process_sub_indicators(request, script):
                 prod_start_year = prod_dataset['Start year']
                 prod_end_year = prod_dataset['End year']
                 payload['productivity'].update({
-                    'prod_asset': prod_asset,
+                    'asset_productivity': prod_asset,
                     'year_initial': prod_start_year,
                     'year_final': prod_end_year
                 })
@@ -445,7 +439,7 @@ def process_sub_indicators(request, script):
 
             payload.update({
                 'geojsons': [json.loads(geom.json)],
-                'crs': str(geom.crs),
+                'crs': CRS,
                 'crosses_180th': False,
                 'task_name': task_name,
                 'task_notes': request.POST.get("task_notes"),
@@ -463,7 +457,9 @@ def process_sub_indicators(request, script):
                     'run_mode': "remote",
                     'name': script.name,
                     'name_readable': script.name_readable,
-                    'slug': script.name
+                    'slug': "{0}-{1}".format(
+                        script.name,
+                        script.version.replace('.', '-'))
                 },
                 'local_context': {
                     'area_of_interest_name': aoi.name,
@@ -506,9 +502,13 @@ def ajax_run_job(request):
         for payload in payloads:
             if payload["crs"] == 'None':
                 payload["crs"] = CRS
-            url_fragment = f"/api/v1/script/{script.uid}/run"
-            response = api.call_api(url_fragment, "post",
-                                    payload, use_token=True)
+
+            url_fragment = "/api/v1/script/" + script.uid + "/run"
+            response = api.call_api(
+                url_fragment,
+                "post",
+                payload,
+                use_token=True)
 
             if response is not None:
                 out = response["data"]
@@ -527,34 +527,52 @@ def ajax_run_job(request):
 
                 job.save()
                 job.user.profile.save(update_fields=["uid"])
-        return JsonResponse({"msg": "Submitted Successfully!"}, status=200)
-    pass
+                return JsonResponse({
+                    "msg": "Your job request was submitted successfully!"},
+                    status=200)
+            else:
+                return JsonResponse(
+                    {
+                        "msg": "There was an error submitting your job request. Please try again!"
+                    },
+                    status=400)
 
 
 @login_required
 def view_job(request, job_id):
     template = loader.get_template('job/job.html')
-    parents = accountmodels.Algorithm.objects.filter(
-        parent_id=None, deleted=False).values().order_by("id")
 
-    job = Job.objects.get(id=job_id)
+    job = Job.objects.get(id=job_id, deleted=False)
 
     api = Api(token=request.session['bearer_token'])
-    currentjob = api.get_execution(job.uid)
-
+    currentjob = api.get_execution_result(job.uid)
     styles = get_styles()
-    exec_script = job.script
+    band_list = []
+    url_list = []
+    i = 0
+    try:
+        for ras in currentjob.get('rasters').values():
+            bands = ras.get("bands")
+            url_list.append(ras.get("uri").get("uri"))
+            for band in bands:
+                if band["add_to_map"]:
+                    band_list.append({
+                        "name": band["name"],
+                        "index": i,
+                        "styles": styles[band["name"]]
+                    })
+                    i += 1
+    except Exception as e:
+        pass
+
     algo = accountmodels.Algorithm.objects.get(
-        scripts__execution_script=exec_script)
-    bands = [{"name": currentjob["results"]["bands"][i]["name"],
-              "index": i,
-              "styles": styles[currentjob["results"]["bands"][i]["name"]]}
-             for i in range(len(currentjob["results"]["bands"])) if currentjob["results"]["bands"][i]["add_to_map"]]
+        script=job.script)
+
     context = {
         "parents":  views.get_algorithms(),
         "id": algo.parent.id,
-        "bands": bands,
-        "urls": currentjob["results"]["urls"]
+        "bands": band_list,
+        "urls": url_list
     }
     return HttpResponse(template.render(context, request))
 
@@ -579,32 +597,22 @@ def ajax_load_results(request, script_id):
 
 @login_required
 def ajax_download_job(request, id):
-    job = Job.objects.get(user=request.user, id=id, deleted=False)
-    urls = job.results["urls"]
-    print(urls)
-    if len(urls) == 1:
-        if url_exists(urls[0]["url"]):
-            return JsonResponse({"url": urls[0]["url"]}, status=200)
-        else:
-            return JsonResponse({"msg": "Cannot download the results for this job!"}, status=400)
-
-    date = datetime.now()
-    filename = "../" + \
-        str(date.timestamp) + job.results.name + ".zip"
-    with open(filename, "wb") as fout:
-        for url in urls:
-            response = urllib.request.urlopen(url["url"])
-            # filename = response.headers.get(
-            #     "Content-Disposition").split("filename=")[1]
-            fout.write(response.read())
-    if os.path.exists(filename):
-        return JsonResponse({"url": "/media/" + filename,
-                             "fname": filename}, status=200)
+    job = Job.objects.get(user=request.user,
+                          id=id, deleted=False)
+    api = Api(token=request.session['bearer_token'])
+    exec = api.get_execution_result(job.uid)
+    urls = []
+    try:
+        for ras in exec.get('rasters').values():
+            for band in ras.values():
+                if isinstance(band, dict):
+                    urls.append(band.get("uri"))
+    except Exception as e:
+        pass
+    if len(urls) > 0:
+        return JsonResponse({"url": urls[0]}, status=200)
     else:
-        return JsonResponse(
-            {
-                "msg": "Cannot download the results for this job"},
-            status=400)
+        return JsonResponse({"msg": "Cannot download the results for this job!"}, status=400)
 
 
 @login_required
@@ -623,19 +631,14 @@ def ajax_cancel_job(request, id):
 
 @login_required
 def ajax_delete_job(request, id):
-    try:
-        job = Job.objects.get(user=request.user, id=id, deleted=False)
-        job.deleted = True
-        job.status = Status.objects.get(code="DELETED")
-        job.save(update_fields=['deleted', 'status'])
-        template = loader.get_template('job/task_tbl.html')
-        context = {
-            "jobs": getjobs(request, job.script.id)
-        }
-        return HttpResponse(template.render(context, request))
-    except Exception as e:
-        print(e)
-        return JsonResponse({"msg": "Job not found"}, status=400)
+    job = Job.objects.get(id=id)
+    script_id = job.script.id
+    job.delete()
+    template = loader.get_template('job/task_tbl.html')
+    context = {
+        "jobs": getjobs(request, script_id)
+    }
+    return HttpResponse(template.render(context, request))
 
 
 def getjobs(request, script_id):
@@ -656,7 +659,7 @@ def getjobs(request, script_id):
                 job.end_date = currentjob["end_date"]
                 job.status = Status.objects.get(code=currentjob["status"])
                 job.results = currentjob["results"]
-                job.save(update_fields=["progress",
-                                        "end_date", "status", "results"])
+                job.save()
         job_result.append(job)
     return job_result
+    # return jobs

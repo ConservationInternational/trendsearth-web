@@ -6,29 +6,29 @@
 
 {% block content %}
 <div class="col-flex">
-    <div class="row border" style="padding: 0px 10px;">
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="algorithm_children" class="form-label">Select Indicator</label>
-                <span class="required">*</span>
-                <select class="form-select form-select-sm" id="algorithm_children">
-                    {% for child in children %}
-                    <option value="{{child.id}}">{{child.name}}</option>
-                    {% endfor %}
-                </select>
-                <input type="hidden" id="run_mode" value="3">
-            </div>
-            <!-- <div class="col-md-6 mb-3">
-                <label for="run_mode" class="form-label">Run Mode</label>
-                <span class="required">*</span>
-                <select class="form-select form-select-sm" id="run_mode">
-                </select>
-            </div> -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="algorithm_children" class="form-label">Select Indicator</label>
+            <span class="required">*</span>
+            <select class="form-select form-select-sm" id="algorithm_children">
+                {% for child in children %}
+                <option value="{{child.id}}">{{child.name}}</option>
+                {% endfor %}
+            </select>
+            <input type="hidden" id="run_mode" value="3">
         </div>
     </div>
-    <div class="row" style="padding: 5px 0px;" id="algorithm_body">
-
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row" id="algorithm_body">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 </div>
 {% include 'core/modals/aggregation_definition.html' %}
 {% include 'account/modals/aoi.html'%}
@@ -54,7 +54,6 @@
                 clicks = 0;
             });
         });
-
 
         $("#btn_editAggregation").on("click", function () {
             if (clicks < 1)
@@ -95,25 +94,13 @@
                 processData: false,
                 contentType: false,
                 success: function (response) {
-                    $("#aggregationDefinitionModal .btn-close").click()
-                    $("#messages-list").removeClass("msg-white");
-                    $("#messages-list").addClass("msg-dark");
-                    const messages = document.getElementById("messages-list");
-                    messages.innerHTML = response.msg;
-
-                    $("#messages-list").fadeOut(2000, "swing", function () {
-                        messages.innerHTML = "";
-                        $("#messages-list").show();
-                        $("#messages-list").removeClass("msg-black");
-                        $("#messages-list").addClass("msg-white");
-                    });
+                    showMessage(response.msg, 2000);
+                },
+                error: function (response) {
+                    showMessage(response.responseJSON.msg, 2000);
                 }
             });
         });
-
-
-
-
         $(".active").removeClass("active");
         $("#item_{{id}}").addClass("active");
 

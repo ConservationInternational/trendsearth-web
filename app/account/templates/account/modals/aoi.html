@@ -288,7 +288,7 @@
                 } else if ($("#aoi_file").is(":checked")) {
                     data_file = $("#data_file")[0];
                     if (data_file == undefined || data_file.files.length == 0) {
-                        showMessage("Input file is required!", 3000);
+                        showMessage("Input file is required!", "danger");
                         return;
                     } else {
                         data_file = data_file.files[0];
@@ -322,10 +322,10 @@
                 success: function (response) {
                     $("#aoi_lbl").html(response.name);
                     $("aoi_id").val(response.id);
-                    showMessage(response.msg, 3000);
+                    showMessage(response.msg, "success");
                 },
                 error: function (response) {
-                    showMessage(response.responseJSON.msg, 3000);
+                    showMessage(response.responseJSON.msg, "danger");
                 }
             });
         });
