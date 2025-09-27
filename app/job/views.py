@@ -112,15 +112,15 @@ def process_land_cover(request):
     aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
     payload = {
-        "year_initial": int(request.POST.get("initial_year_de")),
-        "year_final": int(request.POST.get("target_year_de")),
         "geojsons": json.dumps([json.loads(geom.json)]),
         "crs": CRS,
         "crosses_180th": False,
-        "legend_nesting": get_nestings(request),
-        "trans_matrix": json.loads(matrix),
         "task_name": task_name,
         "task_notes": request.POST.get("task_notes"),
+        "year_initial": int(request.POST.get("initial_year_de")),
+        "year_final": int(request.POST.get("target_year_de")),
+        "legend_nesting": get_nestings(request),
+        "trans_matrix": json.loads(matrix),
     }
     return [payload]
 
@@ -133,17 +133,19 @@ def process_soc(request):
     aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
     payload = {
-        "year_initial": int(request.POST.get("initial_year_de")),
-        "year_final": int(request.POST.get("target_year_de")),
-        "fl": request.POST.get("climate_regime"),
-        "download_annual_lc": request.POST.get("download_annual_lc") == "true",
         "geojsons": json.dumps([json.loads(geom.json)]),
         "crs": CRS,
         "crosses_180th": False,
-        "legend_nesting": get_nestings(request),
-        "trans_matrix": json.loads(matrix),
         "task_name": task_name,
         "task_notes": request.POST.get("task_notes"),
+        "soil_organic_carbon": {
+            "year_initial": int(request.POST.get("initial_year_de")),
+            "year_final": int(request.POST.get("target_year_de")),
+            "fl": float(request.POST.get("climate_regime", "0.8")),
+            "legend_nesting": get_nestings(request),
+            "trans_matrix": json.loads(matrix),
+        },
+        "download_annual_lc": request.POST.get("download_annual_lc") == "true",
     }
     return [payload]
 
@@ -159,29 +161,28 @@ def process_drought_vulnerability(request):
     aoi = accountmodels.Aoi.objects.get(id=aoi_id)
     geom = aoi.geom
 
-    payload = {}
-    payload["population"] = {
-        "asset": population_dataset["GEE Dataset"],
-        "source": population_dataset_name,
+    payload = {
+        "geojsons": json.dumps([json.loads(geom.json)]),
+        "crs": CRS,
+        "crosses_180th": False,
+        "task_name": request.POST.get("task_name"),
+        "task_notes": request.POST.get("task_notes"),
+        "year_initial": int(request.POST.get("initial_year_de")),
+        "year_final": int(request.POST.get("target_year_de")),
+        "population": {
+            "asset": population_dataset["GEE Dataset"],
+            "source": population_dataset_name,
+        },
+        "spi": {
+            "asset": spi_dataset["GEE Dataset"],
+            "source": spi_dataset_name,
+            "lag": int(request.POST.get("lag_cb")),
+        },
+        "land_cover": {
+            "asset": "users/geflanddegradation/toolbox_datasets/lcov_esacc_1992_2022",
+            "source": "ESA CCI",
+        },
     }
-
-    payload["spi"] = {
-        "asset": spi_dataset["GEE Dataset"],
-        "source": spi_dataset_name,
-        "lag": int(request.POST.get("lag_cb")),
-    }
-
-    payload.update(
-        {
-            "geojsons": json.dumps([json.loads(geom.json)]),
-            "crs": CRS,
-            "crosses_180th": False,
-            "task_name": request.POST.get("task_name"),
-            "task_notes": request.POST.get("task_notes"),
-            "year_initial": int(request.POST.get("initial_year_de")),
-            "year_final": int(request.POST.get("target_year_de")),
-        }
-    )
     return [payload]
 
 
@@ -270,16 +271,16 @@ def process_total_carbon(request):
     geom = aoi.geom
 
     payload = {
-        "year_initial": int(request.POST.get("year_initial")),
-        "year_final": int(request.POST.get("year_final")),
-        "fc_threshold": float(request.POST.get("fc_threshold")),
-        "method": request.POST.get("method"),
-        "biomass_data": request.POST.get("biomass_data"),
         "geojsons": json.dumps([json.loads(geom.json)]),
         "crs": CRS,
         "crosses_180th": False,
         "task_name": request.POST.get("task_name"),
         "task_notes": request.POST.get("task_notes"),
+        "year_initial": int(request.POST.get("year_initial")),
+        "year_final": int(request.POST.get("year_final")),
+        "fc_threshold": float(request.POST.get("fc_threshold")),
+        "method": request.POST.get("method"),
+        "biomass_data": request.POST.get("biomass_data"),
     }
     return [payload]
 
@@ -321,32 +322,45 @@ def process_land_productivity(request, script):
         )
 
         payload = {
-            "prod_mode": prod_mode,
-            "calc_traj": request.POST.get("calc_traj"),
-            "calc_perf": request.POST.get("calc_perf"),
-            "calc_state": request.POST.get("calc_state"),
-            "prod_traj_year_initial": request.POST.get("prod_traj_year_initial"),
-            "prod_traj_year_final": request.POST.get("prod_traj_year_final"),
-            "prod_perf_year_initial": request.POST.get("prod_perf_year_initial"),
-            "prod_perf_year_final": request.POST.get("prod_perf_year_final"),
-            "prod_state_year_bl_start": request.POST.get("prod_state_year_bl_start"),
-            "prod_state_year_bl_end": request.POST.get("prod_state_year_bl_end"),
-            "prod_state_year_tg_start": request.POST.get("prod_state_year_tg_start"),
-            "prod_state_year_tg_end": request.POST.get("prod_state_year_tg_end"),
             "geojsons": json.dumps([json.loads(geom.json)]),
             "crs": CRS,
             "crosses_180th": False,
-            "ndvi_gee_dataset": ndvi_dataset,
-            "climate_gee_dataset": climate_gee_dataset,
             "task_name": task_name,
             "task_notes": request.POST.get("task_notes"),
+            "productivity": {
+                "mode": prod_mode,
+                "asset_productivity": ndvi_dataset,
+                "asset_climate": climate_gee_dataset,
+                "traj_method": "ndvi_trend",  # Default method
+                "traj_year_initial": int(
+                    request.POST.get("prod_traj_year_initial", 2001)
+                ),
+                "traj_year_final": int(request.POST.get("prod_traj_year_final", 2015)),
+                "perf_year_initial": int(
+                    request.POST.get("prod_perf_year_initial", 2001)
+                ),
+                "perf_year_final": int(request.POST.get("prod_perf_year_final", 2015)),
+                "state_year_bl_start": int(
+                    request.POST.get("prod_state_year_bl_start", 2001)
+                ),
+                "state_year_bl_end": int(
+                    request.POST.get("prod_state_year_bl_end", 2012)
+                ),
+                "state_year_tg_start": int(
+                    request.POST.get("prod_state_year_tg_start", 2013)
+                ),
+                "state_year_tg_end": int(
+                    request.POST.get("prod_state_year_tg_end", 2015)
+                ),
+            },
         }
 
         if request.POST.get("trajectory_indicator") is not None:
             current_trajectory_function = trajectory_functions[
                 request.POST.get("trajectory_indicator")
             ]
-            payload.update(current_trajectory_function["params"])
+            # Update the trajectory method in the productivity object
+            payload["productivity"].update(current_trajectory_function["params"])
         return [payload]
 
 
@@ -449,7 +463,7 @@ def process_sub_indicators(request, script):
 
             payload.update(
                 {
-                    "geojsons": [json.loads(geom.json)],
+                    "geojsons": json.dumps([json.loads(geom.json)]),
                     "crs": CRS,
                     "crosses_180th": False,
                     "task_name": task_name,
