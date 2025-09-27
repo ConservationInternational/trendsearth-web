@@ -12,5 +12,4 @@ mkdocs
 openpyxl
 django-crispy-forms
 crispy-bootstrap5
-# te_schemas>=2.1.17  # TODO: Add when available via pip
-# te_algorithms>=2.1.17  # TODO: Add when available via pip
+git+https://github.com/ConservationInternational/trends.earth-schemas.git@master
