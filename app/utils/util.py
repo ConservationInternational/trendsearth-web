@@ -3,8 +3,6 @@ import requests
 import json
 import zipfile
 
-from marshmallow.exceptions import ValidationError
-
 from te_schemas.land_cover import (
     LCLegendNesting,
     LCTransitionMeaningDeg,
@@ -19,8 +17,8 @@ from .logger import log
 def get_trans_matrix():
     """
     Get the default land cover transition matrix.
-    
-    This function is deprecated. Use te_schemas to create your own 
+
+    This function is deprecated. Use te_schemas to create your own
     LCTransitionDefinitionDeg instances with appropriate data.
     The UNCCD default data should be provided by te_schemas package.
     """
@@ -33,7 +31,7 @@ def get_trans_matrix():
 def read_lc_matrix_file(f):
     """
     Read land cover matrix file using te_schemas.
-    
+
     This function is deprecated. Use te_schemas.land_cover.LCTransitionDefinitionDeg.Schema().loads()
     directly with appropriate data from te_schemas package instead of local files.
     """
@@ -82,8 +80,8 @@ def matrix_to_table(matrix=None):
 def table_to_matrix(tdata, matrix=None, nesting=None):
     """
     Convert table data to transition matrix.
-    
-    This function requires proper te_schemas LCTransitionDefinitionDeg and LCLegendNesting 
+
+    This function requires proper te_schemas LCTransitionDefinitionDeg and LCLegendNesting
     instances to be provided. Use te_schemas package to create appropriate instances
     with UNCCD default data.
     """
@@ -97,7 +95,7 @@ def table_to_matrix(tdata, matrix=None, nesting=None):
             "matrix parameter is required. Use te_schemas.land_cover.LCTransitionDefinitionDeg "
             "with appropriate UNCCD default data from te_schemas package."
         )
-    
+
     rows = len(matrix.legend.key)
     cols = len(matrix.legend.key)
 
@@ -134,14 +132,14 @@ def table_to_matrix(tdata, matrix=None, nesting=None):
 def get_lc_nesting(nesting=None):
     """
     Get land cover nesting.
-    
-    This function is deprecated. Use te_schemas to create your own 
+
+    This function is deprecated. Use te_schemas to create your own
     LCLegendNesting instances with appropriate data.
     The UNCCD/ESA default data should be provided by te_schemas package.
     """
     if nesting is not None:
         return LCLegendNesting.Schema().loads(nesting)
-    
+
     raise NotImplementedError(
         "get_lc_nesting() with default data is deprecated. Use te_schemas.land_cover.LCLegendNesting "
         "with appropriate UNCCD/ESA default data from te_schemas package."
@@ -151,7 +149,7 @@ def get_lc_nesting(nesting=None):
 def read_lc_nesting_file(f):
     """
     Read land cover nesting file using te_schemas.
-    
+
     This function is deprecated. Use te_schemas.land_cover.LCLegendNesting.Schema().loads()
     directly with appropriate data from te_schemas package instead of local files.
     """
