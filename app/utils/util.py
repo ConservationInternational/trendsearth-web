@@ -3,8 +3,6 @@ import requests
 import json
 import zipfile
 
-from marshmallow.exceptions import ValidationError
-
 from te_schemas.land_cover import (
     LCLegendNesting,
     LCTransitionMeaningDeg,
@@ -17,25 +15,30 @@ from .logger import log
 
 
 def get_trans_matrix():
-    return read_lc_matrix_file(
-        os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            "data",
-            "land_cover_transition_matrix_unccd.json",
-        )
+    """
+    Get the default land cover transition matrix.
+
+    This function is deprecated. Use te_schemas to create your own
+    LCTransitionDefinitionDeg instances with appropriate data.
+    The UNCCD default data should be provided by te_schemas package.
+    """
+    raise NotImplementedError(
+        "get_trans_matrix() is deprecated. Use te_schemas.land_cover.LCTransitionDefinitionDeg "
+        "with appropriate UNCCD default data from te_schemas package."
     )
 
 
 def read_lc_matrix_file(f):
-    try:
-        with open(f) as matrix_file:
-            matrix = LCTransitionDefinitionDeg.Schema().loads(matrix_file.read())
-    except ValidationError as e:
-        log(f"Error loading land cover transition matrix from {f}: {e}")
-        return None
-    else:
-        log(f"Loaded land cover transition matrix definition from {f}")
-        return matrix
+    """
+    Read land cover matrix file using te_schemas.
+
+    This function is deprecated. Use te_schemas.land_cover.LCTransitionDefinitionDeg.Schema().loads()
+    directly with appropriate data from te_schemas package instead of local files.
+    """
+    raise NotImplementedError(
+        "read_lc_matrix_file() is deprecated. Use te_schemas.land_cover.LCTransitionDefinitionDeg.Schema().loads() "
+        "directly with data from te_schemas package instead of local files."
+    )
 
 
 def matrix_to_table(matrix=None):
@@ -75,10 +78,24 @@ def matrix_to_table(matrix=None):
 
 
 def table_to_matrix(tdata, matrix=None, nesting=None):
+    """
+    Convert table data to transition matrix.
+
+    This function requires proper te_schemas LCTransitionDefinitionDeg and LCLegendNesting
+    instances to be provided. Use te_schemas package to create appropriate instances
+    with UNCCD default data.
+    """
     if nesting is None:
-        nesting = get_lc_nesting()
+        raise ValueError(
+            "nesting parameter is required. Use te_schemas.land_cover.LCLegendNesting "
+            "with appropriate UNCCD/ESA default data from te_schemas package."
+        )
     if matrix is None:
-        matrix = get_trans_matrix()
+        raise ValueError(
+            "matrix parameter is required. Use te_schemas.land_cover.LCTransitionDefinitionDeg "
+            "with appropriate UNCCD default data from te_schemas package."
+        )
+
     rows = len(matrix.legend.key)
     cols = len(matrix.legend.key)
 
@@ -98,11 +115,6 @@ def table_to_matrix(tdata, matrix=None, nesting=None):
                         val
                     )
                 )
-                raise ValueError(
-                    'unrecognized value "{}" when reading transition meaning from cellWidget'.format(
-                        val
-                    )
-                )
             transitions.append(
                 LCTransitionMeaningDeg(
                     nesting.parent.key[row], nesting.parent.key[col], meaning
@@ -118,29 +130,33 @@ def table_to_matrix(tdata, matrix=None, nesting=None):
 
 
 def get_lc_nesting(nesting=None):
-    if nesting is None:
-        nesting = read_lc_nesting_file(
-            os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "data",
-                "land_cover_nesting_unccd_esa.json",
-            )
-        )
-    else:
-        nesting = LCLegendNesting.Schema().loads(nesting)
-    return nesting
+    """
+    Get land cover nesting.
+
+    This function is deprecated. Use te_schemas to create your own
+    LCLegendNesting instances with appropriate data.
+    The UNCCD/ESA default data should be provided by te_schemas package.
+    """
+    if nesting is not None:
+        return LCLegendNesting.Schema().loads(nesting)
+
+    raise NotImplementedError(
+        "get_lc_nesting() with default data is deprecated. Use te_schemas.land_cover.LCLegendNesting "
+        "with appropriate UNCCD/ESA default data from te_schemas package."
+    )
 
 
 def read_lc_nesting_file(f):
-    try:
-        with open(f) as nesting_file:
-            nesting = LCLegendNesting.Schema().loads(nesting_file.read())
-    except ValidationError as e:
-        log(f"Error loading land cover legend nesting definition from {f}: {e}")
+    """
+    Read land cover nesting file using te_schemas.
 
-    else:
-        log("Loaded land cover legend nesting definition from {}".format(f))
-        return nesting
+    This function is deprecated. Use te_schemas.land_cover.LCLegendNesting.Schema().loads()
+    directly with appropriate data from te_schemas package instead of local files.
+    """
+    raise NotImplementedError(
+        "read_lc_nesting_file() is deprecated. Use te_schemas.land_cover.LCLegendNesting.Schema().loads() "
+        "directly with data from te_schemas package instead of local files."
+    )
 
 
 def url_exists(url):
