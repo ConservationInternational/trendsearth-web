@@ -5,27 +5,12 @@ import zipfile
 
 from marshmallow.exceptions import ValidationError
 
-try:
-    from te_schemas.land_cover import (
-        LCLegendNesting,
-        LCTransitionMeaningDeg,
-        LCTransitionDefinitionDeg,
-        LCTransitionMatrixDeg,
-    )
-except ImportError:
-    from .te_schemas_compat import LCTransitionDefinitionDeg
-
-    # Stub for other missing classes
-    class LCLegendNesting:
-        pass
-
-    class LCTransitionMeaningDeg:
-        pass
-
-    class LCTransitionMatrixDeg:
-        pass
-
-
+from te_schemas.land_cover import (
+    LCLegendNesting,
+    LCTransitionMeaningDeg,
+    LCTransitionDefinitionDeg,
+    LCTransitionMatrixDeg,
+)
 from django.conf import settings
 
 from .logger import log

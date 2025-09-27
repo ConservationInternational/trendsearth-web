@@ -13,10 +13,7 @@ from utils import conf
 from account.views import get_charts_data, get_algorithms, get_user_aoi
 from job.views import getjobs
 
-try:
-    from te_schemas.land_cover import LCTransitionDefinitionDeg
-except ImportError:
-    from utils.te_schemas_compat import LCTransitionDefinitionDeg
+from te_schemas.land_cover import LCTransitionDefinitionDeg
 
 
 @login_required

@@ -3,11 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
-try:
-    from te_schemas.productivity import ProductivityMode
-    from te_schemas.land_cover import LCTransitionDefinitionDeg
-except ImportError:
-    from utils.te_schemas_compat import ProductivityMode, LCTransitionDefinitionDeg
+from te_schemas.productivity import ProductivityMode
+from te_schemas.land_cover import LCTransitionDefinitionDeg
 from job.models import Job, Status
 
 from utils.util import table_to_matrix, get_trans_matrix
