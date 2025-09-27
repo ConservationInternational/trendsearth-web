@@ -53,6 +53,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# Add rollbar middleware if token is available
+if os.getenv("ROLLBAR_TOKEN"):
+    MIDDLEWARE.insert(0, "rollbar.contrib.django.middleware.RollbarNotifierMiddleware")
+
 ROOT_URLCONF = "main.urls"
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -245,3 +249,23 @@ MESSAGE_TAGS = {
     messages.WARNING: "alert-warning",
     messages.ERROR: "alert-danger",
 }
+
+# Rollbar configuration
+ROLLBAR_TOKEN = os.getenv("ROLLBAR_TOKEN")
+if ROLLBAR_TOKEN:
+    ROLLBAR = {
+        "access_token": ROLLBAR_TOKEN,
+        "environment": os.getenv("ROLLBAR_ENVIRONMENT", "development"),
+        "root": BASE_DIR,
+        "code_version": "1.0",
+        "capture_username": True,
+        "capture_ip": True,
+        "capture_email": True,
+        "locals": {
+            "enabled": True,
+        },
+        "exception_level_filters": [
+            (KeyboardInterrupt, "ignored"),
+        ],
+        "branch": "main",
+    }

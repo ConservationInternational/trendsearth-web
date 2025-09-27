@@ -12,4 +12,5 @@ mkdocs
 openpyxl
 django-crispy-forms
 crispy-bootstrap5
+rollbar
 git+https://github.com/ConservationInternational/trends.earth-schemas.git@master
