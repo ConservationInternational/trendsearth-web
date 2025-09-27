@@ -41,6 +41,22 @@ services:
             - postgresdb
         networks:
             - ldmp
+
+    # Optional testing service - use: docker-compose run --rm test
+    test:
+        build:
+            context: ./app
+        command: python test_simple.py
+        volumes:
+            - ./app:/home/app
+        env_file:
+            - ./.env
+        depends_on:
+            - postgresdb
+        networks:
+            - ldmp
+        profiles:
+            - testing
           
 volumes:
     static_volume:
