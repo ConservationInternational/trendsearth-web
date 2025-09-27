@@ -12,7 +12,11 @@ from utils.util import matrix_to_table, table_to_matrix
 from utils import conf
 from account.views import get_charts_data, get_algorithms, get_user_aoi
 from job.views import getjobs
-from te_schemas.land_cover import LCTransitionDefinitionDeg
+
+try:
+    from te_schemas.land_cover import LCTransitionDefinitionDeg
+except ImportError:
+    from utils.te_schemas_compat import LCTransitionDefinitionDeg
 
 
 @login_required
