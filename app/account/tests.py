@@ -11,5 +11,5 @@ class ApiTestCase(TestCase):
         username = "robertohuru@gmail.com"
         password = "EJAIFO85P7NXPL6ZG6IJ"
 
-        api = Api(email=username, password=password)
+        Api(email=username, password=password)
         self.assertEqual(1, 0)

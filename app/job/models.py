@@ -1,11 +1,8 @@
-import enum
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
-from django.utils import tree
 from django.utils.timezone import now
 
-from account.models import Aoi, Script
+from account.models import Script
 
 
 class Status(models.Model):

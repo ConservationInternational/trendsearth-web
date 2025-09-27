@@ -610,7 +610,7 @@ class JobManager(object):
                 try:
                     raw_job = json.load(fh)
                     job = Job.deserialize(raw_job)
-                except json.decoder.JSONDecodeError as exc:
+                except json.decoder.JSONDecodeError:
                     if conf.settings_manager.get_value(conf.Setting.DEBUG):
                         log(f"Unable to decode file {job_metadata_path!r} as valid json")
                 except KeyError:
@@ -833,7 +833,6 @@ def get_remote_jobs(
             for raw_job in raw_jobs:
                 try:
                     job = Job.deserialize(raw_job)
-                    has_results = job.results is not None
                     if (job.results is not None and
                             job.results.type == models.JobResult.TIME_SERIES_TABLE):
                         log(

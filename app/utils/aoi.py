@@ -231,7 +231,6 @@ class AOI(object):
         # create the CoordinateTransformation
         coordTrans = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
 
-        union = None
         crs = {'type': 'name', 'properties': {
             'name': 'urn:ogc:def:crs:EPSG::{}'.format(srid)}}
 

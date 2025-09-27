@@ -1,7 +1,5 @@
-import email
 import os
 import json
-import numpy as np
 from datetime import (
     datetime,
     timedelta
@@ -34,7 +32,6 @@ from django.contrib.auth import (
 from django.views.generic.edit import FormView
 from django.contrib import messages
 from django.conf import settings
-from django.db import connection
 
 from osgeo import ogr
 
@@ -353,7 +350,7 @@ def password_reset_view(request):
             data = form.cleaned_data['email']
             try:
                 user = User.objects.get(email=data)
-            except Exception as e:
+            except Exception:
                 messages.add_message(
                     request, messages.ERROR,
                     'User with the email provided does not exist!')
@@ -372,7 +369,7 @@ def password_reset_view(request):
             }
             email = render_to_string(email_template_name, content)
             try:
-                ret = send_mail(
+                send_mail(
                     subject, email, from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email], fail_silently=False)
             except BadHeaderError as e:
@@ -477,7 +474,7 @@ def settings_view(request):
     instance = None
     try:
         instance = models.Settings.objects.get(user=request.user)
-    except Exception as e:
+    except Exception:
         pass
     if request.POST:
         form = forms.SettingsForm(instance=instance, data=request.POST)
@@ -568,7 +565,7 @@ def view_feedback(request):
             }
             email = render_to_string(email_template_name, content)
             try:
-                ret = send_mail(
+                send_mail(
                     subject, html_message=email, message=email,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email], fail_silently=False)
@@ -663,7 +660,7 @@ def ajax_change_aoi(request):
         lat, lon = None, None
         buffer_size = None
         file, uploaded_file_path = None, None
-        aoi_id, geom = None, None
+        geom = None
 
         area_name = request.POST.get("name")
 

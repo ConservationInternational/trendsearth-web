@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.8
+FROM python:3.13
 ENV PYTHONUNBUFFERED=1
 
 # create directory for the app user
@@ -10,7 +10,7 @@ RUN groupadd -g 1000 app && useradd -g app -s /bin/sh app
 
 # install packages
 RUN apt-get update && apt-get install -y \
-	python-dev \
+	python3-dev \
 	libsasl2-dev \
 	libssl-dev
 RUN apt-get update && apt-get install -y \

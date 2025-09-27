@@ -1,6 +1,5 @@
 from datetime import datetime
 import json
-from django import urls
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
@@ -8,16 +7,13 @@ from django.http import (
 )
 from django.shortcuts import render
 from django.template import loader
-from django.urls import reverse_lazy
 from account import models as accountmodels
 from job.models import Job, Layer
-from utils.api import Api
 
 from . import models
 from utils.util import matrix_to_table, table_to_matrix
 from utils import conf
 from account.views import (
-    get_chart_data,
     get_charts_data,
     get_algorithms,
     get_user_aoi)
@@ -354,5 +350,5 @@ def ajax_save_matrix(request):
         )
         return JsonResponse({
             "msg": "Degradation matrix saved successfully!"}, status=200)
-    except Exception as e:
+    except Exception:
         return JsonResponse({"msg": "Error saving the matrix!"}, status=400)

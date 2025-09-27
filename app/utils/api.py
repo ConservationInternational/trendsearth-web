@@ -93,7 +93,7 @@ class Api(object):
             self.login()
 
     def clean_api_response(self, resp):
-        if resp == None:
+        if resp is None:
             # Return 'None' unmodified
             response = resp
         else:
@@ -163,7 +163,7 @@ class Api(object):
             headers = {}
 
         # Only continue if don't need token or if token load was successful
-        if (not use_token) or (not self.token is None):
+        if (not use_token) or (self.token is not None):
             if payload:
                 clean_payload = payload.copy()
                 if 'password' in clean_payload:

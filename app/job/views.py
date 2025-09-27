@@ -1,17 +1,13 @@
-from datetime import datetime
 
-import urllib.request
 import json
-import os
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
-    HttpResponseRedirect,
     JsonResponse
 )
 from django.template import loader
 from te_schemas.productivity import ProductivityMode
-from te_schemas.land_cover import LCTransitionDefinitionDeg, LCLegendNesting
+from te_schemas.land_cover import LCTransitionDefinitionDeg
 from job.models import Job, Status
 
 from utils.util import table_to_matrix, get_trans_matrix
@@ -21,7 +17,7 @@ from core import views
 from utils import conf
 from utils.api import Api
 from utils.logger import log
-from utils.util import url_exists, get_styles
+from utils.util import get_styles
 
 CRS = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
 
@@ -562,7 +558,7 @@ def view_job(request, job_id):
                         "styles": styles[band["name"]]
                     })
                     i += 1
-    except Exception as e:
+    except Exception:
         pass
 
     algo = accountmodels.Algorithm.objects.get(
@@ -607,7 +603,7 @@ def ajax_download_job(request, id):
             for band in ras.values():
                 if isinstance(band, dict):
                     urls.append(band.get("uri"))
-    except Exception as e:
+    except Exception:
         pass
     if len(urls) > 0:
         return JsonResponse({"url": urls[0]}, status=200)
