@@ -6,7 +6,6 @@ from dateutil import tz
 from django.conf import settings
 
 API_URL = settings.API_URL
-API_URL = "https://api.trends.earth"
 TIMEOUT = 200
 
 
