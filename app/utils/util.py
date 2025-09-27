@@ -4,33 +4,56 @@ import json
 import zipfile
 
 from marshmallow.exceptions import ValidationError
+from django.conf import settings
 
-from te_schemas.land_cover import (
-    LCLegendNesting,
+from .schemas_compat import (
+    LCLegendNesting, 
     LCTransitionMeaningDeg,
     LCTransitionDefinitionDeg,
     LCTransitionMatrixDeg,
+    get_default_land_cover_matrix,
+    get_default_land_cover_nesting,
+    TE_SCHEMAS_AVAILABLE,
 )
-from django.conf import settings
-
 from .logger import log
 
 
 def get_trans_matrix():
+    """
+    Get the default land cover transition matrix.
+    
+    Prefer te_schemas built-in data over local files when available.
+    """
+    # First try to get from te_schemas compatibility layer
+    matrix = get_default_land_cover_matrix()
+    if matrix is not None:
+        return matrix
+    
+    # Fallback to old method if compatibility layer fails
     return read_lc_matrix_file(
         os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
-            "data",
+            "data", 
             "land_cover_transition_matrix_unccd.json",
         )
     )
 
 
 def read_lc_matrix_file(f):
+    """
+    Read land cover matrix file using te_schemas when available.
+    
+    This function is deprecated and should be replaced by using
+    te_schemas built-in default matrices.
+    """
     try:
         with open(f) as matrix_file:
-            matrix = LCTransitionDefinitionDeg.Schema().loads(matrix_file.read())
-    except ValidationError as e:
+            if TE_SCHEMAS_AVAILABLE:
+                matrix = LCTransitionDefinitionDeg.Schema().loads(matrix_file.read())
+            else:
+                # Fallback to simple JSON loading if te_schemas not available
+                matrix = json.load(matrix_file)
+    except (ValidationError, json.JSONDecodeError) as e:
         log(f"Error loading land cover transition matrix from {f}: {e}")
         return None
     else:
@@ -118,7 +141,23 @@ def table_to_matrix(tdata, matrix=None, nesting=None):
 
 
 def get_lc_nesting(nesting=None):
+    """
+    Get land cover nesting, preferring te_schemas built-in data.
+    
+    This function is deprecated and should be replaced by using
+    te_schemas built-in default nesting.
+    """
     if nesting is None:
+        # Try to get from te_schemas compatibility layer first
+        default_nesting = get_default_land_cover_nesting()
+        if default_nesting is not None:
+            if TE_SCHEMAS_AVAILABLE:
+                return default_nesting
+            else:
+                # Convert JSON to expected format for backward compatibility
+                return default_nesting
+        
+        # Fallback to local file
         nesting = read_lc_nesting_file(
             os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
@@ -127,17 +166,30 @@ def get_lc_nesting(nesting=None):
             )
         )
     else:
-        nesting = LCLegendNesting.Schema().loads(nesting)
+        if TE_SCHEMAS_AVAILABLE:
+            nesting = LCLegendNesting.Schema().loads(nesting)
+        else:
+            nesting = json.loads(nesting) if isinstance(nesting, str) else nesting
     return nesting
 
 
 def read_lc_nesting_file(f):
+    """
+    Read land cover nesting file using te_schemas when available.
+    
+    This function is deprecated and should be replaced by using
+    te_schemas built-in default nesting.
+    """
     try:
         with open(f) as nesting_file:
-            nesting = LCLegendNesting.Schema().loads(nesting_file.read())
-    except ValidationError as e:
+            if TE_SCHEMAS_AVAILABLE:
+                nesting = LCLegendNesting.Schema().loads(nesting_file.read())
+            else:
+                # Fallback to simple JSON loading if te_schemas not available
+                nesting = json.load(nesting_file)
+    except (ValidationError, json.JSONDecodeError) as e:
         log(f"Error loading land cover legend nesting definition from {f}: {e}")
-
+        return None
     else:
         log("Loaded land cover legend nesting definition from {}".format(f))
         return nesting

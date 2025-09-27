@@ -3,8 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
-from te_schemas.productivity import ProductivityMode
-from te_schemas.land_cover import LCTransitionDefinitionDeg
+from utils.schemas_compat import ProductivityMode, LCTransitionDefinitionDeg
 from job.models import Job, Status
 
 from utils.util import table_to_matrix, get_trans_matrix

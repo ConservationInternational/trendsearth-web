@@ -12,3 +12,5 @@ mkdocs
 openpyxl
 django-crispy-forms
 crispy-bootstrap5
+# te_schemas>=2.1.17  # TODO: Add when available via pip
+# te_algorithms>=2.1.17  # TODO: Add when available via pip
