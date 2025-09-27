@@ -16,9 +16,33 @@ The **trendsearth-web** repository is a Django-based web application that serves
 
 ## Build Instructions
 
-### Prerequisites
+### GitHub Copilot Environment Setup
 
-**Always install these dependencies in order before attempting to build or run the application:**
+**IMPORTANT**: When working in GitHub Copilot's environment, all dependencies are pre-installed via `.github/copilot-setup-steps.yml`. The following are already available:
+
+✅ **Pre-installed Dependencies:**
+- **Python 3.13** - Ready for Django development
+- **GDAL libraries** - System-wide GDAL/OGR with Python bindings installed
+- **PostgreSQL client tools** - For database connections (PostGIS extensions available)
+- **te_schemas** - Trends.Earth schemas package (from GitHub master branch)
+- **te_algorithms** - Trends.Earth algorithms package (from GitHub master branch)
+- **Testing tools** - ruff for code quality checks
+- **All Python requirements** - Django 4.2+ and all app dependencies from `requirements.txt`
+
+✅ **Ecosystem Repositories Available for Reference:**
+- `trends.earth` - QGIS plugin and Google Earth Engine scripts (in `/tmp/trends.earth/`)
+- `trends.earth-api` - Backend API services (in `/tmp/trends.earth-api/`)
+- `trends.earth-api-ui` - Alternative API interface (in `/tmp/trends.earth-api-ui/`)
+
+**In Copilot environment, you can immediately:**
+- Start development without dependency installation
+- Run tests: `cd app/ && python test_simple.py`
+- Check code quality: `ruff check app/ && ruff format --check app/`
+- Reference related repositories in `/tmp/` for cross-ecosystem development
+
+### Manual Prerequisites (for local development outside Copilot)
+
+**Only install these if working outside GitHub Copilot environment:**
 
 1. **Python 3.13** - Required for Django compatibility
 2. **GDAL libraries** - Critical for geospatial operations (will cause Django startup failures if missing)
@@ -26,6 +50,20 @@ The **trendsearth-web** repository is a Django-based web application that serves
 4. **Docker and Docker Compose** - For containerized development (recommended)
 
 ### Environment Setup
+
+**In GitHub Copilot Environment:**
+All dependencies are pre-installed. You can immediately start development and testing:
+
+```bash
+# Verify everything is ready (should pass immediately)
+cd app/
+python test_simple.py
+
+# Check code quality (tools pre-installed)
+ruff check app/ && ruff format --check app/
+```
+
+**For Manual Setup (outside Copilot):**
 
 1. **Dependencies Installation** (takes ~60 seconds):
    ```bash
@@ -162,6 +200,27 @@ cd app/ && python test_simple.py && python -m ruff check app/ && python -m ruff 
 
 ### Development Workflow
 
+**In GitHub Copilot Environment (dependencies pre-installed):**
+
+1. **Making Changes**:
+   - Dependencies are ready: `te_schemas`, `te_algorithms`, Django, GDAL already installed
+   - Run smoke tests: `cd app/ && python test_simple.py` (should work immediately)
+   - Test with ruff: `ruff check app/ && ruff format --check app/` (tools pre-installed)
+
+2. **Database Changes**:
+   ```bash
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+
+3. **Adding New Features**:
+   - Follow Django app structure (models → views → templates → URLs)
+   - Use PostGIS for spatial operations (client tools available)
+   - Follow existing AJAX patterns for frontend interactions
+   - Reference ecosystem repos in `/tmp/` for compatibility checks
+
+**For Manual Development (outside Copilot):**
+
 1. **Making Changes**:
    - Always run smoke tests first: `cd app/ && python test_simple.py`
    - Make minimal changes to existing functionality
@@ -187,6 +246,14 @@ This repository is part of the Trends.Earth ecosystem. When making changes, cons
 - **trends.earth-algorithms**: Processing algorithms
 - **trends.earth-schemas**: Data schema definitions
 - **trends.earth-api-ui**: Alternative API interface
+
+**In GitHub Copilot Environment:**
+These related repositories are pre-cloned and available in `/tmp/` for reference:
+- `/tmp/trends.earth/` - Main QGIS plugin and GEE scripts
+- `/tmp/trends.earth-api/` - Backend API services  
+- `/tmp/trends.earth-api-ui/` - Alternative API interface
+
+This allows you to easily check for code duplication, understand API contracts, and ensure compatibility across the ecosystem.
 
 **Critical**: Always check for code duplication and ensure compatibility across repositories when implementing features that might exist elsewhere in the ecosystem.
 
