@@ -4,6 +4,7 @@ import json
 import zipfile
 
 from marshmallow.exceptions import ValidationError
+
 from te_schemas.land_cover import (
     LCLegendNesting,
     LCTransitionMeaningDeg,
