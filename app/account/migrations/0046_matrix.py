@@ -6,24 +6,42 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('account', '0045_script_deleted'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("account", "0045_script_deleted"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Matrix',
+            name="Matrix",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=100, null=True)),
-                ('content', models.TextField(null=True)),
-                ('date_created', models.DateTimeField(default=django.utils.timezone.now)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='auth.user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=100, null=True)),
+                ("content", models.TextField(null=True)),
+                (
+                    "date_created",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="auth.user",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'lc_matrix',
+                "db_table": "lc_matrix",
             },
         ),
     ]

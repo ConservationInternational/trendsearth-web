@@ -4,26 +4,25 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0020_remove_region_country_delete_country_delete_region'),
+        ("account", "0020_remove_region_country_delete_country_delete_region"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Nation',
-            new_name='Country',
+            old_name="Nation",
+            new_name="Country",
         ),
         migrations.RenameModel(
-            old_name='Province',
-            new_name='Region',
+            old_name="Province",
+            new_name="Region",
         ),
         migrations.AlterModelTable(
-            name='country',
-            table='country',
+            name="country",
+            table="country",
         ),
         migrations.AlterModelTable(
-            name='region',
-            table='region',
+            name="region",
+            table="region",
         ),
     ]

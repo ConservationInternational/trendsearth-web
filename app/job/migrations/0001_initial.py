@@ -6,190 +6,401 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('account', '0007_remove_aoi_country'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("account", "0007_remove_aoi_country"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Band',
+            name="Band",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('metadata', models.JSONField()),
-                ('name', models.CharField(max_length=150)),
-                ('no_data_value', models.FloatField(default=-32768.0)),
-                ('activated', models.BooleanField(default=True)),
-                ('add_to_map', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("metadata", models.JSONField()),
+                ("name", models.CharField(max_length=150)),
+                ("no_data_value", models.FloatField(default=-32768.0)),
+                ("activated", models.BooleanField(default=True)),
+                ("add_to_map", models.BooleanField(default=True)),
             ],
             options={
-                'db_table': 'bands',
+                "db_table": "bands",
             },
         ),
         migrations.CreateModel(
-            name='CloudResults',
+            name="CloudResults",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150)),
-                ('data_path', models.CharField(max_length=150)),
-                ('other_paths', django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=200), size=None), size=None)),
-                ('bands', models.ManyToManyField(to='job.Band')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=150)),
+                ("data_path", models.CharField(max_length=150)),
+                (
+                    "other_paths",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=django.contrib.postgres.fields.ArrayField(
+                            base_field=models.CharField(max_length=200), size=None
+                        ),
+                        size=None,
+                    ),
+                ),
+                ("bands", models.ManyToManyField(to="job.Band")),
             ],
             options={
-                'db_table': 'cloud_results',
+                "db_table": "cloud_results",
             },
         ),
         migrations.CreateModel(
-            name='LocalContext',
+            name="LocalContext",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('base_dir', models.CharField(max_length=150)),
-                ('aoi', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='account.aoi')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("base_dir", models.CharField(max_length=150)),
+                (
+                    "aoi",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="account.aoi"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'local_contents',
+                "db_table": "local_contents",
             },
         ),
         migrations.CreateModel(
-            name='Parameters',
+            name="Parameters",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150)),
-                ('params', models.JSONField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=150)),
+                ("params", models.JSONField()),
             ],
             options={
-                'db_table': 'parameters',
+                "db_table": "parameters",
             },
         ),
         migrations.CreateModel(
-            name='Result',
+            name="Result",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=20)),
-                ('value', models.CharField(max_length=50)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=20)),
+                ("value", models.CharField(max_length=50)),
             ],
             options={
-                'db_table': 'job_results',
+                "db_table": "job_results",
             },
         ),
         migrations.CreateModel(
-            name='ScriptStatus',
+            name="ScriptStatus",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=20)),
-                ('value', models.CharField(max_length=50)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=20)),
+                ("value", models.CharField(max_length=50)),
             ],
             options={
-                'db_table': 'script_statuses',
+                "db_table": "script_statuses",
             },
         ),
         migrations.CreateModel(
-            name='Status',
+            name="Status",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=20)),
-                ('value', models.CharField(max_length=50)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=20)),
+                ("value", models.CharField(max_length=50)),
             ],
             options={
-                'db_table': 'job_statuses',
+                "db_table": "job_statuses",
             },
         ),
         migrations.CreateModel(
-            name='Url',
+            name="Url",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.CharField(max_length=150)),
-                ('md5_hash', models.CharField(max_length=150)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("url", models.CharField(max_length=150)),
+                ("md5_hash", models.CharField(max_length=150)),
             ],
             options={
-                'db_table': 'urls',
+                "db_table": "urls",
             },
         ),
         migrations.CreateModel(
-            name='TimeSeriesTableResult',
+            name="TimeSeriesTableResult",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=150, null=True)),
-                ('table', django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.ArrayField(base_field=models.JSONField(), size=None), size=None)),
-                ('jobresult_type', models.ForeignKey(default=3, on_delete=django.db.models.deletion.CASCADE, to='job.result')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=150, null=True)),
+                (
+                    "table",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=django.contrib.postgres.fields.ArrayField(
+                            base_field=models.JSONField(), size=None
+                        ),
+                        size=None,
+                    ),
+                ),
+                (
+                    "jobresult_type",
+                    models.ForeignKey(
+                        default=3,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="job.result",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'timeseries_tbl_results',
+                "db_table": "timeseries_tbl_results",
             },
         ),
         migrations.CreateModel(
-            name='RemoteScript',
+            name="RemoteScript",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150)),
-                ('slug', models.CharField(max_length=150)),
-                ('description', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_public', models.BooleanField(default=False)),
-                ('status', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='job.scriptstatus')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='auth.user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=150)),
+                ("slug", models.CharField(max_length=150)),
+                ("description", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_public", models.BooleanField(default=False)),
+                (
+                    "status",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="job.scriptstatus",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="auth.user"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'remote_scripts',
+                "db_table": "remote_scripts",
             },
         ),
         migrations.CreateModel(
-            name='Notes',
+            name="Notes",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('note', models.TextField(blank=True, null=True)),
-                ('local_context', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='job.localcontext')),
-                ('parameter', models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, to='job.parameters')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("note", models.TextField(blank=True, null=True)),
+                (
+                    "local_context",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="job.localcontext",
+                    ),
+                ),
+                (
+                    "parameter",
+                    models.ForeignKey(
+                        default=None,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="job.parameters",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'notes',
+                "db_table": "notes",
             },
         ),
         migrations.CreateModel(
-            name='LocalResults',
+            name="LocalResults",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=150, null=True)),
-                ('data_path', models.CharField(max_length=200)),
-                ('other_paths', django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=200), size=None), size=None)),
-                ('bands', models.ManyToManyField(to='job.Band')),
-                ('jobresult_type', models.ForeignKey(default=2, on_delete=django.db.models.deletion.CASCADE, to='job.result')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=150, null=True)),
+                ("data_path", models.CharField(max_length=200)),
+                (
+                    "other_paths",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=django.contrib.postgres.fields.ArrayField(
+                            base_field=models.CharField(max_length=200), size=None
+                        ),
+                        size=None,
+                    ),
+                ),
+                ("bands", models.ManyToManyField(to="job.Band")),
+                (
+                    "jobresult_type",
+                    models.ForeignKey(
+                        default=2,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="job.result",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'local_results',
+                "db_table": "local_results",
             },
         ),
         migrations.CreateModel(
-            name='Job',
+            name="Job",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('progress', models.IntegerField()),
-                ('start_date', models.DateTimeField(auto_now_add=True)),
-                ('end_date', models.DateTimeField(blank=True, null=True)),
-                ('jobLocalResult', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='job.localresults')),
-                ('jobcloudresult', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='job.cloudresults')),
-                ('params', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='job.parameters')),
-                ('script', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='account.executionscript')),
-                ('status', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='job.status')),
-                ('timeseriestableresult', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='job.timeseriestableresult')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='auth.user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("progress", models.IntegerField()),
+                ("start_date", models.DateTimeField(auto_now_add=True)),
+                ("end_date", models.DateTimeField(blank=True, null=True)),
+                (
+                    "jobLocalResult",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="job.localresults",
+                    ),
+                ),
+                (
+                    "jobcloudresult",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="job.cloudresults",
+                    ),
+                ),
+                (
+                    "params",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="job.parameters"
+                    ),
+                ),
+                (
+                    "script",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="account.executionscript",
+                    ),
+                ),
+                (
+                    "status",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="job.status"
+                    ),
+                ),
+                (
+                    "timeseriestableresult",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="job.timeseriestableresult",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="auth.user"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'jobs',
+                "db_table": "jobs",
             },
         ),
         migrations.AddField(
-            model_name='cloudresults',
-            name='jobresult_type',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='job.result'),
+            model_name="cloudresults",
+            name="jobresult_type",
+            field=models.ForeignKey(
+                default=1, on_delete=django.db.models.deletion.CASCADE, to="job.result"
+            ),
         ),
         migrations.AddField(
-            model_name='cloudresults',
-            name='urls',
-            field=models.ManyToManyField(to='job.Url'),
+            model_name="cloudresults",
+            name="urls",
+            field=models.ManyToManyField(to="job.Url"),
         ),
     ]

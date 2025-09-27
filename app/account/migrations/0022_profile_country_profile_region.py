@@ -5,20 +5,31 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0021_rename_nation_country_rename_province_region_and_more'),
+        ("account", "0021_rename_nation_country_rename_province_region_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='country',
-            field=models.ForeignKey(blank=True, default=118, null=True, on_delete=django.db.models.deletion.CASCADE, to='account.country'),
+            model_name="profile",
+            name="country",
+            field=models.ForeignKey(
+                blank=True,
+                default=118,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="account.country",
+            ),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='region',
-            field=models.ForeignKey(blank=True, default=1786, null=True, on_delete=django.db.models.deletion.CASCADE, to='account.region'),
+            model_name="profile",
+            name="region",
+            field=models.ForeignKey(
+                blank=True,
+                default=1786,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="account.region",
+            ),
         ),
     ]

@@ -5,28 +5,40 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('account', '0033_alter_settings_user'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("account", "0033_alter_settings_user"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Layer',
+            name="Layer",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200)),
-                ('layername', models.CharField(default='', max_length=100)),
-                ('url', models.CharField(max_length=200)),
-                ('workspace', models.CharField(default='ldmp', max_length=50)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('is_result', models.BooleanField(default=False)),
-                ('is_visible', models.BooleanField(default=False)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='auth.user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                ("layername", models.CharField(default="", max_length=100)),
+                ("url", models.CharField(max_length=200)),
+                ("workspace", models.CharField(default="ldmp", max_length=50)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("is_result", models.BooleanField(default=False)),
+                ("is_visible", models.BooleanField(default=False)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, to="auth.user"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'layers',
+                "db_table": "layers",
             },
         ),
     ]

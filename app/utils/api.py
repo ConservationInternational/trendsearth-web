@@ -6,7 +6,7 @@ from dateutil import tz
 from django.conf import settings
 
 API_URL = settings.API_URL
-API_URL = 'https://api.trends.earth'
+API_URL = "https://api.trends.earth"
 TIMEOUT = 200
 
 
@@ -21,61 +21,62 @@ class RequestTask(object):
         self.resp = None
 
     def run(self):
-        if self.method == 'get':
-            self.resp = requests.get(self.url, json=self.payload,
-                                     headers=self.headers,
-                                     timeout=TIMEOUT)
-        elif self.method == 'post':
-            self.resp = requests.post(self.url, json=self.payload,
-                                      headers=self.headers,
-                                      timeout=TIMEOUT)
-        elif self.method == 'put':
-            self.resp = requests.put(self.url, json=self.payload,
-                                     headers=self.headers,
-                                     timeout=TIMEOUT)
-        elif self.method == 'delete':
-            self.resp = requests.delete(self.url, json=self.payload,
-                                        headers=self.headers,
-                                        timeout=TIMEOUT)
-        elif self.method == 'patch':
-            self.resp = requests.patch(self.url, json=self.payload,
-                                       headers=self.headers,
-                                       timeout=TIMEOUT)
-        elif self.method == 'head':
-            self.resp = requests.head(self.url, json=self.payload,
-                                      headers=self.headers,
-                                      timeout=TIMEOUT)
+        if self.method == "get":
+            self.resp = requests.get(
+                self.url, json=self.payload, headers=self.headers, timeout=TIMEOUT
+            )
+        elif self.method == "post":
+            self.resp = requests.post(
+                self.url, json=self.payload, headers=self.headers, timeout=TIMEOUT
+            )
+        elif self.method == "put":
+            self.resp = requests.put(
+                self.url, json=self.payload, headers=self.headers, timeout=TIMEOUT
+            )
+        elif self.method == "delete":
+            self.resp = requests.delete(
+                self.url, json=self.payload, headers=self.headers, timeout=TIMEOUT
+            )
+        elif self.method == "patch":
+            self.resp = requests.patch(
+                self.url, json=self.payload, headers=self.headers, timeout=TIMEOUT
+            )
+        elif self.method == "head":
+            self.resp = requests.head(
+                self.url, json=self.payload, headers=self.headers, timeout=TIMEOUT
+            )
         else:
-            self.exception = ValueError(
-                "Unrecognized method: {}".format(self.method))
+            self.exception = ValueError("Unrecognized method: {}".format(self.method))
             return False
 
         return True
 
     def finished(self, result):
         if result:
-            print('Task completed')
+            print("Task completed")
         else:
             if self.exception is None:
-                print(f'API {self.method} not successful - probably cancelled')
+                print(f"API {self.method} not successful - probably cancelled")
 
             elif self.exception is requests.exceptions.ConnectionError:
-                print('''API unable to access server -
-                 check internet connection''')
+                print("""API unable to access server -
+                 check internet connection""")
 
             elif self.exception is requests.exceptions.Timeout:
-                print('''API unable to login - general error''')
+                print("""API unable to login - general error""")
 
             else:
                 print(
-                    f'''API {self.method} not successful -
-                     exception: {self.exception}''')
+                    f"""API {self.method} not successful -
+                     exception: {self.exception}"""
+                )
                 raise self.exception
 
         if self.resp is not None:
             print(
                 f'''API response from "{self.method}" request:
-                 {self.resp.status_code}''')
+                 {self.resp.status_code}'''
+            )
         else:
             print(f'''API response from "{self.method}"
              request was None''')
@@ -83,17 +84,17 @@ class RequestTask(object):
 
 class Api(object):
     def __init__(self, **kwargs):
-        self.url = kwargs.pop('url', None)
-        self.token = kwargs.pop('token', None)
+        self.url = kwargs.pop("url", None)
+        self.token = kwargs.pop("token", None)
 
         if self.token is None:
-            self.email = kwargs.pop('email', None)
-            self.password = kwargs.pop('password', None)
+            self.email = kwargs.pop("email", None)
+            self.password = kwargs.pop("password", None)
 
             self.login()
 
     def clean_api_response(self, resp):
-        if resp == None:
+        if resp is None:
             # Return 'None' unmodified
             response = resp
         else:
@@ -102,11 +103,11 @@ class Api(object):
                 # response
                 response = resp.json().copy()
 
-                if 'password' in response:
-                    response['password'] = '**REMOVED**'
+                if "password" in response:
+                    response["password"] = "**REMOVED**"
 
-                if 'access_token' in response:
-                    response['access_token'] = '**REMOVED**'
+                if "access_token" in response:
+                    response["access_token"] = "**REMOVED**"
                 response = json.dumps(response, indent=4, sort_keys=True)
             except ValueError:
                 response = resp.text
@@ -119,15 +120,15 @@ class Api(object):
             # response
             resp = resp.json()
         except ValueError:
-            return ('Unknown error', None)
-        status = resp.get('status', None)
+            return ("Unknown error", None)
+        status = resp.get("status", None)
 
         if not status:
-            status = resp.get('status_code', 'None')
-        desc = resp.get('detail', None)
+            status = resp.get("status_code", "None")
+        desc = resp.get("detail", None)
 
         if not desc:
-            desc = resp.get('description', 'Generic error')
+            desc = resp.get("description", "Generic error")
 
         return (desc, status)
 
@@ -136,53 +137,50 @@ class Api(object):
             return None
 
         resp = self.call_api(
-            '/auth',
-            method='post',
-            payload={
-                "email": self.email,
-                "password": self.password
-            },
+            "/auth",
+            method="post",
+            payload={"email": self.email, "password": self.password},
         )
         print(resp)
 
         if resp:
             try:
-                self.token = resp.get('access_token', None)
+                self.token = resp.get("access_token", None)
             except KeyError:
                 pass
 
-    def call_api(self, endpoint, method='get', payload=None, use_token=False):
+    def call_api(self, endpoint, method="get", payload=None, use_token=False):
         if use_token:
             if self.token is None:
                 self.login()
             if self.token:
-                headers = {'Authorization': f'Bearer {self.token}'}
+                headers = {"Authorization": f"Bearer {self.token}"}
             else:
                 return
         else:
             headers = {}
 
         # Only continue if don't need token or if token load was successful
-        if (not use_token) or (not self.token is None):
+        if (not use_token) or (self.token is not None):
             if payload:
                 clean_payload = payload.copy()
-                if 'password' in clean_payload:
-                    clean_payload['password'] = '**REMOVED**'
+                if "password" in clean_payload:
+                    clean_payload["password"] = "**REMOVED**"
             else:
                 clean_payload = payload
 
             resp = self._make_request(
-                'Trends.Earth API call',
+                "Trends.Earth API call",
                 url=API_URL + endpoint,
                 method=method,
                 payload=payload,
-                headers=headers
+                headers=headers,
             )
             if resp.status_code == 200:
                 return resp.json()
             else:
                 desc, status = self.get_error_status(resp)
-                print("Error", u"Error: {} (status {}).".format(desc, status))
+                print("Error", "Error: {} (status {}).".format(desc, status))
 
     def _make_request(self, description, **kwargs):
         api_task = RequestTask(description, **kwargs)
@@ -191,11 +189,7 @@ class Api(object):
 
     def get_header(self, url):
         resp = self._make_request(
-            'Get head',
-            url=url,
-            method='head',
-            payload=None,
-            headers=None
+            "Get head", url=url, method="head", payload=None, headers=None
         )
 
         if resp is not None:
@@ -203,42 +197,42 @@ class Api(object):
                 return resp.headers
             else:
                 desc, status = self.get_error_status(resp)
-                print("Error", u"Error: {} (status {}).".format(desc, status))
+                print("Error", "Error: {} (status {}).".format(desc, status))
 
-    def get_user(self, email='me'):
+    def get_user(self, email="me"):
         resp = self.call_api(
-            u'/api/v1/user/{}'.format(quote_plus(email)), use_token=True)
+            "/api/v1/user/{}".format(quote_plus(email)), use_token=True
+        )
         if resp:
-            return resp['data']
+            return resp["data"]
 
     def get_users(self):
-        resp = self.call_api(u'/api/v1/user', use_token=True)
+        resp = self.call_api("/api/v1/user", use_token=True)
         if resp:
-            return resp['data']
+            return resp["data"]
 
     def delete_user(self, user):
-        resp = self.call_api(
-            u'/api/v1/user/' + user, method="delete", use_token=True)
+        resp = self.call_api("/api/v1/user/" + user, method="delete", use_token=True)
         if resp:
-            return resp['data']
+            return resp["data"]
 
     def delete_profile(self):
-        resp = self.call_api(
-            u'/api/v1/user/me', method="delete", use_token=True)
+        resp = self.call_api("/api/v1/user/me", method="delete", use_token=True)
         if resp:
-            return resp['data']
+            return resp["data"]
 
     def get_execution(self, execution, exclude=""):
         """
-                    Get all executions
-                    :param id: Script ID
-                    :return:
-                """
-        resp = self.call_api(u'/api/v1/execution/' +
-                             execution + exclude, 'get', use_token=True)
+        Get all executions
+        :param id: Script ID
+        :return:
+        """
+        resp = self.call_api(
+            "/api/v1/execution/" + execution + exclude, "get", use_token=True
+        )
 
         if resp:
-            return resp['data']
+            return resp["data"]
         else:
             return None
 
@@ -249,74 +243,89 @@ class Api(object):
         :param date:
         :return:
         """
-        query = ['include=script']
+        query = ["include=script"]
 
         query = []
 
         if id:
-            query.append(u'user_id={}'.format(quote_plus(id)))
+            query.append("user_id={}".format(quote_plus(id)))
 
         # if date:
         #     query.append(u'updated_at={}'.format(date))
         query = "?" + "&".join(query)
 
         resp = self.call_api(
-            u'/api/v1/execution{}'.format(query), method='get', use_token=True)
+            "/api/v1/execution{}".format(query), method="get", use_token=True
+        )
 
         if not resp:
             return None
         else:
             # do import here to avoid circular import
-            data = resp['data']
+            data = resp["data"]
             # Sort responses in descending order using start time by default
-            data = sorted(data, key=lambda job_dict: round(
-                datetime.strptime(job_dict['start_date'], '%Y-%m-%dT%H:%M:%S.%f').timestamp()), reverse=True)
+            data = sorted(
+                data,
+                key=lambda job_dict: round(
+                    datetime.strptime(
+                        job_dict["start_date"], "%Y-%m-%dT%H:%M:%S.%f"
+                    ).timestamp()
+                ),
+                reverse=True,
+            )
             # Convert start/end dates into datatime objects in local time zone
 
             for job_dict in data:
                 start_date = datetime.strptime(
-                    job_dict['start_date'], '%Y-%m-%dT%H:%M:%S.%f')
+                    job_dict["start_date"], "%Y-%m-%dT%H:%M:%S.%f"
+                )
                 start_date = start_date.replace(tzinfo=tz.tzutc())
                 start_date = start_date.astimezone(tz.tzlocal())
-                job_dict['start_date'] = start_date
+                job_dict["start_date"] = start_date
                 end_date = datetime.strptime(
-                    job_dict['end_date'], '%Y-%m-%dT%H:%M:%S.%f')
+                    job_dict["end_date"], "%Y-%m-%dT%H:%M:%S.%f"
+                )
                 end_date = end_date.replace(tzinfo=tz.tzutc())
                 end_date = end_date.astimezone(tz.tzlocal())
-                job_dict['end_date'] = end_date
+                job_dict["end_date"] = end_date
 
             return data
 
     def get_execution_log(self, id):
         """
-            :param id: Script ID
-            :return:
+        :param id: Script ID
+        :return:
         """
         resp = self.call_api(
-            u'/api/v1/execution/{}/log?start=2021-01-17'.format(quote_plus(id)), 'get', use_token=True)
+            "/api/v1/execution/{}/log?start=2021-01-17".format(quote_plus(id)),
+            "get",
+            use_token=True,
+        )
 
         if resp:
-            return resp['data']
+            return resp["data"]
         else:
             return None
 
     def get_executions(self, exclude=""):
         """
-            Get all executions
-            :param id: Script ID
-            :return:
+        Get all executions
+        :param id: Script ID
+        :return:
         """
-        resp = self.call_api(u'/api/v1/execution' +
-                             exclude, 'get', use_token=True)
+        resp = self.call_api("/api/v1/execution" + exclude, "get", use_token=True)
 
         if resp:
-            return resp['data']
+            return resp["data"]
         else:
             return None
 
     def get_execution_result(self, execution):
-        resp = self.call_api(u'/api/v1/execution/' + execution +
-                             "/download-results", 'get', use_token=True)
+        resp = self.call_api(
+            "/api/v1/execution/" + execution + "/download-results",
+            "get",
+            use_token=True,
+        )
         if resp:
             return resp
         else:
@@ -330,58 +339,74 @@ class Api(object):
         """
         if id:
             resp = self.call_api(
-                u'/api/v1/script/{}'.format(quote_plus(id)), 'get', use_token=True)
+                "/api/v1/script/{}".format(quote_plus(id)), "get", use_token=True
+            )
         else:
-            resp = self.call_api(u'/api/v1/script', 'get', use_token=True)
+            resp = self.call_api("/api/v1/script", "get", use_token=True)
 
         if resp:
-            return resp['data']
+            return resp["data"]
         else:
             return None
 
     def get_script_log(self, id):
         """
-            :param id: Script ID
-            :return:
+        :param id: Script ID
+        :return:
         """
         resp = self.call_api(
-            u'/api/v1/script/{}/log?start=2021-01-17'.format(quote_plus(id)), 'get', use_token=True)
+            "/api/v1/script/{}/log?start=2021-01-17".format(quote_plus(id)),
+            "get",
+            use_token=True,
+        )
 
         if resp:
-            return resp['data']
+            return resp["data"]
         else:
             return None
 
-    def register(self, email, password, name, organization, country,
-                 role="USER",
-                 first_name="",
-                 last_name="",
-                 is_in_mailing_list=False,
-                 is_plugin_user=False):
-        payload = {"email": email,
-                   "password": password,
-                   "name": name,
-                   "institution": organization,
-                   "country": country,
-                   "role": role,
-                   "first_name": first_name,
-                   "last_name": last_name,
-                   "is_in_mailing_list": is_in_mailing_list,
-                   "is_plugin_user": is_plugin_user
-                   }
+    def register(
+        self,
+        email,
+        password,
+        name,
+        organization,
+        country,
+        role="USER",
+        first_name="",
+        last_name="",
+        is_in_mailing_list=False,
+        is_plugin_user=False,
+    ):
+        payload = {
+            "email": email,
+            "password": password,
+            "name": name,
+            "institution": organization,
+            "country": country,
+            "role": role,
+            "first_name": first_name,
+            "last_name": last_name,
+            "is_in_mailing_list": is_in_mailing_list,
+            "is_plugin_user": is_plugin_user,
+        }
 
-        return self.call_api('/api/v1/user', method='post', payload=payload)
+        return self.call_api("/api/v1/user", method="post", payload=payload)
 
     def update_user(self, email, name, organization, country):
-        payload = {"email": email,
-                   "name": name,
-                   "institution": organization,
-                   "country": country}
+        payload = {
+            "email": email,
+            "name": name,
+            "institution": organization,
+            "country": country,
+        }
 
-        return self.call_api('/api/v1/user/me', 'patch', payload, use_token=True)
+        return self.call_api("/api/v1/user/me", "patch", payload, use_token=True)
 
     def send_mail(self, toemail, msg):
-        payload = {"recipients": toemail,
-                   "html": msg, }
+        payload = {
+            "recipients": toemail,
+            "html": msg,
+        }
 
-        return self.call_api('/api/v1/email', 'post', payload, use_token=True)
+        return self.call_api("/api/v1/email", "post", payload, use_token=True)

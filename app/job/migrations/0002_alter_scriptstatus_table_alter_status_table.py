@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0001_initial'),
+        ("job", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelTable(
-            name='scriptstatus',
-            table='script_status',
+            name="scriptstatus",
+            table="script_status",
         ),
         migrations.AlterModelTable(
-            name='status',
-            table='job_status',
+            name="status",
+            table="job_status",
         ),
     ]

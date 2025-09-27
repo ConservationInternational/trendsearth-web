@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0006_alter_job_params_alter_job_results'),
+        ("job", "0006_alter_job_params_alter_job_results"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='job',
-            name='params',
+            model_name="job",
+            name="params",
             field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='results',
+            model_name="job",
+            name="results",
             field=models.TextField(),
         ),
     ]

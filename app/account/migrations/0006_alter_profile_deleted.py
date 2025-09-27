@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0005_alter_algorithm_parent'),
+        ("account", "0005_alter_algorithm_parent"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='profile',
-            name='deleted',
+            model_name="profile",
+            name="deleted",
             field=models.BooleanField(blank=True, default=False, null=True),
         ),
     ]

@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0021_job_task_name_job_task_notes'),
+        ("job", "0021_job_task_name_job_task_notes"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='job',
-            options={'ordering': ('-start_date',)},
+            name="job",
+            options={"ordering": ("-start_date",)},
         ),
     ]

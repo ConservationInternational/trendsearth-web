@@ -4,92 +4,91 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0014_alter_job_start_date'),
+        ("job", "0014_alter_job_start_date"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='cloudresults',
-            name='bands',
+            model_name="cloudresults",
+            name="bands",
         ),
         migrations.RemoveField(
-            model_name='cloudresults',
-            name='jobresult_type',
+            model_name="cloudresults",
+            name="jobresult_type",
         ),
         migrations.RemoveField(
-            model_name='cloudresults',
-            name='urls',
+            model_name="cloudresults",
+            name="urls",
         ),
         migrations.RemoveField(
-            model_name='localcontext',
-            name='aoi',
+            model_name="localcontext",
+            name="aoi",
         ),
         migrations.RemoveField(
-            model_name='localresults',
-            name='bands',
+            model_name="localresults",
+            name="bands",
         ),
         migrations.RemoveField(
-            model_name='localresults',
-            name='jobresult_type',
+            model_name="localresults",
+            name="jobresult_type",
         ),
         migrations.RemoveField(
-            model_name='notes',
-            name='local_context',
+            model_name="notes",
+            name="local_context",
         ),
         migrations.RemoveField(
-            model_name='notes',
-            name='parameter',
+            model_name="notes",
+            name="parameter",
         ),
         migrations.RemoveField(
-            model_name='remotescript',
-            name='status',
+            model_name="remotescript",
+            name="status",
         ),
         migrations.RemoveField(
-            model_name='remotescript',
-            name='user',
+            model_name="remotescript",
+            name="user",
         ),
         migrations.RemoveField(
-            model_name='timeseriestableresult',
-            name='jobresult_type',
+            model_name="timeseriestableresult",
+            name="jobresult_type",
         ),
         migrations.RemoveField(
-            model_name='job',
-            name='params',
+            model_name="job",
+            name="params",
         ),
         migrations.RemoveField(
-            model_name='job',
-            name='results',
+            model_name="job",
+            name="results",
         ),
         migrations.DeleteModel(
-            name='Band',
+            name="Band",
         ),
         migrations.DeleteModel(
-            name='CloudResults',
+            name="CloudResults",
         ),
         migrations.DeleteModel(
-            name='LocalContext',
+            name="LocalContext",
         ),
         migrations.DeleteModel(
-            name='LocalResults',
+            name="LocalResults",
         ),
         migrations.DeleteModel(
-            name='Notes',
+            name="Notes",
         ),
         migrations.DeleteModel(
-            name='Parameters',
+            name="Parameters",
         ),
         migrations.DeleteModel(
-            name='RemoteScript',
+            name="RemoteScript",
         ),
         migrations.DeleteModel(
-            name='Result',
+            name="Result",
         ),
         migrations.DeleteModel(
-            name='TimeSeriesTableResult',
+            name="TimeSeriesTableResult",
         ),
         migrations.DeleteModel(
-            name='Url',
+            name="Url",
         ),
     ]

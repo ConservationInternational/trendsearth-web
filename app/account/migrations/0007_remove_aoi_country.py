@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0006_alter_profile_deleted'),
+        ("account", "0006_alter_profile_deleted"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='aoi',
-            name='country',
+            model_name="aoi",
+            name="country",
         ),
     ]

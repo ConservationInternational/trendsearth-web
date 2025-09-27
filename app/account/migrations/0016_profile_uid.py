@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0015_alter_aoi_geom'),
+        ("account", "0015_alter_aoi_geom"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='uid',
-            field=models.CharField(blank='', default='', max_length=200, null=True),
+            model_name="profile",
+            name="uid",
+            field=models.CharField(blank="", default="", max_length=200, null=True),
         ),
     ]

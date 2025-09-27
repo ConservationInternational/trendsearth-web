@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0008_remove_job_params'),
+        ("job", "0008_remove_job_params"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='params',
+            model_name="job",
+            name="params",
             field=models.JSONField(default={}),
             preserve_default=False,
         ),

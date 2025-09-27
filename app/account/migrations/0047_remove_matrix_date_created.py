@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0046_matrix'),
+        ("account", "0046_matrix"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='matrix',
-            name='date_created',
+            model_name="matrix",
+            name="date_created",
         ),
     ]

@@ -1,11 +1,8 @@
-import enum
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
-from django.utils import tree
 from django.utils.timezone import now
 
-from account.models import Aoi, Script
+from account.models import Script
 
 
 class Status(models.Model):
@@ -18,8 +15,7 @@ class Status(models.Model):
 
 class Job(models.Model):
     progress = models.IntegerField()
-    script = models.ForeignKey(
-        Script, on_delete=models.CASCADE, null=True)
+    script = models.ForeignKey(Script, on_delete=models.CASCADE, null=True)
     status = models.ForeignKey(Status, on_delete=models.CASCADE)
     start_date = models.DateTimeField(null=True, blank=True, default=now)
     end_date = models.DateTimeField(null=True, blank=True)
@@ -32,7 +28,7 @@ class Job(models.Model):
 
     class Meta:
         db_table = "jobs"
-        ordering = ('-start_date',)
+        ordering = ("-start_date",)
 
 
 class Layer(models.Model):
@@ -44,8 +40,7 @@ class Layer(models.Model):
     is_result = models.BooleanField(default=False)
     is_visible = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    job = models.OneToOneField(Job, on_delete=models.CASCADE,
-                               null=True)
+    job = models.OneToOneField(Job, on_delete=models.CASCADE, null=True)
     is_base = models.BooleanField(default=False)
 
     class Meta:

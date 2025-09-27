@@ -4,23 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0038_remove_executionscript_run_mode'),
+        ("account", "0038_remove_executionscript_run_mode"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='executionscript',
-            name='parametrization_dialogue',
+            model_name="executionscript",
+            name="parametrization_dialogue",
             field=models.TextField(default=None, null=True, blank=True),
         ),
         migrations.AlterField(
-            model_name='algorithm',
-            name='scripts',
-            field=models.ManyToManyField(to='account.ExecutionScript'),
+            model_name="algorithm",
+            name="scripts",
+            field=models.ManyToManyField(to="account.ExecutionScript"),
         ),
         migrations.DeleteModel(
-            name='Script',
+            name="Script",
         ),
     ]

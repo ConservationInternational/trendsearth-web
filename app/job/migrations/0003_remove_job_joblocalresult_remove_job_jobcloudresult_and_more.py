@@ -4,37 +4,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0002_alter_scriptstatus_table_alter_status_table'),
+        ("job", "0002_alter_scriptstatus_table_alter_status_table"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='job',
-            name='jobLocalResult',
+            model_name="job",
+            name="jobLocalResult",
         ),
         migrations.RemoveField(
-            model_name='job',
-            name='jobcloudresult',
+            model_name="job",
+            name="jobcloudresult",
         ),
         migrations.RemoveField(
-            model_name='job',
-            name='timeseriestableresult',
+            model_name="job",
+            name="timeseriestableresult",
         ),
         migrations.AddField(
-            model_name='job',
-            name='results',
+            model_name="job",
+            name="results",
             field=models.JSONField(default={}),
         ),
         migrations.AddField(
-            model_name='job',
-            name='uid',
+            model_name="job",
+            name="uid",
             field=models.CharField(blank=True, max_length=200, null=True),
         ),
         migrations.AlterField(
-            model_name='job',
-            name='params',
+            model_name="job",
+            name="params",
             field=models.TextField(),
         ),
     ]
