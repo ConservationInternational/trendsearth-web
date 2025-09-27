@@ -4,34 +4,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0008_alter_profile_country_alter_profile_organization_and_more'),
+        ("account", "0008_alter_profile_country_alter_profile_organization_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Nation',
+            name="Nation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(blank=True, max_length=5, null=True)),
-                ('name', models.CharField(max_length=100)),
-                ('crs', models.IntegerField()),
-                ('wrap', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(blank=True, max_length=5, null=True)),
+                ("name", models.CharField(max_length=100)),
+                ("crs", models.IntegerField()),
+                ("wrap", models.BooleanField(default=False)),
             ],
             options={
-                'db_table': 'countries',
+                "db_table": "countries",
             },
         ),
         migrations.CreateModel(
-            name='Province',
+            name="Province",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(blank=True, max_length=50, null=True)),
-                ('name', models.CharField(max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(blank=True, max_length=50, null=True)),
+                ("name", models.CharField(max_length=100)),
             ],
             options={
-                'db_table': 'regions',
+                "db_table": "regions",
             },
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0041_rename_executionscript_script_alter_script_table'),
+        ("account", "0041_rename_executionscript_script_alter_script_table"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='algorithm',
-            old_name='scripts',
-            new_name='script',
+            model_name="algorithm",
+            old_name="scripts",
+            new_name="script",
         ),
     ]

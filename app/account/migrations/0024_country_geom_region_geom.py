@@ -5,20 +5,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0023_alter_profile_country_alter_profile_region'),
+        ("account", "0023_alter_profile_country_alter_profile_region"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='country',
-            name='geom',
-            field=django.contrib.gis.db.models.fields.PolygonField(null=True, srid=4326),
+            model_name="country",
+            name="geom",
+            field=django.contrib.gis.db.models.fields.PolygonField(
+                null=True, srid=4326
+            ),
         ),
         migrations.AddField(
-            model_name='region',
-            name='geom',
-            field=django.contrib.gis.db.models.fields.PolygonField(null=True, srid=4326),
+            model_name="region",
+            name="geom",
+            field=django.contrib.gis.db.models.fields.PolygonField(
+                null=True, srid=4326
+            ),
         ),
     ]

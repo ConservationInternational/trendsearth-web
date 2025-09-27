@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0037_alter_feedback_user'),
+        ("account", "0037_alter_feedback_user"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='executionscript',
-            name='run_mode',
+            model_name="executionscript",
+            name="run_mode",
         ),
     ]

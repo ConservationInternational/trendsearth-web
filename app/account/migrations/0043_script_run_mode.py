@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0042_rename_scripts_algorithm_script'),
+        ("account", "0042_rename_scripts_algorithm_script"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='script',
-            name='run_mode',
+            model_name="script",
+            name="run_mode",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
     ]

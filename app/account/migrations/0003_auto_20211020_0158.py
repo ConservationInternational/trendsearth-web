@@ -5,18 +5,19 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0002_algorithm_uid'),
+        ("account", "0002_algorithm_uid"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='algorithm',
-            name='parent',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='account.algorithm'),
+            model_name="algorithm",
+            name="parent",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.DO_NOTHING, to="account.algorithm"
+            ),
         ),
         migrations.DeleteModel(
-            name='AlgorithmGroup',
+            name="AlgorithmGroup",
         ),
     ]

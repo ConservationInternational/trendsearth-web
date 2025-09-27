@@ -3,7 +3,6 @@ from django.test import TestCase
 # Create your tests here.
 
 from utils.api import Api
-from utils.conf import *
 
 
 class ApiTestCase(TestCase):

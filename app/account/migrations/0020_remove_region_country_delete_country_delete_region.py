@@ -4,20 +4,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0019_remove_profile_country_remove_profile_region'),
+        ("account", "0019_remove_profile_country_remove_profile_region"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='region',
-            name='country',
+            model_name="region",
+            name="country",
         ),
         migrations.DeleteModel(
-            name='Country',
+            name="Country",
         ),
         migrations.DeleteModel(
-            name='Region',
+            name="Region",
         ),
     ]

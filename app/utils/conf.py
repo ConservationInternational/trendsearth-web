@@ -74,7 +74,8 @@ class SettingsManager:
         Setting.BINARIES_DIR: str(Path.home()),
         Setting.BASE_DIR: str(Path.home() / _base_data_path),
         Setting.DEFINITIONS_DIRECTORY: str(
-            Path.home() / _base_data_path / "definitions"),
+            Path.home() / _base_data_path / "definitions"
+        ),
         Setting.CUSTOM_CRS_ENABLED: False,
         Setting.CUSTOM_CRS: "epsg:4326",
         Setting.POLL_REMOTE: True,
@@ -112,8 +113,8 @@ class SettingsManager:
         else:
             type_ = type(self.DEFAULT_SETTINGS[key])
             result = self._settings.value(
-                f"{self.base_path}/{key.value}", self.DEFAULT_SETTINGS[key],
-                type=type_)
+                f"{self.base_path}/{key.value}", self.DEFAULT_SETTINGS[key], type=type_
+            )
 
         return result
 
@@ -122,15 +123,14 @@ class SettingsManager:
 
     def _initialize_settings(self):
         for setting, default_value in self.DEFAULT_SETTINGS.items():
-            current_value = self._settings.value(
-                f"{self.base_path}/{setting.value}")
+            current_value = self._settings.value(f"{self.base_path}/{setting.value}")
 
             if current_value is None:
                 self.write_value(setting, self.DEFAULT_SETTINGS[setting])
 
 
 def _load_script_config(
-        script_config: typing.Dict
+    script_config: typing.Dict,
 ) -> typing.Dict[str, algorithm_models.Script]:
     result = {}
 
@@ -142,8 +142,7 @@ def _load_script_config(
             algo.version = raw.pop("version", "")
             algo.description = raw.pop("description", "")
             algo.name_readable = raw.pop("name_readable", "")
-            algo.run_mode = algorithm_models.AlgorithmRunMode(
-                code=raw.pop("run_mode"))
+            algo.run_mode = algorithm_models.AlgorithmRunMode(code=raw.pop("run_mode"))
 
             algo.save()
             result[algo.name] = algo
@@ -154,7 +153,7 @@ def _load_script_config(
 
 
 def _load_algorithm_config(
-        algorithm_config: typing.List[typing.Dict],
+    algorithm_config: typing.List[typing.Dict],
 ) -> algorithm_models.Algorithm:
     top_level_groups = []
 
@@ -168,26 +167,19 @@ def _load_algorithm_config(
         top_level_groups.append(raw_top_level_group)
 
     return algorithm_models.Algorithm(
-        name="root",
-        name_details="root_details",
-        parent=None,
-        groups=top_level_groups
+        name="root", name_details="root_details", parent=None, groups=top_level_groups
     )
 
 
 datasets_file = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    'data',
-    'gee_datasets.json'
+    os.path.dirname(os.path.realpath(__file__)), "data", "gee_datasets.json"
 )
 with open(datasets_file, encoding="utf8") as f:
     REMOTE_DATASETS = json.load(f)
 
 
 script_file = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    'data',
-    'scripts.json'
+    os.path.dirname(os.path.realpath(__file__)), "data", "scripts.json"
 )
 with open(script_file, encoding="utf8") as f:
     _SCRIPT_CONFIG = json.load(f)

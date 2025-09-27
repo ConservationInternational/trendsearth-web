@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0001_initial'),
+        ("core", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='aggregationinputclass',
-            name='name_long',
+            model_name="aggregationinputclass",
+            name="name_long",
             field=models.CharField(blank=True, max_length=150, null=True),
         ),
         migrations.AlterField(
-            model_name='aggregationinputclass',
-            name='name_short',
+            model_name="aggregationinputclass",
+            name="name_short",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
         migrations.AlterField(
-            model_name='aggregationoutputclass',
-            name='name_long',
+            model_name="aggregationoutputclass",
+            name="name_long",
             field=models.CharField(blank=True, max_length=150, null=True),
         ),
         migrations.AlterField(
-            model_name='aggregationoutputclass',
-            name='name_short',
+            model_name="aggregationoutputclass",
+            name="name_short",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
     ]

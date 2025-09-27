@@ -26,14 +26,13 @@ class AggregationOutputClass(models.Model):
 
 
 class UserAggregationClass(models.Model):
-    user = models.ForeignKey(
-        User, null=True, blank=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     inputclass = models.ForeignKey(
-        AggregationInputClass, null=False, blank=False,
-        on_delete=models.CASCADE)
+        AggregationInputClass, null=False, blank=False, on_delete=models.CASCADE
+    )
     outputclass = models.ForeignKey(
-        AggregationOutputClass, null=False, blank=False,
-        on_delete=models.CASCADE)
+        AggregationOutputClass, null=False, blank=False, on_delete=models.CASCADE
+    )
 
     class Meta:
         db_table = "user_aggregation_class"

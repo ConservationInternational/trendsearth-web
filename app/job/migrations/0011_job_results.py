@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0010_remove_job_results'),
+        ("job", "0010_remove_job_results"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='results',
+            model_name="job",
+            name="results",
             field=models.JSONField(default={}),
             preserve_default=False,
         ),

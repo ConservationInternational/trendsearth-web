@@ -4,20 +4,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0039_executionscript_parametrization_dialogue_and_more'),
+        ("account", "0039_executionscript_parametrization_dialogue_and_more"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='AlgorithmRunMode',
+            name="AlgorithmRunMode",
         ),
         migrations.RemoveField(
-            model_name='algorithm',
-            name='item_type',
+            model_name="algorithm",
+            name="item_type",
         ),
         migrations.DeleteModel(
-            name='AlgorithmNodeType',
+            name="AlgorithmNodeType",
         ),
     ]

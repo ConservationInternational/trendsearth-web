@@ -5,16 +5,19 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('account', '0032_alter_settings_buffer_checked_and_more'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("account", "0032_alter_settings_buffer_checked_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='settings',
-            name='user',
-            field=models.OneToOneField(default=None, on_delete=django.db.models.deletion.CASCADE, to='auth.user'),
+            model_name="settings",
+            name="user",
+            field=models.OneToOneField(
+                default=None,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="auth.user",
+            ),
         ),
     ]

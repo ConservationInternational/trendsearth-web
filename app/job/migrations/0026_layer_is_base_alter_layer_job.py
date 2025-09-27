@@ -5,20 +5,21 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0025_alter_layer_job'),
+        ("job", "0025_alter_layer_job"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='layer',
-            name='is_base',
+            model_name="layer",
+            name="is_base",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='layer',
-            name='job',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to='job.job'),
+            model_name="layer",
+            name="job",
+            field=models.OneToOneField(
+                null=True, on_delete=django.db.models.deletion.CASCADE, to="job.job"
+            ),
         ),
     ]

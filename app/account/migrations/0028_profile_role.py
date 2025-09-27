@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0027_profile_photo_alter_country_code'),
+        ("account", "0027_profile_photo_alter_country_code"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='role',
-            field=models.CharField(blank=True, default='USER', max_length=50, null=True),
+            model_name="profile",
+            name="role",
+            field=models.CharField(
+                blank=True, default="USER", max_length=50, null=True
+            ),
         ),
     ]

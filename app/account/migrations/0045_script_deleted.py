@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0044_remove_script_deleted'),
+        ("account", "0044_remove_script_deleted"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='script',
-            name='deleted',
+            model_name="script",
+            name="deleted",
             field=models.BooleanField(default=False),
         ),
     ]

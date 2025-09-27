@@ -4,44 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0030_profile_role'),
+        ("account", "0030_profile_role"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='settings',
-            name='name',
+            model_name="settings",
+            name="name",
         ),
         migrations.AddField(
-            model_name='settings',
-            name='buffer_checked',
+            model_name="settings",
+            name="buffer_checked",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='settings',
-            name='buffer_size',
+            model_name="settings",
+            name="buffer_size",
             field=models.FloatField(default=10.0),
         ),
         migrations.AddField(
-            model_name='settings',
-            name='can_email_result',
+            model_name="settings",
+            name="can_email_result",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='settings',
-            name='data_age_limit',
+            model_name="settings",
+            name="data_age_limit",
             field=models.IntegerField(default=15),
         ),
         migrations.AddField(
-            model_name='settings',
-            name='in_mail_list',
+            model_name="settings",
+            name="in_mail_list",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='settings',
-            name='update_frequency_milliseconds',
+            model_name="settings",
+            name="update_frequency_milliseconds",
             field=models.IntegerField(default=10000),
         ),
     ]

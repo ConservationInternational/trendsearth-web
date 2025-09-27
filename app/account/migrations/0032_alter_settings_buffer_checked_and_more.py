@@ -4,40 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0031_remove_settings_name_settings_buffer_checked_and_more'),
+        ("account", "0031_remove_settings_name_settings_buffer_checked_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='settings',
-            name='buffer_checked',
+            model_name="settings",
+            name="buffer_checked",
             field=models.BooleanField(blank=True, default=True, null=True),
         ),
         migrations.AlterField(
-            model_name='settings',
-            name='buffer_size',
+            model_name="settings",
+            name="buffer_size",
             field=models.FloatField(blank=True, default=10.0, null=True),
         ),
         migrations.AlterField(
-            model_name='settings',
-            name='can_email_result',
+            model_name="settings",
+            name="can_email_result",
             field=models.BooleanField(blank=True, default=True, null=True),
         ),
         migrations.AlterField(
-            model_name='settings',
-            name='data_age_limit',
+            model_name="settings",
+            name="data_age_limit",
             field=models.IntegerField(blank=True, default=15, null=True),
         ),
         migrations.AlterField(
-            model_name='settings',
-            name='in_mail_list',
+            model_name="settings",
+            name="in_mail_list",
             field=models.BooleanField(blank=True, default=False, null=True),
         ),
         migrations.AlterField(
-            model_name='settings',
-            name='update_frequency_milliseconds',
+            model_name="settings",
+            name="update_frequency_milliseconds",
             field=models.IntegerField(blank=True, default=10000, null=True),
         ),
     ]

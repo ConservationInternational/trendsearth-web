@@ -1,10 +1,7 @@
 from datetime import datetime
 import json
 from django.contrib.auth.decorators import login_required
-from django.http import (
-    HttpResponse,
-    JsonResponse
-)
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
 from account import models as accountmodels
@@ -13,19 +10,14 @@ from job.models import Job, Layer
 from . import models
 from utils.util import matrix_to_table, table_to_matrix
 from utils import conf
-from account.views import (
-    get_charts_data,
-    get_algorithms,
-    get_user_aoi)
+from account.views import get_charts_data, get_algorithms, get_user_aoi
 from job.views import getjobs
-from te_schemas.land_cover import (
-    LCTransitionDefinitionDeg
-)
+from te_schemas.land_cover import LCTransitionDefinitionDeg
 
 
 @login_required
 def dashboard(request):
-    template = loader.get_template('core/index.html')
+    template = loader.get_template("core/index.html")
     center = [0, 0]
     try:
         aoi = accountmodels.Aoi.objects.filter(user=request.user)
@@ -38,37 +30,42 @@ def dashboard(request):
     # line_chart_data, pie_chart_data = get_chart_data(user=None)
 
     line_chart_data, pie_chart_data = get_charts_data(
-        start_date='2021-01-01', end_date=datetime.now(),
-        frequency='month',
-        user_id=None)
+        start_date="2021-01-01",
+        end_date=datetime.now(),
+        frequency="month",
+        user_id=None,
+    )
     context = {
         "parents": get_algorithms(),
-        'line_chart_data': line_chart_data,
-        'pie_chart_data': pie_chart_data,
-        'center': center,
-        'geom': get_user_aoi(request.user)
+        "line_chart_data": line_chart_data,
+        "pie_chart_data": pie_chart_data,
+        "center": center,
+        "geom": get_user_aoi(request.user),
     }
     return HttpResponse(template.render(context, request))
 
 
 @login_required
 def view_algorithm(request, algo_id):
-    template = loader.get_template('core/algorithm.html')
+    template = loader.get_template("core/algorithm.html")
 
-    countries = accountmodels.Country.objects.all().order_by('name')
-    regions = accountmodels.Region.objects.filter(
-        country=countries.first()).order_by("name")
-    cities = accountmodels.City.objects.filter(
-        country=countries.first()).order_by("name_en")
-    aois = accountmodels.Aoi.objects.filter(
-        user=request.user).order_by("-date_created")
+    countries = accountmodels.Country.objects.all().order_by("name")
+    regions = accountmodels.Region.objects.filter(country=countries.first()).order_by(
+        "name"
+    )
+    cities = accountmodels.City.objects.filter(country=countries.first()).order_by(
+        "name_en"
+    )
+    aois = accountmodels.Aoi.objects.filter(user=request.user).order_by("-date_created")
     if aois.count() > 0:
         aoi = aois.first()
         if aoi.country:
-            regions = accountmodels.Region.objects.filter(
-                country=aoi.country).order_by("name")
-            cities = accountmodels.City.objects.filter(
-                country=aoi.country).order_by("name_en")
+            regions = accountmodels.Region.objects.filter(country=aoi.country).order_by(
+                "name"
+            )
+            cities = accountmodels.City.objects.filter(country=aoi.country).order_by(
+                "name_en"
+            )
     else:
         aoi = None
 
@@ -76,19 +73,18 @@ def view_algorithm(request, algo_id):
     if matrix.count() == 0:
         matrix = accountmodels.Matrix.objects.filter(user=None)
     matrix = matrix.first().content
-    matrix = LCTransitionDefinitionDeg.Schema().loads(
-        matrix
-    )
+    matrix = LCTransitionDefinitionDeg.Schema().loads(matrix)
     context = {
-        "parents":  get_algorithms(),
-        "children":  accountmodels.Algorithm.objects.filter(
-            parent_id=algo_id,
-            script__run_mode="remote", deleted=False).order_by("id"),
+        "parents": get_algorithms(),
+        "children": accountmodels.Algorithm.objects.filter(
+            parent_id=algo_id, script__run_mode="remote", deleted=False
+        ).order_by("id"),
         "id": algo_id,
         "table": matrix_to_table(matrix),
         "agg_table": create_aggregation_table(request),
         "jrc_lpd_datasets": list(
-            conf.REMOTE_DATASETS["Land Productivity Dynamics (JRC)"].keys()),
+            conf.REMOTE_DATASETS["Land Productivity Dynamics (JRC)"].keys()
+        ),
         "regions": regions,
         "countries": countries,
         "cities": cities,
@@ -96,8 +92,7 @@ def view_algorithm(request, algo_id):
         "aoi": aoi,
         "current_year": datetime.now().year,
         "years": [year for year in range(2001, datetime.now().year + 1)],
-        "conf": conf.REMOTE_DATASETS
-
+        "conf": conf.REMOTE_DATASETS,
     }
     return HttpResponse(template.render(context, request))
 
@@ -114,19 +109,19 @@ def ajax_update_aggregation_method(request):
             user_aggregate.outputclass_id = array.get("outputclass")
             user_aggregate.user = request.user
             user_aggregate.save()
-        return JsonResponse({"msg": "Updated Aggregation Definition"},
-                            status=200)
+        return JsonResponse({"msg": "Updated Aggregation Definition"}, status=200)
 
 
 @login_required
 def create_aggregation_table(request):
     agg_classes = models.UserAggregationClass.objects.filter(user=request.user)
     if agg_classes.count() == 0:
-        agg_classes = models.UserAggregationClass.objects.filter(
-            user_id=None).exclude(inputclass__code='-32768')
-    agg_output_classes = models.AggregationOutputClass.objects.filter()\
-        .exclude(
-        code='-32768')
+        agg_classes = models.UserAggregationClass.objects.filter(user_id=None).exclude(
+            inputclass__code="-32768"
+        )
+    agg_output_classes = models.AggregationOutputClass.objects.filter().exclude(
+        code="-32768"
+    )
 
     table = """
         <table class="display" id="aggregation_definition_tbl"
@@ -140,7 +135,7 @@ def create_aggregation_table(request):
             </thead>
             <tbody>"""
     for row in agg_classes:
-        if row.inputclass.code == '-32768':
+        if row.inputclass.code == "-32768":
             continue
         table += """<tr >
            <td>
@@ -152,7 +147,8 @@ def create_aggregation_table(request):
             <td>
                 <input type="hidden" value="{}">
                 <select class = "js-states form-select" >""".format(
-            row.inputclass.code, row.inputclass.name_long, row.inputclass.id)
+            row.inputclass.code, row.inputclass.name_long, row.inputclass.id
+        )
 
         for opt in agg_output_classes:
             if row.outputclass.code == opt.code:
@@ -177,25 +173,28 @@ def create_aggregation_table(request):
 @login_required
 def ajax_get_algorithm_view(request, id):
     script = accountmodels.Script.objects.filter(
-        deleted=False,
-        run_mode="remote",
-        algorithm__id=id)
+        deleted=False, run_mode="remote", algorithm__id=id
+    )
 
-    countries = accountmodels.Country.objects.all().order_by('name')
-    regions = accountmodels.Region.objects.filter(
-        country=countries.first()).order_by("name")
+    countries = accountmodels.Country.objects.all().order_by("name")
+    regions = accountmodels.Region.objects.filter(country=countries.first()).order_by(
+        "name"
+    )
 
-    cities = accountmodels.City.objects.filter(
-        country=countries.first()).order_by("name_en")
+    cities = accountmodels.City.objects.filter(country=countries.first()).order_by(
+        "name_en"
+    )
 
     aoi = accountmodels.Aoi.objects.filter(user=request.user)
     if aoi.count() > 0:
         aoi = aoi.first()
         if aoi.country:
-            regions = accountmodels.Region.objects.filter(
-                country=aoi.country).order_by("name")
-            cities = accountmodels.City.objects.filter(
-                country=aoi.country).order_by("name_en")
+            regions = accountmodels.Region.objects.filter(country=aoi.country).order_by(
+                "name"
+            )
+            cities = accountmodels.City.objects.filter(country=aoi.country).order_by(
+                "name_en"
+            )
     else:
         aoi = None
 
@@ -203,14 +202,12 @@ def ajax_get_algorithm_view(request, id):
     if matrix.count() == 0:
         matrix = accountmodels.Matrix.objects.filter(user=None)
     matrix = matrix.first().content
-    matrix = LCTransitionDefinitionDeg.Schema().loads(
-        matrix
-    )
+    matrix = LCTransitionDefinitionDeg.Schema().loads(matrix)
     context = {
         "table": matrix_to_table(matrix),
         "jrc_lpd_datasets": list(
-            conf.REMOTE_DATASETS["Land Productivity Dynamics (JRC)"]
-            .keys()),
+            conf.REMOTE_DATASETS["Land Productivity Dynamics (JRC)"].keys()
+        ),
         "agg_table": create_aggregation_table(request),
         "regions": regions,
         "countries": countries,
@@ -221,42 +218,42 @@ def ajax_get_algorithm_view(request, id):
         "conf": conf.REMOTE_DATASETS,
         "current_year": datetime.now().year,
         "years": [year for year in range(2001, datetime.now().year + 1)],
-        "jobs": getjobs(request, script.first().id)
+        "jobs": getjobs(request, script.first().id),
     }
 
     if script.first().name == "productivity":
         trajectory_functions = {
-            'NDVI trends': {
-                'climate types': [],
-                'description': 'Calculate trend of annually integrated NDVI.',
-                'params': {
-                    'trajectory_method': 'ndvi_trend'
-                }
+            "NDVI trends": {
+                "climate types": [],
+                "description": "Calculate trend of annually integrated NDVI.",
+                "params": {"trajectory_method": "ndvi_trend"},
             },
-            'Pixel RESTREND': {
-                'climate types': [
-                    'Precipitation', 'Soil moisture',
-                    'Evapotranspiration'
+            "Pixel RESTREND": {
+                "climate types": [
+                    "Precipitation",
+                    "Soil moisture",
+                    "Evapotranspiration",
                 ],
-                'description': '''Calculate pixel residual trend
+                "description": """Calculate pixel residual trend
                  (RESTREND of
                  annually integrated NDVI,
                   after removing trend associated with a climate
-                 indicator.''',
-                'params': {
-                    'trajectory_method': 'p_restrend'
-                }
+                 indicator.""",
+                "params": {"trajectory_method": "p_restrend"},
             },
-            'Rain Use Efficiency (RUE)': {
-                'climate types': ['Precipitation'],
-                'description': 'Calculate rain use efficiency\
-                (precipitation divided by NDVI).',
-                'params': {'trajectory_method': 'ue'}},
-            'Water Use Efficiency (WUE)': {
-                'climate types': ['Evapotranspiration'],
-                'description': 'Calculate water use efficiency\
-                 (evapotranspiration divided by NDVI).',
-                'params': {'trajectory_method': 'ue'}}}
+            "Rain Use Efficiency (RUE)": {
+                "climate types": ["Precipitation"],
+                "description": "Calculate rain use efficiency\
+                (precipitation divided by NDVI).",
+                "params": {"trajectory_method": "ue"},
+            },
+            "Water Use Efficiency (WUE)": {
+                "climate types": ["Evapotranspiration"],
+                "description": "Calculate water use efficiency\
+                 (evapotranspiration divided by NDVI).",
+                "params": {"trajectory_method": "ue"},
+            },
+        }
         # trajectory_functions = json.loads(additional_configuration)
         context["trajectory_functions"] = list(trajectory_functions.keys())
         climate_datasets = []
@@ -265,9 +262,7 @@ def ajax_get_algorithm_view(request, id):
             climate_datasets + list(conf.REMOTE_DATASETS[climate_type].keys())
         context["climate_datasets"] = climate_datasets
     if script.count() > 0:
-        return render(
-            request, 'core/forms/' + script.first().name + ".html", context
-        )
+        return render(request, "core/forms/" + script.first().name + ".html", context)
 
 
 @login_required
@@ -281,12 +276,13 @@ def ajax_get_matrix_table(request):
 @login_required
 def ajax_reset_aggregation_table(request):
     models.UserAggregationClass.objects.filter(user=request.user).delete()
-    defaults = models.UserAggregationClass.objects.filter(
-        user_id=None)
+    defaults = models.UserAggregationClass.objects.filter(user_id=None)
     for default in defaults:
         models.UserAggregationClass.objects.create(
-            user=request.user, inputclass=default.inputclass,
-            outputclass=default.outputclass)
+            user=request.user,
+            inputclass=default.inputclass,
+            outputclass=default.outputclass,
+        )
 
     return HttpResponse(create_aggregation_table(request), status=200)
 
@@ -294,15 +290,18 @@ def ajax_reset_aggregation_table(request):
 @login_required
 def ajax_load_climate_dataset(request):
     script = accountmodels.Script.objects.get(
-        name=request.GET.get("algo"), deleted=False)
+        name=request.GET.get("algo"), deleted=False
+    )
     if script.name == "productivity":
         additional_configuration = script.additional_configuration
         additional_configuration = additional_configuration.replace("'", '"')
-        trajectory_functions = json.loads(
-            additional_configuration).get("trajectory functions")
+        trajectory_functions = json.loads(additional_configuration).get(
+            "trajectory functions"
+        )
         climate_datasets = []
-        climate_types = trajectory_functions[request.GET.get(
-            "indicator")]["climate types"]
+        climate_types = trajectory_functions[request.GET.get("indicator")][
+            "climate types"
+        ]
         for climate_type in climate_types:
             climate_datasets += list(conf.REMOTE_DATASETS[climate_type].keys())
 
@@ -323,12 +322,17 @@ def add_layer_to_map(request):
             defaults={
                 "name": job.task_name,
                 "url": "",
-                "is_visible": int(checked) == 1
-            })
-        return JsonResponse({
-            "msg": "Result for this task added to the Map"
-            if int(checked) else "Results for this task removed from the Map"
-        }, status=200)
+                "is_visible": int(checked) == 1,
+            },
+        )
+        return JsonResponse(
+            {
+                "msg": "Result for this task added to the Map"
+                if int(checked)
+                else "Results for this task removed from the Map"
+            },
+            status=200,
+        )
     except Exception as e:
         print(e)
         return JsonResponse({"msg": "Job not found"}, status=400)
@@ -346,9 +350,10 @@ def ajax_save_matrix(request):
     try:
         accountmodels.Matrix.objects.update_or_create(
             user=request.user,
-            defaults={'name': 'Degradation Matrix', 'content': tbl.dumps()}
+            defaults={"name": "Degradation Matrix", "content": tbl.dumps()},
         )
-        return JsonResponse({
-            "msg": "Degradation matrix saved successfully!"}, status=200)
+        return JsonResponse(
+            {"msg": "Degradation matrix saved successfully!"}, status=200
+        )
     except Exception:
         return JsonResponse({"msg": "Error saving the matrix!"}, status=400)

@@ -9,9 +9,12 @@ import re
 
 from osgeo import gdal
 
-from api import Api
-from download import *
-import conf
+from . import api
+from . import download as ldmp_download
+from . import conf
+from . import areaofinterest
+from . import util as utils
+# from . import layers  # TODO: layers module not found
 
 # from . import (
 #     api,
@@ -25,6 +28,9 @@ from . import models
 from ..account.models import Job
 from .logger import log
 
+# Initialize API instance
+api_instance = api.Api()
+
 
 def slugify(value, allow_unicode=False):
     """
@@ -37,12 +43,15 @@ def slugify(value, allow_unicode=False):
     """
     value = str(value)
     if allow_unicode:
-        value = unicodedata.normalize('NFKC', value)
+        value = unicodedata.normalize("NFKC", value)
     else:
-        value = unicodedata.normalize('NFKD', value).encode(
-            'ascii', 'ignore').decode('ascii')
-    value = re.sub(r'[^\w\s-]', '', value.lower())
-    return re.sub(r'[-\s]+', '-', value).strip('-_')
+        value = (
+            unicodedata.normalize("NFKD", value)
+            .encode("ascii", "ignore")
+            .decode("ascii")
+        )
+    value = re.sub(r"[^\w\s-]", "", value.lower())
+    return re.sub(r"[-\s]+", "-", value).strip("-_")
 
 
 class JobManager(object):
@@ -94,40 +103,38 @@ class JobManager(object):
 
     @property
     def running_jobs_dir(self) -> Path:
-        return Path(
-            conf.settings_manager
-                .get_value(conf.Setting.BASE_DIR)) / "running-jobs"
+        return (
+            Path(conf.settings_manager.get_value(conf.Setting.BASE_DIR))
+            / "running-jobs"
+        )
 
     @property
     def finished_jobs_dir(self) -> Path:
-        return Path(
-            conf.settings_manager
-                .get_value(conf.Setting.BASE_DIR)) / "finished-jobs"
+        return (
+            Path(conf.settings_manager.get_value(conf.Setting.BASE_DIR))
+            / "finished-jobs"
+        )
 
     @property
     def failed_jobs_dir(self) -> Path:
-        return Path(
-            conf.settings_manager
-            .get_value(conf.Setting.BASE_DIR)) / "failed-jobs"
+        return (
+            Path(conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / "failed-jobs"
+        )
 
     @property
     def deleted_jobs_dir(self) -> Path:
-        return Path(
-            conf.settings_manager
-            .get_value(conf.Setting.BASE_DIR)) / "deleted-jobs"
+        return (
+            Path(conf.settings_manager.get_value(conf.Setting.BASE_DIR))
+            / "deleted-jobs"
+        )
 
     @property
     def datasets_dir(self) -> Path:
-        return Path(
-            conf.settings_manager
-            .get_value(conf.Setting.BASE_DIR)) / "datasets"
+        return Path(conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / "datasets"
 
     @property
     def exports_dir(self) -> Path:
-        return Path(
-            conf.settings_manager
-            .get_value(conf.Setting.BASE_DIR)) / \
-            "exported"
+        return Path(conf.settings_manager.get_value(conf.Setting.BASE_DIR)) / "exported"
 
     @classmethod
     def get_job_basename(cls, job: Job):
@@ -136,10 +143,9 @@ class JobManager(object):
         task_name = slugify(job.params.task_name)
         if task_name != "":
             name_fragments.append(task_name)
-        name_fragments.extend([
-            job.script.name,
-            job.params.task_notes.local_context.area_of_interest_name
-        ])
+        name_fragments.extend(
+            [job.script.name, job.params.task_notes.local_context.area_of_interest_name]
+        )
         return separator.join(name_fragments)
 
     def clear_known_jobs(self):
@@ -160,25 +166,26 @@ class JobManager(object):
         """
 
         self._known_running_jobs = {
-            j.id: j for j in self._get_local_jobs(models.JobStatus.RUNNING)}
+            j.id: j for j in self._get_local_jobs(models.JobStatus.RUNNING)
+        }
         self._refresh_local_downloaded_jobs()
         # move any downloaded jobs with missing local paths back to FINISHED
         for j_id, j in self._known_downloaded_jobs.items():
             if j.results.data_path and not j.results.data_path.exists():
-                log(f'job {j_id} currently marked as DOWNLOADED but has '
-                    'missing paths, so moving back to FINISHED status')
+                log(
+                    f"job {j_id} currently marked as DOWNLOADED but has "
+                    "missing paths, so moving back to FINISHED status"
+                )
                 j.results.data_path = None
                 self._change_job_status(
-                    j, models.JobStatus.FINISHED, force_rewrite=True)
+                    j, models.JobStatus.FINISHED, force_rewrite=True
+                )
         # filter list in case any jobs were moved from downloaded to finished
         self._known_downloaded_jobs = {
             j_id: j
-            for j_id, j
-            in self._known_downloaded_jobs.items()
-            if j.status in [
-                models.JobStatus.DOWNLOADED,
-                models.JobStatus.GENERATED_LOCALLY
-            ]
+            for j_id, j in self._known_downloaded_jobs.items()
+            if j.status
+            in [models.JobStatus.DOWNLOADED, models.JobStatus.GENERATED_LOCALLY]
         }
 
         # NOTE: finished and failed jobs are treated differently here because
@@ -191,48 +198,47 @@ class JobManager(object):
     def refresh_from_remote_state(self, emit_signal: bool = True):
         """Request the latest state from the remote server
 
-        Then update filesystem directories too.
+         Then update filesystem directories too.
 
-        Checking for remote updates entails:
+         Checking for remote updates entails:
 
-        - Scanning the `running-jobs` local directory, looking for job
-         metadata files
-        - Scanning the remote server in order to retrieve a list of all remote
-         job  metadata files
-        - Comparing each remote job with the local job
-        - If a job is both on the local jobs list and on the remote jobs list,
-            we proceed to update its local job metadata file
+         - Scanning the `running-jobs` local directory, looking for job
+          metadata files
+         - Scanning the remote server in order to retrieve a list of all remote
+          job  metadata files
+         - Comparing each remote job with the local job
+         - If a job is both on the local jobs list and on the remote jobs list,
+             we proceed to update its local job metadata file
 
-       - If a job is only on the local list, then something went wrong with
-         its remote processing. We can notify the user and then we remove
-          the job metadata file
-         from the `running-jobs` directory immediately. This job is effectively
-         discarded. The user will need to retry execution, if needed
+        - If a job is only on the local list, then something went wrong with
+          its remote processing. We can notify the user and then we remove
+           the job metadata file
+          from the `running-jobs` directory immediately. This job is effectively
+          discarded. The user will need to retry execution, if needed
 
-       - If a job is only on the remote list, then we might have asked that its
-         results be deleted in the past. We look for the job's id on the
-         `deleted-datasets` directory.
+        - If a job is only on the remote list, then we might have asked that its
+          results be deleted in the past. We look for the job's id on the
+          `deleted-datasets` directory.
 
-         - If we find that the results of this job were deleted on purpose,
-          then we ignore the remote job.
+          - If we find that the results of this job were deleted on purpose,
+           then we ignore the remote job.
 
-         - If we cannot find the job on the `deleted-datasets` directory,
-            then we assume this is a new job that was created by some
-             other means (another
-           client other than QGIS) and we store it locally in either the
-           `running-jobs` dir or the `finished-jobs` dir, depending on
-            the job's status
+          - If we cannot find the job on the `deleted-datasets` directory,
+             then we assume this is a new job that was created by some
+              other means (another
+            client other than QGIS) and we store it locally in either the
+            `running-jobs` dir or the `finished-jobs` dir, depending on
+             the job's status
 
-       - If the job is complete we can now download the results. However,
-        we may have to do that on demand, so it is not done immediately.
-         Instead, we move the
-         job metadata file to the `finished-jobs` directory on disk
+        - If the job is complete we can now download the results. However,
+         we may have to do that on demand, so it is not done immediately.
+          Instead, we move the
+          job metadata file to the `finished-jobs` directory on disk
 
         """
 
         now = dt.datetime.now(tz=dt.timezone.utc)
-        relevant_date = now - \
-            dt.timedelta(days=self._relevant_job_age_threshold_days)
+        relevant_date = now - dt.timedelta(days=self._relevant_job_age_threshold_days)
         remote_jobs = get_remote_jobs(end_date=relevant_date)
         relevant_remote_jobs = get_relevant_remote_jobs(remote_jobs)
 
@@ -261,20 +267,20 @@ class JobManager(object):
             except PermissionError:
                 log(
                     f"""Permissions error on path
-                        skipping deletion of {job.id}...""")
+                        skipping deletion of {job.id}..."""
+                )
                 # TODO: add back in old code used for removing visible layers
                 # prior to deletion
                 return
-            self._change_job_status(
-                job, models.JobStatus.DELETED, force_rewrite=False)
+            self._change_job_status(job, models.JobStatus.DELETED, force_rewrite=False)
         else:
             log(f"job {job!r} has already been deleted, skipping...")
         self.deleted_job.emit(job)
 
     def submit_remote_job(
-            self,
-            params: typing.Dict,
-            script_id: uuid.UUID,
+        self,
+        params: typing.Dict,
+        script_id: uuid.UUID,
     ) -> typing.Optional[Job]:
         """Submit a job for remote execution
 
@@ -289,10 +295,12 @@ class JobManager(object):
         # Note - this is a reimplementation of api.run_script
         final_params = params.copy()
         final_params["task_notes"] = _add_local_context_to_task_notes(
-            params["task_notes"])
+            params["task_notes"]
+        )
         url_fragment = f"/api/v1/script/{script_id}/run"
-        response = Api.call_api(url_fragment, "post",
-                                final_params, use_token=True)
+        response = api_instance.call_api(
+            url_fragment, "post", final_params, use_token=True
+        )
         try:
             raw_job = response["data"]
         except TypeError:
@@ -305,27 +313,25 @@ class JobManager(object):
         return job
 
     def submit_local_job(
-            self,
-            params: typing.Dict,
-            script_name: str,
-            area_of_interest: areaofinterest.AOI
+        self,
+        params: typing.Dict,
+        script_name: str,
+        area_of_interest: areaofinterest.AOI,
     ):
         final_params = params.copy()
         final_params["task_notes"] = _add_local_context_to_task_notes(
-            params["task_notes"])
+            params["task_notes"]
+        )
         job = Job(
             id=uuid.uuid4(),
             params=models.JobParameters.deserialize(final_params),
             progress=0,
             results=models.JobLocalResults(
-                name=script_name,
-                bands=[],
-                data_path=None,
-                other_paths=[]
+                name=script_name, bands=[], data_path=None, other_paths=[]
             ),
             script=models.get_job_local_script(script_name),
             status=models.JobStatus.PENDING,
-            start_date=dt.datetime.now(dt.timezone.utc)
+            start_date=dt.datetime.now(dt.timezone.utc),
         )
         self.write_job_metadata_file(job)
         self._update_known_jobs_with_newly_submitted_job(job)
@@ -334,11 +340,11 @@ class JobManager(object):
 
     def process_local_job(self, job: Job, area_of_interest: areaofinterest.AOI):
         execution_callable_python_path = job.script.additional_configuration[
-            "execution_callable"]
+            "execution_callable"
+        ]
         execution_handler = utils.load_object(execution_callable_python_path)
         done_job = execution_handler(job, area_of_interest)
-        self._move_job_to_dir(
-            done_job, new_status=models.JobStatus.GENERATED_LOCALLY)
+        self._move_job_to_dir(done_job, new_status=models.JobStatus.GENERATED_LOCALLY)
         self.processed_local_job.emit(done_job)
 
     def download_job_results(self, job: Job) -> Job:
@@ -351,7 +357,8 @@ class JobManager(object):
         if output_path is not None:
             job.results.data_path = output_path
             self._change_job_status(
-                job, models.JobStatus.DOWNLOADED, force_rewrite=True)
+                job, models.JobStatus.DOWNLOADED, force_rewrite=True
+            )
         self.downloaded_job_results.emit(job)
         # TODO: maybe we don't need to return anything here
         return job
@@ -375,8 +382,7 @@ class JobManager(object):
         # change size during the bulk download process. The original
         # `self.known_jobs[JobStatus.FINISHED]` dict is being updated as each
         # job result is being downloaded
-        frozen_finished_jobs = self.known_jobs[models.JobStatus.FINISHED].copy(
-        )
+        frozen_finished_jobs = self.known_jobs[models.JobStatus.FINISHED].copy()
         if len(frozen_finished_jobs) > 0:
             for job in frozen_finished_jobs.values():
                 self.download_job_results(job)
@@ -386,21 +392,25 @@ class JobManager(object):
         if job.results.data_path.suffix in [".tif", ".vrt"]:
             for band_index, band in enumerate(job.results.bands, start=1):
                 if band.add_to_map:
-                    layers.add_layer(
-                        str(job.results.data_path),
-                        band_index,
-                        band.serialize()
-                    )
+                    # TODO: layers module not implemented yet
+                    # layers.add_layer(
+                    #     str(job.results.data_path),
+                    #     band_index,
+                    #     band.serialize()
+                    # )
+                    pass
 
     def display_selected_job_results(self, job: Job, band_numbers):
         if job.results.data_path.suffix in [".tif", ".vrt"]:
             for n, band in enumerate(job.results.bands, start=1):
                 if n in band_numbers:
-                    layers.add_layer(
-                        str(job.results.data_path),
-                        n,
-                        band.serialize()
-                    )
+                    # TODO: layers module not implemented yet
+                    # layers.add_layer(
+                    #     str(job.results.data_path),
+                    #     n,
+                    #     band.serialize()
+                    # )
+                    pass
 
     def import_job(self, job: Job):
         self._move_job_to_dir(job, job.status, force_rewrite=True)
@@ -414,13 +424,11 @@ class JobManager(object):
         self.imported_job.emit(job)
 
     def create_job_from_dataset(
-            self,
-            dataset_path: Path,
-            band_name: str,
-            band_metadata: typing.Dict
+        self, dataset_path: Path, band_name: str, band_metadata: typing.Dict
     ) -> Job:
         band_info = models.JobBand(
-            name=band_name, no_data_value=-32768.0, metadata=band_metadata.copy())
+            name=band_name, no_data_value=-32768.0, metadata=band_metadata.copy()
+        )
         if band_name == "Land cover (7 class)":
             script = conf.KNOWN_SCRIPTS["local-land-cover"]
         elif band_name == "Soil organic carbon":
@@ -435,17 +443,16 @@ class JobManager(object):
             params=models.JobParameters(
                 task_name="Imported dataset",
                 task_notes=models.JobNotes(
-                    user_notes="",
-                    local_context=models.JobLocalContext.create_default()
+                    user_notes="", local_context=models.JobLocalContext.create_default()
                 ),
-                params={}
+                params={},
             ),
             progress=100,
             results=models.JobLocalResults(
                 name=f"{band_name} results",
                 bands=[band_info],
                 data_path=dataset_path,
-                other_paths=[]
+                other_paths=[],
             ),
             script=script,
             status=models.JobStatus.GENERATED_LOCALLY,
@@ -461,7 +468,8 @@ class JobManager(object):
         self.known_jobs[status][job.id] = job
 
     def _change_job_status(
-            self, job: Job, target: models.JobStatus, force_rewrite: bool = True):
+        self, job: Job, target: models.JobStatus, force_rewrite: bool = True
+    ):
         """Modify a job's status both in the in-memory cache and on the filesystem"""
         previous_status = job.status
         if previous_status == models.JobStatus.PENDING:
@@ -479,12 +487,13 @@ class JobManager(object):
         if len(job.results.urls) > 0:
             if len(job.results.urls) == 1:
                 final_output_path = (
-                    base_output_path.parent / f"{base_output_path.name}.tif")
+                    base_output_path.parent / f"{base_output_path.name}.tif"
+                )
                 output_path = _get_single_cloud_result(
-                    job.results.urls[0], final_output_path)
+                    job.results.urls[0], final_output_path
+                )
             else:  # multiple files, download them then save VRT
-                output_path = self._get_multiple_cloud_results(
-                    job, base_output_path)
+                output_path = self._get_multiple_cloud_results(job, base_output_path)
         else:
             log(f"job {job} does not have downloadable results")
         return output_path
@@ -493,24 +502,22 @@ class JobManager(object):
         vrt_tiles = []
         for index, url in enumerate(job.results.urls):
             output_path = (
-                base_output_path.parent /
-                f"{base_output_path.name}_{index}.tif"
+                base_output_path.parent / f"{base_output_path.name}_{index}.tif"
             )
             tile_path = _get_single_cloud_result(url, output_path)
             if tile_path is not None:
                 vrt_tiles.append(tile_path)
-        vrt_file_path = base_output_path.parent / \
-            f"{base_output_path.name}.vrt"
+        vrt_file_path = base_output_path.parent / f"{base_output_path.name}.vrt"
 
-        gdal.BuildVRT(str(vrt_file_path), [
-                      str(vrt_tile) for vrt_tile in vrt_tiles])
+        gdal.BuildVRT(str(vrt_file_path), [str(vrt_tile) for vrt_tile in vrt_tiles])
         return vrt_file_path
 
     def _download_timeseries_table(self, job: Job) -> typing.Optional[Path]:
         raise NotImplementedError
 
     def _refresh_local_running_jobs(
-            self, remote_jobs: typing.List[Job]) -> typing.Dict[uuid.UUID, Job]:
+        self, remote_jobs: typing.List[Job]
+    ) -> typing.Dict[uuid.UUID, Job]:
         """Update local directory of running jobs by comparing with the remote jobs"""
         local_running_jobs = self._get_local_jobs(models.JobStatus.RUNNING)
         self._known_running_jobs = {}
@@ -542,14 +549,17 @@ class JobManager(object):
         return self._known_running_jobs
 
     def _refresh_local_finished_jobs(
-            self, remote_jobs: typing.List[Job]) -> typing.Dict[uuid.UUID, Job]:
+        self, remote_jobs: typing.List[Job]
+    ) -> typing.Dict[uuid.UUID, Job]:
         self._known_finished_jobs = {
-            j.id: j for j in self._get_local_jobs(models.JobStatus.FINISHED)}
+            j.id: j for j in self._get_local_jobs(models.JobStatus.FINISHED)
+        }
         local_ids = self._known_finished_jobs.keys()
         deleted_ids = self._known_deleted_jobs.keys()
         downloaded_ids = self._known_downloaded_jobs.keys()
         remote_finished = [
-            j for j in remote_jobs if j.status == models.JobStatus.FINISHED]
+            j for j in remote_jobs if j.status == models.JobStatus.FINISHED
+        ]
         for remote_job in remote_finished:
             if remote_job.id in deleted_ids:
                 continue  # this job has previously been deleted by the user
@@ -565,18 +575,22 @@ class JobManager(object):
 
     def _refresh_local_downloaded_jobs(self):
         self._known_downloaded_jobs = {
-            j.id: j for j in self._get_local_jobs(models.JobStatus.DOWNLOADED)}
+            j.id: j for j in self._get_local_jobs(models.JobStatus.DOWNLOADED)
+        }
 
     def _refresh_local_generated_jobs(self):
         self._known_downloaded_jobs = {
-            j.id: j for j in self._get_local_jobs(models.JobStatus.GENERATED_LOCALLY)}
+            j.id: j for j in self._get_local_jobs(models.JobStatus.GENERATED_LOCALLY)
+        }
 
     def _refresh_local_deleted_jobs(self):
         self._known_deleted_jobs = {
-            j.id: j for j in self._get_local_jobs(models.JobStatus.DELETED)}
+            j.id: j for j in self._get_local_jobs(models.JobStatus.DELETED)
+        }
 
     def _move_job_to_dir(
-            self, job: Job, new_status: models.JobStatus, force_rewrite: bool = False):
+        self, job: Job, new_status: models.JobStatus, force_rewrite: bool = False
+    ):
         """Move job metadata file to another directory based on the desired status.
 
         This also mutates the input job, updating its current status to the new one.
@@ -612,11 +626,14 @@ class JobManager(object):
                     job = Job.deserialize(raw_job)
                 except json.decoder.JSONDecodeError:
                     if conf.settings_manager.get_value(conf.Setting.DEBUG):
-                        log(f"Unable to decode file {job_metadata_path!r} as valid json")
+                        log(
+                            f"Unable to decode file {job_metadata_path!r} as valid json"
+                        )
                 except KeyError:
                     if conf.settings_manager.get_value(conf.Setting.DEBUG):
                         log(
-                            f"Unable to decode file {job_metadata_path!r} as job json - no script_id in file")
+                            f"Unable to decode file {job_metadata_path!r} as job json - no script_id in file"
+                        )
                 except RuntimeError as exc:
                     log(str(exc))
                 else:
@@ -671,9 +688,7 @@ class JobManager(object):
         for failed_job in self._get_local_jobs(models.JobStatus.FAILED):
             job_age = now - failed_job.end_date
             if job_age.days > self._relevant_job_age_threshold_days:
-                log(
-                    f"Removing job {failed_job!r} as it is no longer on server"
-                )
+                log(f"Removing job {failed_job!r} as it is no longer on server")
                 self._remove_job_metadata_file(failed_job)
             else:
                 self._known_failed_jobs[failed_job.id] = failed_job
@@ -689,11 +704,14 @@ class JobManager(object):
         elif job.status == models.JobStatus.DELETED:
             base = self.deleted_jobs_dir
         elif job.status in (
-                models.JobStatus.DOWNLOADED, models.JobStatus.GENERATED_LOCALLY):
+            models.JobStatus.DOWNLOADED,
+            models.JobStatus.GENERATED_LOCALLY,
+        ):
             base = self.datasets_dir / f"{job.id!s}"
         else:
             raise RuntimeError(
-                f"Could not retrieve file path for job with state {job.status}")
+                f"Could not retrieve file path for job with state {job.status}"
+            )
         return base / f"{self.get_job_basename(job)}.json"
 
     def get_downloaded_dataset_base_file_path(self, job: Job):
@@ -715,12 +733,10 @@ class JobManager(object):
 
 
 def _add_local_context_to_task_notes(task_notes: str) -> str:
-    separator = conf.settings_manager.get_value(
-        conf.Setting.LOCAL_CONTEXT_SEPARATOR)
+    separator = conf.settings_manager.get_value(conf.Setting.LOCAL_CONTEXT_SEPARATOR)
     context = models.JobLocalContext(
         base_dir=conf.settings_manager.get_value(conf.Setting.BASE_DIR),
-        area_of_interest_name=conf.settings_manager.get_value(
-            conf.Setting.AREA_NAME)
+        area_of_interest_name=conf.settings_manager.get_value(conf.Setting.AREA_NAME),
     )
     return separator.join((task_notes, context.serialize()))
 
@@ -735,33 +751,33 @@ def find_job(target: Job, source: typing.List[Job]) -> typing.Optional[Job]:
 
 
 def _get_access_token():
-    login_reply = api.login()
+    login_reply = api_instance.login()
     return login_reply["access_token"]
 
 
 def _get_user_id() -> uuid:
     if conf.settings_manager.get_value(conf.Setting.DEBUG):
-        log('Retrieving user id...')
-    get_user_reply = api.get_user()
+        log("Retrieving user id...")
+    get_user_reply = api_instance.get_user()
     if get_user_reply:
         user_id = get_user_reply.get("id", None)
         return uuid.UUID(user_id)
 
 
 def _get_single_cloud_result(
-        url: models.JobUrl, output_path: Path) -> typing.Optional[Path]:
+    url: models.JobUrl, output_path: Path
+) -> typing.Optional[Path]:
     path_exists = output_path.is_file()
     hash_matches = ldmp_download.local_check_hash_against_etag(
-        output_path, url.decoded_md5_hash)
+        output_path, url.decoded_md5_hash
+    )
     if path_exists and hash_matches:
-        log(
-            f"No download necessary, result already present in {output_path!r}")
+        log(f"No download necessary, result already present in {output_path!r}")
         result = output_path
     else:
         _download_result(url.url, output_path)
-        downloaded_hash_matches = (
-            ldmp_download.local_check_hash_against_etag(
-                output_path, url.decoded_md5_hash)
+        downloaded_hash_matches = ldmp_download.local_check_hash_against_etag(
+            output_path, url.decoded_md5_hash
         )
         result = output_path if downloaded_hash_matches else None
     return result
@@ -785,15 +801,12 @@ def _delete_job_datasets(job: Job):
             if job.results.data_path:
                 job.results.data_path.unlink()
         except FileNotFoundError:
-            log(f"Could not find path {job.results.data_path!r}, "
-                "skipping deletion...")
+            log(f"Could not find path {job.results.data_path!r}, skipping deletion...")
     else:
         log("This job has no results to be deleted, skipping...")
 
 
-def get_remote_jobs(
-    end_date: typing.Optional[dt.datetime] = None
-) -> typing.List[Job]:
+def get_remote_jobs(end_date: typing.Optional[dt.datetime] = None) -> typing.List[Job]:
     """Get a list of remote jobs, as returned by the server"""
     # Note - this is a reimplementation of api.get_execution
     try:
@@ -817,11 +830,11 @@ def get_remote_jobs(
             # we can verify that the server is actually checking for job's end_date
             query["updated_at"] = end_date.strftime("%Y-%m-%d")
         if conf.settings_manager.get_value(conf.Setting.DEBUG):
-            log('Retrieving executions...')
-        response = api.call_api(
+            log("Retrieving executions...")
+        response = api_instance.call_api(
             f"/api/v1/execution?{urllib.parse.urlencode(query)}",
             method="get",
-            use_token=True
+            use_token=True,
         )
         try:
             raw_jobs = response["data"]
@@ -833,8 +846,10 @@ def get_remote_jobs(
             for raw_job in raw_jobs:
                 try:
                     job = Job.deserialize(raw_job)
-                    if (job.results is not None and
-                            job.results.type == models.JobResult.TIME_SERIES_TABLE):
+                    if (
+                        job.results is not None
+                        and job.results.type == models.JobResult.TIME_SERIES_TABLE
+                    ):
                         log(
                             f"Ignoring job {job.id!r} because it contains "
                             "timeseries results. Support for timeseries results "
@@ -845,8 +860,7 @@ def get_remote_jobs(
                 except RuntimeError as exc:
                     log(str(exc))
                 except TypeError as exc:
-                    log(
-                        f"Could not retrieve remote job {raw_job['id']}: {str(exc)}")
+                    log(f"Could not retrieve remote job {raw_job['id']}: {str(exc)}")
     return remote_jobs
 
 

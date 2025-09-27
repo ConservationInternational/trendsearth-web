@@ -4,25 +4,35 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0028_profile_role'),
+        ("account", "0028_profile_role"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Role',
+            name="Role",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(blank=True, default='', max_length=50, null=True)),
-                ('value', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "code",
+                    models.CharField(blank=True, default="", max_length=50, null=True),
+                ),
+                ("value", models.TextField(blank=True, null=True)),
             ],
             options={
-                'db_table': 'account_roles',
+                "db_table": "account_roles",
             },
         ),
         migrations.RemoveField(
-            model_name='profile',
-            name='role',
+            model_name="profile",
+            name="role",
         ),
     ]

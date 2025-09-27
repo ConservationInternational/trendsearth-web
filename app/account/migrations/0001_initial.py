@@ -8,7 +8,6 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -17,157 +16,385 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='AlgorithmNodeType',
+            name="AlgorithmNodeType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(blank=True, max_length=5, null=True)),
-                ('value', models.CharField(max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(blank=True, max_length=5, null=True)),
+                ("value", models.CharField(max_length=100)),
             ],
             options={
-                'db_table': 'algorigthm_nodetype',
+                "db_table": "algorigthm_nodetype",
             },
         ),
         migrations.CreateModel(
-            name='AlgorithmRunMode',
+            name="AlgorithmRunMode",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(blank=True, max_length=10, null=True)),
-                ('value', models.CharField(max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(blank=True, max_length=10, null=True)),
+                ("value", models.CharField(max_length=100)),
             ],
             options={
-                'db_table': 'algorithm_runmode',
+                "db_table": "algorithm_runmode",
             },
         ),
         migrations.CreateModel(
-            name='Continent',
+            name="Continent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(blank=True, max_length=5, null=True)),
-                ('name', models.CharField(max_length=50)),
-                ('geom', django.contrib.gis.db.models.fields.MultiPolygonField(null=True, srid=4326)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(blank=True, max_length=5, null=True)),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "geom",
+                    django.contrib.gis.db.models.fields.MultiPolygonField(
+                        null=True, srid=4326
+                    ),
+                ),
             ],
             options={
-                'db_table': 'continent',
+                "db_table": "continent",
             },
         ),
         migrations.CreateModel(
-            name='Country',
+            name="Country",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(blank=True, max_length=5, null=True)),
-                ('name', models.CharField(max_length=50)),
-                ('geom', django.contrib.gis.db.models.fields.MultiPolygonField(null=True, srid=4326)),
-                ('continent', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='account.continent')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(blank=True, max_length=5, null=True)),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "geom",
+                    django.contrib.gis.db.models.fields.MultiPolygonField(
+                        null=True, srid=4326
+                    ),
+                ),
+                (
+                    "continent",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.continent",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'country',
+                "db_table": "country",
             },
         ),
         migrations.CreateModel(
-            name='ExecutionScript',
+            name="ExecutionScript",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('uid', models.CharField(blank=True, max_length=150, null=True)),
-                ('name', models.CharField(blank=True, max_length=150, null=True)),
-                ('version', models.CharField(blank=True, max_length=150, null=True)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('name_readable', models.CharField(blank=True, max_length=150, null=True)),
-                ('additional_configuration', models.TextField(blank=True, null=True)),
-                ('run_mode', models.ForeignKey(default=1, on_delete=django.db.models.deletion.DO_NOTHING, to='account.algorithmrunmode')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("uid", models.CharField(blank=True, max_length=150, null=True)),
+                ("name", models.CharField(blank=True, max_length=150, null=True)),
+                ("version", models.CharField(blank=True, max_length=150, null=True)),
+                ("description", models.TextField(blank=True, null=True)),
+                (
+                    "name_readable",
+                    models.CharField(blank=True, max_length=150, null=True),
+                ),
+                ("additional_configuration", models.TextField(blank=True, null=True)),
+                (
+                    "run_mode",
+                    models.ForeignKey(
+                        default=1,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.algorithmrunmode",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'execution_script',
+                "db_table": "execution_script",
             },
         ),
         migrations.CreateModel(
-            name='Settings',
+            name="Settings",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150)),
-                ('user', models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=150)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        default=None,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'settings',
+                "db_table": "settings",
             },
         ),
         migrations.CreateModel(
-            name='Script',
+            name="Script",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('parametrization_dialogue', models.TextField(default=None)),
-                ('execution_script', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='account.executionscript')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("parametrization_dialogue", models.TextField(default=None)),
+                (
+                    "execution_script",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.executionscript",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'script',
+                "db_table": "script",
             },
         ),
         migrations.CreateModel(
-            name='Region',
+            name="Region",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(blank=True, max_length=5, null=True)),
-                ('name', models.CharField(blank=True, max_length=50, null=True)),
-                ('geom', django.contrib.gis.db.models.fields.MultiPolygonField(null=True, srid=4326)),
-                ('country', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='account.country')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(blank=True, max_length=5, null=True)),
+                ("name", models.CharField(blank=True, max_length=50, null=True)),
+                (
+                    "geom",
+                    django.contrib.gis.db.models.fields.MultiPolygonField(
+                        null=True, srid=4326
+                    ),
+                ),
+                (
+                    "country",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.country",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'region',
+                "db_table": "region",
             },
         ),
         migrations.CreateModel(
-            name='Profile',
+            name="Profile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('organization', models.CharField(max_length=200)),
-                ('deleted', models.BooleanField(default=False)),
-                ('country', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='account.country')),
-                ('region', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='account.region')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("organization", models.CharField(max_length=200)),
+                ("deleted", models.BooleanField(default=False)),
+                (
+                    "country",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.country",
+                    ),
+                ),
+                (
+                    "region",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.region",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Aoi',
+            name="Aoi",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default=None, max_length=100)),
-                ('geom', django.contrib.gis.db.models.fields.MultiPolygonField(null=True, srid=4326)),
-                ('date_created', models.DateTimeField(default=django.utils.timezone.now)),
-                ('country', models.ForeignKey(default=None, on_delete=django.db.models.deletion.DO_NOTHING, to='account.country')),
-                ('region', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='account.region')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(default=None, max_length=100)),
+                (
+                    "geom",
+                    django.contrib.gis.db.models.fields.MultiPolygonField(
+                        null=True, srid=4326
+                    ),
+                ),
+                (
+                    "date_created",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                (
+                    "country",
+                    models.ForeignKey(
+                        default=None,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.country",
+                    ),
+                ),
+                (
+                    "region",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.region",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'area_of_interest',
+                "db_table": "area_of_interest",
             },
         ),
         migrations.CreateModel(
-            name='AlgorithmGroup',
+            name="AlgorithmGroup",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=150, null=True)),
-                ('name_details', models.TextField(blank=True, null=True)),
-                ('groups', models.ManyToManyField(blank=True, related_name='_account_algorithmgroup_groups_+', to='account.AlgorithmGroup')),
-                ('item_type', models.ForeignKey(default=1, on_delete=django.db.models.deletion.DO_NOTHING, to='account.algorithmnodetype')),
-                ('parent', models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='account.algorithmgroup')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=150, null=True)),
+                ("name_details", models.TextField(blank=True, null=True)),
+                (
+                    "groups",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="_account_algorithmgroup_groups_+",
+                        to="account.AlgorithmGroup",
+                    ),
+                ),
+                (
+                    "item_type",
+                    models.ForeignKey(
+                        default=1,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.algorithmnodetype",
+                    ),
+                ),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.algorithmgroup",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'algorithm_group',
+                "db_table": "algorithm_group",
             },
         ),
         migrations.CreateModel(
-            name='Algorithm',
+            name="Algorithm",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=150, null=True)),
-                ('name_details', models.TextField(blank=True, default=None, null=True)),
-                ('brief_description', models.TextField(blank=True, default=None, null=True)),
-                ('description', models.TextField(blank=True, default=None, null=True)),
-                ('item_type', models.ForeignKey(default=2, on_delete=django.db.models.deletion.DO_NOTHING, to='account.algorithmnodetype')),
-                ('parent', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='account.algorithmgroup')),
-                ('scripts', models.ManyToManyField(to='account.Script')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=150, null=True)),
+                ("name_details", models.TextField(blank=True, default=None, null=True)),
+                (
+                    "brief_description",
+                    models.TextField(blank=True, default=None, null=True),
+                ),
+                ("description", models.TextField(blank=True, default=None, null=True)),
+                (
+                    "item_type",
+                    models.ForeignKey(
+                        default=2,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.algorithmnodetype",
+                    ),
+                ),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="account.algorithmgroup",
+                    ),
+                ),
+                ("scripts", models.ManyToManyField(to="account.Script")),
             ],
             options={
-                'db_table': 'algorithm',
+                "db_table": "algorithm",
             },
         ),
     ]

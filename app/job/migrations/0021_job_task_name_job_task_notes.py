@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('job', '0020_alter_job_results'),
+        ("job", "0020_alter_job_results"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='task_name',
-            field=models.CharField(default='', max_length=250),
+            model_name="job",
+            name="task_name",
+            field=models.CharField(default="", max_length=250),
         ),
         migrations.AddField(
-            model_name='job',
-            name='task_notes',
-            field=models.TextField(default=''),
+            model_name="job",
+            name="task_notes",
+            field=models.TextField(default=""),
         ),
     ]
