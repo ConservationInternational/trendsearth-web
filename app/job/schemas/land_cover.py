@@ -1,14 +1,25 @@
 """
 Marshmallow schema for land cover change job parameters.
+
+This schema reuses te_schemas.land_cover.LCTransitionDefinitionDeg for 
+transition matrix validation to maintain consistency with existing code.
 """
 
-from marshmallow import fields, validate, validates_schema, ValidationError
-from .base import BaseJobSchema, DateRangeSchema
+from marshmallow import fields, validate, validates_schema, ValidationError, post_load
+from .base import BaseJobSchema
 import json
+
+try:
+    from te_schemas.land_cover import LCTransitionDefinitionDeg
+    from utils.util import table_to_matrix
+except ImportError:
+    # Fallback if te_schemas is not available
+    LCTransitionDefinitionDeg = None
+    table_to_matrix = None
 
 
 class LandCoverSchema(BaseJobSchema):
-    """Schema for land cover change script parameters."""
+    """Schema for land cover change script parameters using te_schemas validation."""
     
     # Date fields specific to land cover (different naming from base DateRangeSchema)
     initial_year_de = fields.Int(required=True, validate=validate.Range(min=1900, max=2100))
@@ -17,9 +28,9 @@ class LandCoverSchema(BaseJobSchema):
     # Land cover transition matrix data (from frontend table)
     tdata = fields.Str(required=True, validate=validate.Length(min=1))
     
-    # Legend nesting configuration
-    legend_nesting = fields.Raw(dump_only=True)  # Populated during processing
-    trans_matrix = fields.Raw(dump_only=True)    # Populated during processing
+    # Legend nesting configuration (populated during processing)
+    legend_nesting = fields.Raw(dump_only=True)
+    trans_matrix = fields.Raw(dump_only=True)
 
     @validates_schema
     def validate_date_range(self, data, **kwargs):
@@ -29,15 +40,45 @@ class LandCoverSchema(BaseJobSchema):
 
     @validates_schema
     def validate_transition_data(self, data, **kwargs):
-        """Validate that tdata contains valid transition matrix JSON."""
+        """Validate transition matrix using te_schemas.land_cover.LCTransitionDefinitionDeg."""
+        if not LCTransitionDefinitionDeg or not table_to_matrix:
+            # Fallback to basic JSON validation if te_schemas not available
+            try:
+                tdata = json.loads(data['tdata'])
+                if not isinstance(tdata, (list, dict)):
+                    raise ValidationError('tdata must be valid JSON array or object')
+            except (json.JSONDecodeError, TypeError):
+                raise ValidationError('tdata must be valid JSON')
+            return
+
         try:
-            tdata = json.loads(data['tdata'])
-            if not isinstance(tdata, (list, dict)):
-                raise ValidationError('tdata must be valid JSON array or object')
+            # Parse the table data
+            form_data = json.loads(data['tdata'])
+            
+            # Convert to matrix format using existing utility
+            matrix = table_to_matrix(form_data)
+            
+            # Validate using te_schemas LCTransitionDefinitionDeg
+            validated_matrix = LCTransitionDefinitionDeg.Schema().load(matrix)
+            
+            # Store the validated matrix for later use
+            data['_validated_matrix'] = validated_matrix
+            
         except (json.JSONDecodeError, TypeError):
             raise ValidationError('tdata must be valid JSON')
+        except Exception as e:
+            raise ValidationError(f'Invalid transition matrix: {str(e)}')
+
+    @post_load
+    def process_transition_matrix(self, data, **kwargs):
+        """Post-process the validated transition matrix."""
+        if LCTransitionDefinitionDeg and '_validated_matrix' in data:
+            # Serialize the validated matrix for API submission
+            data['trans_matrix'] = LCTransitionDefinitionDeg.Schema().dump(data['_validated_matrix'])
+            # Remove the temporary field
+            del data['_validated_matrix']
+        return data
 
     class Meta:
-        # Additional metadata for schema registry
         script_name = "land-cover"
-        description = "Land cover change analysis parameters"
+        description = "Land cover change analysis parameters using te_schemas validation"

@@ -34,7 +34,7 @@ def process_land_cover_with_schema(request):
         # Validate parameters using schema
         validated_data = validate_and_transform_parameters('land-cover', request)[0]
         
-        # Process transition matrix data (same logic as original)
+        # Process transition matrix data using te_schemas (consistent with original code)
         form_data = json.loads(validated_data['tdata'])
         matrix = table_to_matrix(form_data)
         matrix = LCTransitionDefinitionDeg.Schema().dumps(matrix)

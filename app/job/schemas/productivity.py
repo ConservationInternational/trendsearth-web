@@ -1,22 +1,81 @@
 """
 Marshmallow schema for land productivity job parameters.
+
+This schema reuses te_schemas.productivity.ProductivityMode for 
+productivity mode validation to maintain consistency with existing code.
 """
 
 from marshmallow import fields, validate, validates_schema, ValidationError
 from .base import BaseJobSchema, DateRangeSchema
 
+try:
+    from te_schemas.productivity import ProductivityMode
+except ImportError:
+    # Fallback if te_schemas is not available
+    ProductivityMode = None
+
+
+class ProductivityModeField(fields.Field):
+    """Custom field for ProductivityMode validation using te_schemas."""
+    
+    def _serialize(self, value, attr, obj, **kwargs):
+        if ProductivityMode and isinstance(value, ProductivityMode):
+            return value.value
+        return value
+    
+    def _deserialize(self, value, attr, data, **kwargs):
+        if not ProductivityMode:
+            # Fallback validation if te_schemas not available
+            valid_modes = ['state', 'performance', 'trajectory', 'all']
+            if value not in valid_modes:
+                raise ValidationError(f'prod_mode must be one of: {valid_modes}')
+            return value
+            
+        # Handle both enum values and raw strings
+        if isinstance(value, str):
+            # Try to match by value first
+            for mode in ProductivityMode:
+                if mode.value == value:
+                    return mode
+            
+            # Try to match by name (case insensitive)
+            try:
+                return ProductivityMode[value.upper()]
+            except KeyError:
+                pass
+            
+            # Handle legacy values from frontend
+            legacy_mapping = {
+                'state': ProductivityMode.TRENDS_EARTH_5_CLASS_LPD,
+                'performance': ProductivityMode.TRENDS_EARTH_5_CLASS_LPD,
+                'trajectory': ProductivityMode.TRENDS_EARTH_5_CLASS_LPD,
+                'all': ProductivityMode.TRENDS_EARTH_5_CLASS_LPD,
+            }
+            if value in legacy_mapping:
+                return legacy_mapping[value]
+        
+        # If numeric value (as seen in existing code)
+        if isinstance(value, (int, str)) and str(value).isdigit():
+            mode_mapping = {
+                1: ProductivityMode.TRENDS_EARTH_5_CLASS_LPD,
+                2: ProductivityMode.JRC_5_CLASS_LPD,
+                3: ProductivityMode.FAO_WOCAT_5_CLASS_LPD,
+            }
+            mode_id = int(value)
+            if mode_id in mode_mapping:
+                return mode_mapping[mode_id]
+        
+        raise ValidationError(f'Invalid productivity mode: {value}. Valid options: {[mode.value for mode in ProductivityMode]}')
+
 
 class ProductivitySchema(BaseJobSchema, DateRangeSchema):
-    """Schema for land productivity script parameters."""
+    """Schema for land productivity script parameters using te_schemas validation."""
     
     # NDVI dataset selection
     ndvi_dataset = fields.Str(required=True, validate=validate.Length(min=1))
     
-    # Productivity mode selection
-    prod_mode = fields.Str(
-        required=True,
-        validate=validate.OneOf(['state', 'performance', 'trajectory', 'all'])
-    )
+    # Productivity mode selection using te_schemas ProductivityMode
+    prod_mode = ProductivityModeField(required=True)
     
     # Trajectory-specific parameters
     trajectory_indicator = fields.Str(validate=validate.Length(min=1))
@@ -39,11 +98,14 @@ class ProductivitySchema(BaseJobSchema, DateRangeSchema):
         """Validate trajectory-specific parameters when trajectory mode is selected."""
         prod_mode = data.get('prod_mode')
         
-        if prod_mode in ['trajectory', 'all']:
+        # Handle both enum and string values
+        mode_str = prod_mode.value if ProductivityMode and hasattr(prod_mode, 'value') else str(prod_mode)
+        
+        if mode_str in ['trajectory', 'all'] or 'trajectory' in mode_str.lower():
             if not data.get('trajectory_indicator'):
                 raise ValidationError('trajectory_indicator is required for trajectory mode')
         
-        # If trajectory_indicator is set, validate it's a known indicator
+        # Validate trajectory indicator values
         trajectory_indicator = data.get('trajectory_indicator')
         if trajectory_indicator:
             valid_indicators = [
@@ -60,10 +122,13 @@ class ProductivitySchema(BaseJobSchema, DateRangeSchema):
         """Validate performance-specific parameters when performance mode is selected."""
         prod_mode = data.get('prod_mode')
         
-        if prod_mode in ['performance', 'all']:
+        # Handle both enum and string values
+        mode_str = prod_mode.value if ProductivityMode and hasattr(prod_mode, 'value') else str(prod_mode)
+        
+        if mode_str in ['performance', 'all'] or 'performance' in mode_str.lower():
             if not data.get('performance_n_years'):
                 data['performance_n_years'] = 5  # Default value
 
     class Meta:
         script_name = "productivity"
-        description = "Land productivity analysis parameters"
+        description = "Land productivity analysis parameters using te_schemas validation"

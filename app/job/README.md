@@ -1,39 +1,97 @@
 # Marshmallow Schemas for Trends.Earth Job Parameters
 
-This directory contains marshmallow schemas for validating input parameters to all supported Trends.Earth Google Earth Engine (GEE) scripts. The schemas provide comprehensive validation, avoid code duplication through shared base schemas, and support future dynamic GUI generation.
+This directory contains marshmallow schemas for validating input parameters to all supported Trends.Earth Google Earth Engine (GEE) scripts. The schemas provide comprehensive validation, avoid code duplication through shared base schemas, and **reuse existing `te_schemas` wherever relevant and possible** to maintain consistency with the existing codebase.
 
 ## Overview
 
 The schema implementation includes:
 
-- **Base schemas** for common parameters shared across scripts
-- **Script-specific schemas** for each of the 9 supported GEE scripts  
+- **Base schemas** for common parameters shared across scripts, reusing `te_schemas.jobs.Job` fields
+- **Script-specific schemas** for each of the 9 supported GEE scripts with `te_schemas` integration  
 - **Schema registry** for dynamic schema retrieval by script name
 - **Utility functions** for integration with existing job processing
-- **Comprehensive validation** with descriptive error messages
+- **Comprehensive validation** with descriptive error messages and `te_schemas` compatibility
 - **Metadata support** for future GUI generation
+
+## te_schemas Integration
+
+This implementation **reuses existing `te_schemas`** wherever relevant and possible:
+
+### Reused te_schemas Components
+
+1. **`te_schemas.jobs.Job`** - Base job fields (`task_name`, `task_notes`) are reused in `BaseJobSchema`
+2. **`te_schemas.land_cover.LCTransitionDefinitionDeg`** - Used for land cover matrix validation in:
+   - `LandCoverSchema`
+   - `SubIndicatorsSchema`
+3. **`te_schemas.productivity.ProductivityMode`** - Used for productivity mode validation in:
+   - `ProductivitySchema` 
+   - `SubIndicatorsSchema`
+
+### Fallback Handling
+
+All schemas include graceful fallback handling when `te_schemas` modules are not available, ensuring compatibility across different environments.
 
 ## Schema Structure
 
 ### Base Schemas (`schemas/base.py`)
 
-- **`BaseJobSchema`**: Common parameters (aoi_id, task_name, task_notes, geometry fields)
+- **`BaseJobSchema`**: Common parameters with `te_schemas.jobs.Job` field reuse
 - **`AOISchema`**: Area of Interest parameters with JSON validation
-- **`TaskInfoSchema`**: Task metadata fields
+- **`TaskInfoSchema`**: Task metadata using `te_schemas.jobs.Job` fields
 - **`DateRangeSchema`**: Year range validation with cross-field checks
 
-### Script-Specific Schemas
+### Script-Specific Schemas with te_schemas Integration
 
 1. **`LandCoverSchema`** (`schemas/land_cover.py`)
-   - Land cover change parameters
-   - Transition matrix validation
+   - **te_schemas integration**: Uses `LCTransitionDefinitionDeg` for matrix validation
+   - Land cover change parameters with robust transition matrix validation
    - Date range: initial_year_de, target_year_de
 
-2. **`ProductivitySchema`** (`schemas/productivity.py`) 
-   - Land productivity analysis parameters
-   - NDVI dataset selection
-   - Trajectory method validation (NDVI trends, RESTREND, RUE, WUE)
-   - Performance and state mode parameters
+2. **`ProductivitySchema`** (`schemas/productivity.py`)
+   - **te_schemas integration**: Uses `ProductivityMode` enum for mode validation
+   - Land productivity analysis parameters with proper mode handling
+   - Supports both numeric (1,2,3) and string mode inputs
+   - NDVI dataset selection and trajectory method validation
+
+3. **`SubIndicatorsSchema`** (`schemas/sub_indicators.py`)
+   - **te_schemas integration**: Uses both `LCTransitionDefinitionDeg` and `ProductivityMode`
+   - SDG 15.3.1 sub-indicators analysis with comprehensive validation
+   - Multiple sub-indicator selection with cross-validation
+
+4. **Other Schemas** (`drought.py`, `urban_change.py`, etc.)
+   - Maintain consistency with existing parameter patterns
+   - Ready for future `te_schemas` integration as more modules become available
+
+## Usage
+
+### Basic Schema Validation with te_schemas
+
+```python
+from job.schemas import schema_registry
+
+# Land cover validation using te_schemas.land_cover.LCTransitionDefinitionDeg
+try:
+    validated_data = schema_registry.validate_parameters('land-cover', {
+        'aoi_id': 1,
+        'task_name': 'Land Cover Analysis',
+        'initial_year_de': 2001,
+        'target_year_de': 2020,
+        'tdata': '{"0": {"0": "0", "1": "-"}, "1": {"0": "+", "1": "0"}}'
+    })
+    print("Matrix validated using te_schemas!")
+except ValidationError as e:
+    print(f"Validation failed: {e.messages}")
+
+# Productivity validation using te_schemas.productivity.ProductivityMode
+validated_data = schema_registry.validate_parameters('productivity', {
+    'aoi_id': 1,
+    'task_name': 'Productivity Analysis',
+    'year_initial': 2001,
+    'year_final': 2020,
+    'ndvi_dataset': 'MODIS',
+    'prod_mode': 1  # Automatically converted to ProductivityMode.TRENDS_EARTH_5_CLASS_LPD
+})
+```
 
 3. **`DroughtVulnerabilitySchema`** (`schemas/drought.py`)
    - Drought vulnerability analysis

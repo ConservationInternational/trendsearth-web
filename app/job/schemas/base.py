@@ -1,10 +1,18 @@
 """
 Base marshmallow schemas containing common parameter definitions shared across scripts.
+
+This base schema reuses te_schemas.jobs.Job for common job fields where applicable.
 """
 
 from marshmallow import Schema, fields, validate, validates_schema, ValidationError
 from marshmallow_dataclass import dataclass
 import json
+
+try:
+    from te_schemas.jobs import Job as TeJob
+except ImportError:
+    # Fallback if te_schemas is not available
+    TeJob = None
 
 
 class AOISchema(Schema):
@@ -26,9 +34,17 @@ class AOISchema(Schema):
 
 
 class TaskInfoSchema(Schema):
-    """Schema for task information common to all scripts."""
-    task_name = fields.Str(required=True, validate=validate.Length(min=1, max=250))
-    task_notes = fields.Str(load_default="", validate=validate.Length(max=1000))
+    """Schema for task information using te_schemas.jobs.Job field definitions."""
+    
+    if TeJob:
+        # Use field definitions from te_schemas.jobs.Job for consistency
+        job_schema = TeJob.Schema()
+        task_name = job_schema.fields['task_name']
+        task_notes = job_schema.fields['task_notes']
+    else:
+        # Fallback field definitions
+        task_name = fields.Str(required=True, validate=validate.Length(min=1, max=250))
+        task_notes = fields.Str(load_default="", validate=validate.Length(max=1000))
 
 
 class DateRangeSchema(Schema):
@@ -44,11 +60,20 @@ class DateRangeSchema(Schema):
 
 
 class BaseJobSchema(Schema):
-    """Base schema that includes common parameters for all job types."""
-    # Include common parameter groups
+    """Base schema that includes common parameters for all job types using te_schemas where applicable."""
+    
+    # AOI selection
     aoi_id = fields.Int(required=True, validate=validate.Range(min=1))
-    task_name = fields.Str(required=True, validate=validate.Length(min=1, max=250))
-    task_notes = fields.Str(load_default="", validate=validate.Length(max=1000))
+    
+    # Task information using te_schemas.jobs.Job field definitions
+    if TeJob:
+        job_schema = TeJob.Schema()
+        task_name = job_schema.fields['task_name']
+        task_notes = job_schema.fields['task_notes']
+    else:
+        # Fallback field definitions
+        task_name = fields.Str(required=True, validate=validate.Length(min=1, max=250))
+        task_notes = fields.Str(load_default="", validate=validate.Length(max=1000))
     
     # Derived fields that will be populated during processing
     geojsons = fields.Str(dump_only=True)  # Populated from AOI
