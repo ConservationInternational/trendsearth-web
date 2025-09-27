@@ -12,3 +12,4 @@ mkdocs
 openpyxl
 django-crispy-forms
 crispy-bootstrap5
+rollbar

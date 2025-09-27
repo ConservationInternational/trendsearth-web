@@ -14,3 +14,12 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "main.settings")
 
 application = get_wsgi_application()
+
+# Initialize rollbar after Django is set up
+try:
+    from utils.rollbar_config import init_rollbar
+
+    init_rollbar()
+except ImportError:
+    # Rollbar configuration not available
+    pass
