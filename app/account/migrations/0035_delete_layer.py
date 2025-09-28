@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("account", "0034_layer"),
+        ("account", "0033_alter_settings_user"),
     ]
 
     operations = [

@@ -16,6 +16,20 @@ class AccountConfig(AppConfig):
 
         try:
             with connection.cursor() as cursor:
+                # Check if script table exists before querying it
+                cursor.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables 
+                        WHERE table_schema = 'public' 
+                        AND table_name = 'script'
+                    );
+                """)
+                table_exists = cursor.fetchone()[0]
+                
+                if not table_exists:
+                    log.info("Script table does not exist yet. Skipping data population.")
+                    return
+                
                 cursor.execute("select * from script")
                 records = dictfetchall(cursor)
                 if len(records) < 1:

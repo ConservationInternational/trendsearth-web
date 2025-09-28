@@ -221,7 +221,7 @@ Create a `.env` file in the project root with the following variables:
 POSTGRES_DB=te_web
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
-POSTGRES_HOST=postgresdb
+POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
 
 # Django Configuration

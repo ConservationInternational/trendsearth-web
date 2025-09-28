@@ -52,4 +52,4 @@ RUN chown -R app:app $APP_HOME/*
 EXPOSE 9000
 USER app
 
-ENTRYPOINT ["./wait_for_postgres.sh", "postgresdb", "./entrypoint.sh"]
+ENTRYPOINT ["./wait_for_postgres.sh", "postgres", "./entrypoint.sh"]

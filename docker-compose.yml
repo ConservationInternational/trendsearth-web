@@ -2,7 +2,7 @@ networks:
     trendsearth:
 
 services:
-    postgresdb:
+    postgres:
         build:
             context: ./config/db
             dockerfile: Dockerfile
@@ -24,8 +24,7 @@ services:
     app:
         build:
             context: ./app
-        command: >
-                sh -c "python manage.py migrate && gunicorn main.wsgi:application --bind 0.0.0.0:9000"
+        command: ["./wait_for_postgres.sh", "postgres", "sh", "-c", "python manage.py migrate && gunicorn main.wsgi:application --bind 0.0.0.0:9000"]
         ports:
           - target: 9000
             published: 9000
@@ -38,7 +37,7 @@ services:
         env_file:
             - ./.env
         depends_on:
-            - postgresdb
+            - postgres
         networks:
             - trendsearth
 
@@ -52,7 +51,7 @@ services:
         env_file:
             - ./.env
         depends_on:
-            - postgresdb
+            - postgres
         networks:
             - trendsearth
         profiles:
