@@ -42,10 +42,59 @@ def signout(request):
         HttpResponse: If session is active, log out and redirect
         the view to home page
     """
-    logout(request)
+    # Call API logout if we have tokens
     if "bearer_token" in request.session:
-        del request.session["bearer_token"]
+        try:
+            refresh_token = request.session.get("refresh_token")
+            api = Api(
+                token=request.session["bearer_token"], refresh_token=refresh_token
+            )
+            api.logout()
+        except Exception as e:
+            # Log the error but continue with logout
+            print(f"Error during API logout: {e}")
 
+    logout(request)
+    # Clear all token-related session data
+    for key in ["bearer_token", "refresh_token"]:
+        if key in request.session:
+            del request.session[key]
+
+    return HttpResponseRedirect(reverse_lazy("home"))
+
+
+def signout_all(request):
+    """Logout from all active sessions/devices
+
+    Args:
+        request (request): http request
+
+    Returns:
+        HttpResponse: Redirect to home page after logging out from all devices
+    """
+    # Call API logout-all if we have tokens
+    if "bearer_token" in request.session:
+        try:
+            refresh_token = request.session.get("refresh_token")
+            api = Api(
+                token=request.session["bearer_token"], refresh_token=refresh_token
+            )
+            api.logout_all()
+        except Exception as e:
+            # Log the error but continue with logout
+            print(f"Error during API logout-all: {e}")
+
+    logout(request)
+    # Clear all token-related session data
+    for key in ["bearer_token", "refresh_token"]:
+        if key in request.session:
+            del request.session[key]
+
+    messages.add_message(
+        request,
+        messages.SUCCESS,
+        "You have been logged out from all devices.",
+    )
     return HttpResponseRedirect(reverse_lazy("home"))
 
 
@@ -78,6 +127,9 @@ class LoginView(FormView):
 
         api = Api(email=credentials["email"], password=credentials["password"])
         self.request.session["bearer_token"] = api.token
+        # Store refresh token securely in session
+        if api.refresh_token:
+            self.request.session["refresh_token"] = api.refresh_token
         api_user = api.get_user()
         if api_user is None:
             messages.add_message(
@@ -285,7 +337,10 @@ def update_user_details(request):
     if request.method == "POST":
         if not request.session.get("bearer_token"):
             return HttpResponseRedirect(reverse_lazy("logout"))
-        api = Api(token=request.session["bearer_token"])
+        api = Api(
+            token=request.session["bearer_token"],
+            refresh_token=request.session.get("refresh_token"),
+        )
 
         user = User.objects.get(id=int(request.POST.get("user_id")))
         form = forms.SignupForm(request.POST or None, instance=user)
@@ -450,7 +505,10 @@ def delete_user(request):
         user = User.objects.get(id=int(request.POST.get("user_id")))
         uid = user.profile.uid
         user.delete()
-        api = Api(token=request.session["bearer_token"])
+        api = Api(
+            token=request.session["bearer_token"],
+            refresh_token=request.session.get("refresh_token"),
+        )
         api.delete_user(uid)
         template = loader.get_template("account/list_users.html")
         context = {"users_list": User.objects.all()}
@@ -460,7 +518,10 @@ def delete_user(request):
 @login_required
 def delete_profile(request):
     if request.method == "POST":
-        api = Api(token=request.session["bearer_token"])
+        api = Api(
+            token=request.session["bearer_token"],
+            refresh_token=request.session.get("refresh_token"),
+        )
         api.delete_profile()
         request.user.delete()
         logout(request)
