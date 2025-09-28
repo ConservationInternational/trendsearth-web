@@ -35,7 +35,7 @@ class Layer(models.Model):
     name = models.CharField(max_length=200)
     layername = models.CharField(max_length=100, default="")
     url = models.CharField(max_length=200)
-    workspace = models.CharField(max_length=50, default="ldmp")
+    workspace = models.CharField(max_length=50, default="trendsearth")
     created_at = models.DateTimeField(auto_now_add=True)
     is_result = models.BooleanField(default=False)
     is_visible = models.BooleanField(default=False)

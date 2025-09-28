@@ -1,5 +1,5 @@
 """
-WSGI config for ldmpweb project.
+WSGI config for trendsearth-web project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

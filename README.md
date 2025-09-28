@@ -55,7 +55,7 @@ The application integrates with the broader [Trends.Earth ecosystem](https://tre
 
 3. **Build and run with Docker Compose**:
    ```bash
-   docker-compose up --build
+   docker compose up --build
    ```
 
 4. **Access the application**:
@@ -90,9 +90,9 @@ The Docker setup includes:
 3. **Configure database**:
    ```bash
    # Create database user and database
-   sudo -u postgres createuser --createdb ldmpuser
-   sudo -u postgres createdb -O ldmpuser ldmpdb
-   sudo -u postgres psql -c "CREATE EXTENSION postgis;" ldmpdb
+   sudo -u postgres createuser --createdb te_user
+   sudo -u postgres createdb -O te_user te_web
+   sudo -u postgres psql -c "CREATE EXTENSION postgis;" te_web
    ```
 
 4. **Run migrations and start server**:
@@ -136,13 +136,13 @@ ruff format --check app/
 
 ```bash
 # Run full application stack for testing
-docker-compose up --build
+docker compose up --build
 
 # Run smoke tests in Docker environment
-docker-compose run --rm test
+docker compose run --rm test
 
 # Alternative: Run tests with specific profile
-docker-compose --profile testing run --rm test
+docker compose --profile testing run --rm test
 ```
 
 ### Rollbar Integration Testing
@@ -218,7 +218,7 @@ Create a `.env` file in the project root with the following variables:
 
 ```bash
 # Database Configuration
-POSTGRES_DB=ldmpdb
+POSTGRES_DB=te_web
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_HOST=postgresdb

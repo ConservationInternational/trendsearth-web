@@ -1,5 +1,5 @@
 networks:
-    ldmp:
+    trendsearth:
 
 services:
     postgresdb:
@@ -12,16 +12,16 @@ services:
                     memory: 512M
         command: postgres -c max_connections=300 -c log_min_messages=LOG
         environment:
-          - POSTGRES_DB=ldmpdb
+          - POSTGRES_DB=te_web
           - POSTGRES_USER=postgres
           - POSTGRES_PASSWORD=postgres
           - POSTGRES_PORT=5432
         networks:
-            - ldmp
+            - trendsearth
         env_file:
             - ./.env
 
-    ldmpweb:
+    app:
         build:
             context: ./app
         command: >
@@ -40,7 +40,7 @@ services:
         depends_on:
             - postgresdb
         networks:
-            - ldmp
+            - trendsearth
 
     # Optional testing service - use: docker-compose run --rm test
     test:
@@ -54,7 +54,7 @@ services:
         depends_on:
             - postgresdb
         networks:
-            - ldmp
+            - trendsearth
         profiles:
             - testing
           

@@ -1,5 +1,5 @@
 """
-Django settings for ldmpweb project.
+Django settings for trendsearth-web project.
 """
 
 from django.contrib.messages import constants as messages
@@ -100,7 +100,7 @@ WSGI_APPLICATION = "main.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": os.environ.get("POSTGRES_DB", "ldmpdb"),
+        "NAME": os.environ.get("POSTGRES_DB", "te_web"),
         "USER": os.environ.get("POSTGRES_USER", "postgres"),
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
         "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
