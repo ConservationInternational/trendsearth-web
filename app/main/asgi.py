@@ -1,5 +1,5 @@
 """
-ASGI config for ldmpweb project.
+ASGI config for trendsearth-web project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

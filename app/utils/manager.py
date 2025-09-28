@@ -10,7 +10,7 @@ import re
 from osgeo import gdal
 
 from . import api
-from . import download as ldmp_download
+from . import download as trendsearth_download
 from . import conf
 from . import areaofinterest
 from . import util as utils
@@ -20,7 +20,7 @@ from . import util as utils
 #     api,
 #     areaofinterest,
 #     conf,
-#     download as ldmp_download,
+#     download as trendsearth_download,
 #     layers,
 #     utils,
 # )
@@ -768,7 +768,7 @@ def _get_single_cloud_result(
     url: models.JobUrl, output_path: Path
 ) -> typing.Optional[Path]:
     path_exists = output_path.is_file()
-    hash_matches = ldmp_download.local_check_hash_against_etag(
+    hash_matches = trendsearth_download.local_check_hash_against_etag(
         output_path, url.decoded_md5_hash
     )
     if path_exists and hash_matches:
@@ -776,7 +776,7 @@ def _get_single_cloud_result(
         result = output_path
     else:
         _download_result(url.url, output_path)
-        downloaded_hash_matches = ldmp_download.local_check_hash_against_etag(
+        downloaded_hash_matches = trendsearth_download.local_check_hash_against_etag(
             output_path, url.decoded_md5_hash
         )
         result = output_path if downloaded_hash_matches else None
@@ -785,7 +785,7 @@ def _get_single_cloud_result(
 
 def _download_result(url: str, output_path: Path) -> bool:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    download_worker = ldmp_download.Download(url, str(output_path))
+    download_worker = trendsearth_download.Download(url, str(output_path))
     download_worker.start()
     result = bool(download_worker.get_resp())
     if not result:

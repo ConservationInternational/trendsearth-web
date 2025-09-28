@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=200)),
                 ("layername", models.CharField(default="", max_length=100)),
                 ("url", models.CharField(max_length=200)),
-                ("workspace", models.CharField(default="ldmp", max_length=50)),
+                ("workspace", models.CharField(default="trendsearth", max_length=50)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("is_result", models.BooleanField(default=False)),
                 ("is_visible", models.BooleanField(default=False)),

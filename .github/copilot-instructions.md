@@ -84,7 +84,7 @@ ruff check app/ && ruff format --check app/
 #### Docker-based Build (Recommended)
 ```bash
 # Build and run with Docker Compose (takes ~3-5 minutes first time)
-docker-compose up --build
+docker compose up --build
 ```
 
 **Note**: Docker build requires `.env` file with database credentials. The application will be available on port 9000.
