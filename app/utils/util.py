@@ -58,7 +58,9 @@ def matrix_to_table(matrix=None):
         tbody += "<th>" + horizontalHeaderLabels[row] + "</th>"
         for col in range(0, cols):
             final_class = matrix.legend.key[col]
-            meaning = matrix.definitions.meaningByTransition(initial_class, final_class)
+            meaning = matrix.definitions.meaning_by_transition(
+                initial_class, final_class
+            )
             if meaning == "stable":
                 code = '<input type="text" value="0" class="lc-input stable"/>'
             elif meaning == "degradation":
@@ -71,6 +73,7 @@ def matrix_to_table(matrix=None):
                         meaning
                     )
                 )
+                code = '<input type="text" value="?" class="lc-input unknown"/>'
             tbody += "<td>" + code + "</td>"
         tbody += "</tr>"
     tbody += "</tbody>"

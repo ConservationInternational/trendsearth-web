@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="algorithm",
             name="scripts",
-            field=models.ManyToManyField(to="account.ExecutionScript"),
+            field=models.ManyToManyField(to="account.Script"),
         ),
         migrations.DeleteModel(
             name="Script",

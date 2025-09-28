@@ -25,11 +25,13 @@ class AccountConfig(AppConfig):
                     );
                 """)
                 table_exists = cursor.fetchone()[0]
-                
+
                 if not table_exists:
-                    log.info("Script table does not exist yet. Skipping data population.")
+                    log.info(
+                        "Script table does not exist yet. Skipping data population."
+                    )
                     return
-                
+
                 cursor.execute("select * from script")
                 records = dictfetchall(cursor)
                 if len(records) < 1:
@@ -113,9 +115,11 @@ class AccountConfig(AppConfig):
                     cursor.execute(querystr)
                     records = dictfetchall(cursor)
                     for record in records:
-                        filepath = os.path.dirname(os.path.abspath(__file__))
-                        +"/configs/admin_bounds/admin_bounds_polys_{country}.json/admin_bounds_polys_{country}.json".format(
-                            country=record.get("code")
+                        filepath = (
+                            os.path.dirname(os.path.abspath(__file__))
+                            + "/configs/admin_bounds/admin_bounds_polys_{country}.json/admin_bounds_polys_{country}.json".format(
+                                country=record.get("code")
+                            )
                         )
                         country = json.load(open(filepath))
                         querystr = (
@@ -126,7 +130,6 @@ class AccountConfig(AppConfig):
                             )
                         )
                         cursor.execute(querystr)
-                        print(querystr)
                         for key, value in country.get("admin1").items():
                             querystr = (
                                 "UPDATE region SET geom = ST_GeomFromGeoJSON('{}')"

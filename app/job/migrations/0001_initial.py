@@ -364,7 +364,7 @@ class Migration(migrations.Migration):
                     "script",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="account.executionscript",
+                        to="account.script",
                     ),
                 ),
                 (

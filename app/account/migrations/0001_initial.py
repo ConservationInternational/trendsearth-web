@@ -187,7 +187,7 @@ class Migration(migrations.Migration):
                     "execution_script",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.DO_NOTHING,
-                        to="account.executionscript",
+                        to="account.script",
                     ),
                 ),
             ],

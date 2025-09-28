@@ -84,7 +84,7 @@ def view_algorithm(request, algo_id):
         "table": matrix_to_table(matrix),
         "agg_table": create_aggregation_table(request),
         "jrc_lpd_datasets": list(
-            conf.REMOTE_DATASETS["Land Productivity Dynamics (JRC)"].keys()
+            conf.REMOTE_DATASETS["Land Productivity Dynamics"].keys()
         ),
         "regions": regions,
         "countries": countries,
@@ -207,7 +207,7 @@ def ajax_get_algorithm_view(request, id):
     context = {
         "table": matrix_to_table(matrix),
         "jrc_lpd_datasets": list(
-            conf.REMOTE_DATASETS["Land Productivity Dynamics (JRC)"].keys()
+            conf.REMOTE_DATASETS["Land Productivity Dynamics"].keys()
         ),
         "agg_table": create_aggregation_table(request),
         "regions": regions,
@@ -290,9 +290,13 @@ def ajax_reset_aggregation_table(request):
 
 @login_required
 def ajax_load_climate_dataset(request):
-    script = accountmodels.Script.objects.get(
-        name=request.GET.get("algo"), deleted=False
-    )
+    try:
+        script = accountmodels.Script.objects.get(
+            name=request.GET.get("algo"), deleted=False
+        )
+    except accountmodels.Script.DoesNotExist:
+        return HttpResponse("")
+
     if script.name == "productivity":
         additional_configuration = script.additional_configuration
         additional_configuration = additional_configuration.replace("'", '"')

@@ -108,6 +108,10 @@ class Script(models.Model):
         db_table = "script"
 
 
+# Alias for backward compatibility with Django ORM that might still reference the old name
+ExecutionScript = Script
+
+
 class Algorithm(models.Model):
     uid = models.CharField(max_length=150, null=True, blank=True)
     name = models.CharField(max_length=150, blank=True, null=True)
