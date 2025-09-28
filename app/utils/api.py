@@ -19,13 +19,48 @@ def create_api_from_session(session):
 
     api = Api(token=token, refresh_token=refresh_token)
 
-    # Update session if tokens were refreshed
+    # Update session if tokens were refreshed during initialization
     if api.token != token:
         session["bearer_token"] = api.token
+        if hasattr(session, "modified"):
+            session.modified = True
     if api.refresh_token and api.refresh_token != refresh_token:
         session["refresh_token"] = api.refresh_token
+        if hasattr(session, "modified"):
+            session.modified = True
 
     return api
+
+
+def update_session_tokens(session, api):
+    """Helper function to update session tokens after API operations"""
+    if not api:
+        return
+
+    current_token = session.get("bearer_token")
+    current_refresh = session.get("refresh_token")
+
+    if api.token != current_token:
+        if api.token:
+            session["bearer_token"] = api.token
+        else:
+            # Token was cleared, remove from session
+            if "bearer_token" in session:
+                del session["bearer_token"]
+        # Mark session as modified if it's a Django session object
+        if hasattr(session, "modified"):
+            session.modified = True
+
+    if api.refresh_token != current_refresh:
+        if api.refresh_token:
+            session["refresh_token"] = api.refresh_token
+        else:
+            # Refresh token was cleared, remove from session
+            if "refresh_token" in session:
+                del session["refresh_token"]
+        # Mark session as modified if it's a Django session object
+        if hasattr(session, "modified"):
+            session.modified = True
 
 
 class RequestTask(object):
@@ -177,6 +212,7 @@ class Api(object):
     def refresh_access_token(self):
         """Refresh the access token using the refresh token"""
         if not self.refresh_token:
+            print("No refresh token available")
             return None
 
         resp = self.call_api(
@@ -192,9 +228,13 @@ class Api(object):
                 new_refresh_token = resp.get("refresh_token", None)
                 if new_refresh_token:
                     self.refresh_token = new_refresh_token
+                print("Successfully refreshed access token")
                 return resp
             except KeyError:
+                print("Error parsing refresh token response")
                 pass
+        else:
+            print("Failed to refresh access token")
         return None
 
     def logout(self):
@@ -265,6 +305,11 @@ class Api(object):
                         payload=payload,
                         headers=headers,
                     )
+                else:
+                    # Refresh failed, clear tokens to force re-login
+                    print("Token refresh failed, clearing tokens")
+                    self.token = None
+                    self.refresh_token = None
 
             if resp.status_code == 200:
                 return resp.json()
