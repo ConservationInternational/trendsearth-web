@@ -9,6 +9,60 @@ API_URL = settings.API_URL
 TIMEOUT = 200
 
 
+def create_api_from_session(session):
+    """Helper function to create Api instance from Django session with token refresh support"""
+    token = session.get("bearer_token")
+    refresh_token = session.get("refresh_token")
+
+    if not token:
+        return None
+
+    api = Api(token=token, refresh_token=refresh_token)
+
+    # Update session if tokens were refreshed during initialization
+    if api.token != token:
+        session["bearer_token"] = api.token
+        if hasattr(session, "modified"):
+            session.modified = True
+    if api.refresh_token and api.refresh_token != refresh_token:
+        session["refresh_token"] = api.refresh_token
+        if hasattr(session, "modified"):
+            session.modified = True
+
+    return api
+
+
+def update_session_tokens(session, api):
+    """Helper function to update session tokens after API operations"""
+    if not api:
+        return
+
+    current_token = session.get("bearer_token")
+    current_refresh = session.get("refresh_token")
+
+    if api.token != current_token:
+        if api.token:
+            session["bearer_token"] = api.token
+        else:
+            # Token was cleared, remove from session
+            if "bearer_token" in session:
+                del session["bearer_token"]
+        # Mark session as modified if it's a Django session object
+        if hasattr(session, "modified"):
+            session.modified = True
+
+    if api.refresh_token != current_refresh:
+        if api.refresh_token:
+            session["refresh_token"] = api.refresh_token
+        else:
+            # Refresh token was cleared, remove from session
+            if "refresh_token" in session:
+                del session["refresh_token"]
+        # Mark session as modified if it's a Django session object
+        if hasattr(session, "modified"):
+            session.modified = True
+
+
 class RequestTask(object):
     def __init__(self, description, url, method, payload, headers):
         self.description = description
@@ -85,6 +139,7 @@ class Api(object):
     def __init__(self, **kwargs):
         self.url = kwargs.pop("url", None)
         self.token = kwargs.pop("token", None)
+        self.refresh_token = kwargs.pop("refresh_token", None)
 
         if self.token is None:
             self.email = kwargs.pop("email", None)
@@ -107,6 +162,9 @@ class Api(object):
 
                 if "access_token" in response:
                     response["access_token"] = "**REMOVED**"
+
+                if "refresh_token" in response:
+                    response["refresh_token"] = "**REMOVED**"
                 response = json.dumps(response, indent=4, sort_keys=True)
             except ValueError:
                 response = resp.text
@@ -145,8 +203,65 @@ class Api(object):
         if resp:
             try:
                 self.token = resp.get("access_token", None)
+                self.refresh_token = resp.get("refresh_token", None)
             except KeyError:
                 pass
+
+        return resp
+
+    def refresh_access_token(self):
+        """Refresh the access token using the refresh token"""
+        if not self.refresh_token:
+            print("No refresh token available")
+            return None
+
+        resp = self.call_api(
+            "/auth/refresh",
+            method="post",
+            payload={"refresh_token": self.refresh_token},
+        )
+
+        if resp:
+            try:
+                self.token = resp.get("access_token", None)
+                # Some APIs also return a new refresh token
+                new_refresh_token = resp.get("refresh_token", None)
+                if new_refresh_token:
+                    self.refresh_token = new_refresh_token
+                print("Successfully refreshed access token")
+                return resp
+            except KeyError:
+                print("Error parsing refresh token response")
+                pass
+        else:
+            print("Failed to refresh access token")
+        return None
+
+    def logout(self):
+        """Logout from the current session"""
+        if not self.token:
+            return None
+
+        resp = self.call_api("/auth/logout", method="post", use_token=True)
+
+        # Clear tokens after logout
+        self.token = None
+        self.refresh_token = None
+
+        return resp
+
+    def logout_all(self):
+        """Logout from all sessions/devices"""
+        if not self.token:
+            return None
+
+        resp = self.call_api("/auth/logout-all", method="post", use_token=True)
+
+        # Clear tokens after logout
+        self.token = None
+        self.refresh_token = None
+
+        return resp
 
     def call_api(self, endpoint, method="get", payload=None, use_token=False):
         if use_token:
@@ -175,6 +290,27 @@ class Api(object):
                 payload=payload,
                 headers=headers,
             )
+
+            # Handle token refresh for authenticated requests
+            if resp.status_code == 401 and use_token and self.refresh_token:
+                # Try to refresh the token
+                refresh_result = self.refresh_access_token()
+                if refresh_result and self.token:
+                    # Retry the original request with the new token
+                    headers = {"Authorization": f"Bearer {self.token}"}
+                    resp = self._make_request(
+                        "Trends.Earth API call (retry with refreshed token)",
+                        url=API_URL + endpoint,
+                        method=method,
+                        payload=payload,
+                        headers=headers,
+                    )
+                else:
+                    # Refresh failed, clear tokens to force re-login
+                    print("Token refresh failed, clearing tokens")
+                    self.token = None
+                    self.refresh_token = None
+
             if resp.status_code == 200:
                 return resp.json()
             else:

@@ -25,11 +25,13 @@ class AccountConfig(AppConfig):
                     );
                 """)
                 table_exists = cursor.fetchone()[0]
-                
+
                 if not table_exists:
-                    log.info("Script table does not exist yet. Skipping data population.")
+                    log.info(
+                        "Script table does not exist yet. Skipping data population."
+                    )
                     return
-                
+
                 cursor.execute("select * from script")
                 records = dictfetchall(cursor)
                 if len(records) < 1:

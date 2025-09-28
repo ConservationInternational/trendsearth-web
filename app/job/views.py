@@ -519,7 +519,10 @@ def ajax_run_job(request):
         elif algo_name == "total-carbon":
             payloads = process_total_carbon(request)
 
-        api = Api(token=request.session["bearer_token"])
+        api = Api(
+            token=request.session["bearer_token"],
+            refresh_token=request.session.get("refresh_token"),
+        )
 
         for payload in payloads:
             if payload["crs"] == "None":
@@ -563,7 +566,10 @@ def view_job(request, job_id):
 
     job = Job.objects.get(id=job_id, deleted=False)
 
-    api = Api(token=request.session["bearer_token"])
+    api = Api(
+        token=request.session["bearer_token"],
+        refresh_token=request.session.get("refresh_token"),
+    )
     currentjob = api.get_execution_result(job.uid)
     styles = get_styles()
     band_list = []
@@ -614,7 +620,10 @@ def ajax_load_results(request, script_id):
 @login_required
 def ajax_download_job(request, id):
     job = Job.objects.get(user=request.user, id=id, deleted=False)
-    api = Api(token=request.session["bearer_token"])
+    api = Api(
+        token=request.session["bearer_token"],
+        refresh_token=request.session.get("refresh_token"),
+    )
     exec = api.get_execution_result(job.uid)
     urls = []
     try:
@@ -662,7 +671,10 @@ def getjobs(request, script_id):
     if not request.session.get("bearer_token"):
         views.signout(request)
 
-    api = Api(token=request.session["bearer_token"])
+    api = Api(
+        token=request.session["bearer_token"],
+        refresh_token=request.session.get("refresh_token"),
+    )
     job_result = []
     for job in jobs:
         if job.status.value in ("PENDING", "RUNNING", "READY"):
