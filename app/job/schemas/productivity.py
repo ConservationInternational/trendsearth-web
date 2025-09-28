@@ -3,34 +3,24 @@ Marshmallow schema for land productivity job parameters.
 
 This schema reuses te_schemas.productivity.ProductivityMode for 
 productivity mode validation to maintain consistency with existing code.
+te_schemas and GDAL are required dependencies for this code to work.
 """
 
 from marshmallow import fields, validate, validates_schema, ValidationError
 from .base import BaseJobSchema, DateRangeSchema
 
-try:
-    from te_schemas.productivity import ProductivityMode
-except ImportError:
-    # Fallback if te_schemas is not available
-    ProductivityMode = None
+from te_schemas.productivity import ProductivityMode
 
 
 class ProductivityModeField(fields.Field):
     """Custom field for ProductivityMode validation using te_schemas."""
     
     def _serialize(self, value, attr, obj, **kwargs):
-        if ProductivityMode and isinstance(value, ProductivityMode):
+        if isinstance(value, ProductivityMode):
             return value.value
         return value
     
     def _deserialize(self, value, attr, data, **kwargs):
-        if not ProductivityMode:
-            # Fallback validation if te_schemas not available
-            valid_modes = ['state', 'performance', 'trajectory', 'all']
-            if value not in valid_modes:
-                raise ValidationError(f'prod_mode must be one of: {valid_modes}')
-            return value
-            
         # Handle both enum values and raw strings
         if isinstance(value, str):
             # Try to match by value first
@@ -99,7 +89,7 @@ class ProductivitySchema(BaseJobSchema, DateRangeSchema):
         prod_mode = data.get('prod_mode')
         
         # Handle both enum and string values
-        mode_str = prod_mode.value if ProductivityMode and hasattr(prod_mode, 'value') else str(prod_mode)
+        mode_str = prod_mode.value if hasattr(prod_mode, 'value') else str(prod_mode)
         
         if mode_str in ['trajectory', 'all'] or 'trajectory' in mode_str.lower():
             if not data.get('trajectory_indicator'):
@@ -123,7 +113,7 @@ class ProductivitySchema(BaseJobSchema, DateRangeSchema):
         prod_mode = data.get('prod_mode')
         
         # Handle both enum and string values
-        mode_str = prod_mode.value if ProductivityMode and hasattr(prod_mode, 'value') else str(prod_mode)
+        mode_str = prod_mode.value if hasattr(prod_mode, 'value') else str(prod_mode)
         
         if mode_str in ['performance', 'all'] or 'performance' in mode_str.lower():
             if not data.get('performance_n_years'):

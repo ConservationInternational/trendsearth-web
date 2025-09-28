@@ -1,50 +1,40 @@
 """
 Base marshmallow schemas containing common parameter definitions shared across scripts.
 
-This base schema reuses te_schemas.jobs.Job for common job fields where applicable.
+This base schema reuses te_schemas components wherever possible to avoid duplication.
+te_schemas and GDAL are required dependencies for this code to work.
 """
 
 from marshmallow import Schema, fields, validate, validates_schema, ValidationError
 from marshmallow_dataclass import dataclass
 import json
 
-try:
-    from te_schemas.jobs import Job as TeJob
-except ImportError:
-    # Fallback if te_schemas is not available
-    TeJob = None
+from te_schemas.jobs import Job as TeJob
+from te_schemas.aoi import AOI as TeAOI
 
 
 class AOISchema(Schema):
-    """Schema for Area of Interest parameters common to all scripts."""
+    """Schema for Area of Interest parameters using te_schemas.aoi.AOI."""
+    
+    # AOI ID for database lookup
     aoi_id = fields.Int(required=True, validate=validate.Range(min=1))
-    geojsons = fields.Str(required=True)
-    crs = fields.Str(load_default='GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]')
-    crosses_180th = fields.Bool(load_default=False)
-
-    @validates_schema
-    def validate_geojsons(self, data, **kwargs):
-        """Validate that geojsons field contains valid JSON."""
-        try:
-            geojsons = json.loads(data['geojsons'])
-            if not isinstance(geojsons, list):
-                raise ValidationError('geojsons must be a JSON array')
-        except (json.JSONDecodeError, TypeError):
-            raise ValidationError('geojsons must be valid JSON')
+    
+    # Use te_schemas.aoi.AOI for geojson validation
+    geojson = fields.Nested(TeAOI.Schema(), dump_only=True)
+    
+    # Legacy fields for backward compatibility with existing API
+    geojsons = fields.Str(dump_only=True)  # JSON array of geojson objects
+    crs = fields.Str(dump_only=True)       # WGS84 CRS string
+    crosses_180th = fields.Bool(dump_only=True, load_default=False)
 
 
 class TaskInfoSchema(Schema):
     """Schema for task information using te_schemas.jobs.Job field definitions."""
     
-    if TeJob:
-        # Use field definitions from te_schemas.jobs.Job for consistency
-        job_schema = TeJob.Schema()
-        task_name = job_schema.fields['task_name']
-        task_notes = job_schema.fields['task_notes']
-    else:
-        # Fallback field definitions
-        task_name = fields.Str(required=True, validate=validate.Length(min=1, max=250))
-        task_notes = fields.Str(load_default="", validate=validate.Length(max=1000))
+    # Reuse exact field definitions from te_schemas.jobs.Job
+    job_schema = TeJob.Schema()
+    task_name = job_schema.fields['task_name']
+    task_notes = job_schema.fields['task_notes']
 
 
 class DateRangeSchema(Schema):
@@ -66,14 +56,9 @@ class BaseJobSchema(Schema):
     aoi_id = fields.Int(required=True, validate=validate.Range(min=1))
     
     # Task information using te_schemas.jobs.Job field definitions
-    if TeJob:
-        job_schema = TeJob.Schema()
-        task_name = job_schema.fields['task_name']
-        task_notes = job_schema.fields['task_notes']
-    else:
-        # Fallback field definitions
-        task_name = fields.Str(required=True, validate=validate.Length(min=1, max=250))
-        task_notes = fields.Str(load_default="", validate=validate.Length(max=1000))
+    job_schema = TeJob.Schema()
+    task_name = job_schema.fields['task_name']
+    task_notes = job_schema.fields['task_notes']
     
     # Derived fields that will be populated during processing
     geojsons = fields.Str(dump_only=True)  # Populated from AOI
@@ -82,7 +67,7 @@ class BaseJobSchema(Schema):
 
     def load_and_populate_aoi(self, data):
         """
-        Helper method to load AOI data and populate geometry fields.
+        Helper method to load AOI data and populate geometry fields using te_schemas.aoi.AOI.
         Should be called by subclass schemas during processing.
         """
         # This will be implemented to fetch AOI from database and populate geojsons

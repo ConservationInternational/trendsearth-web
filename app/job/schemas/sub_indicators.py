@@ -2,6 +2,7 @@
 Marshmallow schema for SDG 15.3.1 sub-indicators job parameters.
 
 This schema reuses te_schemas for land cover matrix and productivity mode validation.
+te_schemas and GDAL are required dependencies for this code to work.
 """
 
 from marshmallow import fields, validate, validates_schema, ValidationError, post_load
@@ -9,15 +10,9 @@ from .base import BaseJobSchema, DateRangeSchema
 from .productivity import ProductivityModeField  # Reuse the custom field
 import json
 
-try:
-    from te_schemas.land_cover import LCTransitionDefinitionDeg
-    from te_schemas.productivity import ProductivityMode
-    from utils.util import table_to_matrix
-except ImportError:
-    # Fallback if te_schemas is not available
-    LCTransitionDefinitionDeg = None
-    ProductivityMode = None
-    table_to_matrix = None
+from te_schemas.land_cover import LCTransitionDefinitionDeg
+from te_schemas.productivity import ProductivityMode
+from utils.util import table_to_matrix
 
 
 class SubIndicatorsSchema(BaseJobSchema, DateRangeSchema):
@@ -59,16 +54,6 @@ class SubIndicatorsSchema(BaseJobSchema, DateRangeSchema):
     @validates_schema
     def validate_transition_data(self, data, **kwargs):
         """Validate transition matrix using te_schemas.land_cover.LCTransitionDefinitionDeg."""
-        if not LCTransitionDefinitionDeg or not table_to_matrix:
-            # Fallback to basic JSON validation if te_schemas not available
-            try:
-                tdata = json.loads(data['tdata'])
-                if not isinstance(tdata, (list, dict)):
-                    raise ValidationError('tdata must be valid JSON array or object')
-            except (json.JSONDecodeError, TypeError):
-                raise ValidationError('tdata must be valid JSON')
-            return
-
         try:
             # Parse the table data
             form_data = json.loads(data['tdata'])
@@ -106,15 +91,12 @@ class SubIndicatorsSchema(BaseJobSchema, DateRangeSchema):
                 raise ValidationError('ndvi_dataset is required when calculate_productivity is enabled')
             if not data.get('prod_mode'):
                 # Set default productivity mode
-                if ProductivityMode:
-                    data['prod_mode'] = ProductivityMode.TRENDS_EARTH_5_CLASS_LPD
-                else:
-                    data['prod_mode'] = 'trajectory'
+                data['prod_mode'] = ProductivityMode.TRENDS_EARTH_5_CLASS_LPD
 
     @post_load
     def process_transition_matrix(self, data, **kwargs):
         """Post-process the validated transition matrix."""
-        if LCTransitionDefinitionDeg and '_validated_matrix' in data:
+        if '_validated_matrix' in data:
             # Serialize the validated matrix for API submission
             data['trans_matrix'] = LCTransitionDefinitionDeg.Schema().dump(data['_validated_matrix'])
             # Remove the temporary field

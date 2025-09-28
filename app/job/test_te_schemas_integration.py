@@ -6,8 +6,8 @@ import json
 import sys
 import os
 
-# Add the current directory to Python path for imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add the parent directory to Python path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def test_land_cover_te_schemas_integration():
     """Test that land cover schema uses te_schemas.land_cover.LCTransitionDefinitionDeg."""

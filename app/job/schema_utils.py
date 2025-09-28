@@ -3,6 +3,7 @@ Utility functions for integrating marshmallow schemas with job processing.
 
 These utilities provide helpers for validating parameters, populating AOI data,
 and transforming validated data into the format expected by the GEE scripts.
+te_schemas and GDAL are required dependencies for this code to work.
 """
 
 import json
@@ -11,6 +12,7 @@ from typing import Dict, Any, List, Optional
 from marshmallow import ValidationError
 
 from account import models as accountmodels
+from te_schemas.aoi import AOI as TeAOI
 from .schemas import schema_registry
 
 logger = logging.getLogger(__name__)
@@ -60,7 +62,7 @@ def validate_job_parameters(script_name: str, request_data: Dict[str, Any]) -> D
 
 def populate_aoi_data(validated_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Populate AOI geometry data from the database using aoi_id.
+    Populate AOI geometry data from the database using aoi_id and te_schemas.aoi.AOI.
     
     Args:
         validated_data: Validated parameters containing aoi_id
@@ -76,12 +78,16 @@ def populate_aoi_data(validated_data: Dict[str, Any]) -> Dict[str, Any]:
         # Fetch AOI from database
         aoi = accountmodels.Aoi.objects.get(id=aoi_id)
         
-        # Populate geometry fields
-        validated_data['geojsons'] = json.dumps([json.loads(aoi.geom.json)])
-        validated_data['crs'] = DEFAULT_CRS
-        validated_data['crosses_180th'] = False  # Could be calculated if needed
+        # Create te_schemas AOI object from the database geometry
+        geojson_dict = json.loads(aoi.geom.json)
+        te_aoi = TeAOI(geojson=geojson_dict)
         
-        logger.debug(f"Populated AOI data for aoi_id: {aoi_id}")
+        # Populate geometry fields using te_schemas AOI
+        validated_data['geojsons'] = json.dumps([te_aoi.geojson])
+        validated_data['crs'] = DEFAULT_CRS
+        validated_data['crosses_180th'] = False  # Could be calculated using te_schemas if needed
+        
+        logger.debug(f"Populated AOI data for aoi_id: {aoi_id} using te_schemas.aoi.AOI")
         return validated_data
         
     except accountmodels.Aoi.DoesNotExist:
@@ -204,7 +210,7 @@ def get_schema_description(script_name: str) -> Optional[str]:
 
 def validate_and_transform_parameters(script_name: str, request) -> List[Dict[str, Any]]:
     """
-    Complete parameter validation and transformation for job processing.
+    Complete parameter validation and transformation for job processing using te_schemas.
     
     This function validates parameters using the schema and transforms them
     into the format expected by the existing job processing functions.
@@ -228,7 +234,7 @@ def validate_and_transform_parameters(script_name: str, request) -> List[Dict[st
         if len(value) > 1:  # Multiple values for same key
             request_data[key] = value
     
-    # Validate parameters
+    # Validate parameters using te_schemas integration
     validated_data = validate_job_parameters(script_name, request_data)
     
     # For now, return as single payload in list (some scripts may return multiple)

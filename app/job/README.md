@@ -17,26 +17,29 @@ The schema implementation includes:
 
 This implementation **reuses existing `te_schemas`** wherever relevant and possible:
 
+### Required Dependencies
+
+- **`te_schemas`**: Required dependency providing land cover, productivity, job, and AOI schemas
+- **GDAL**: Required for geospatial operations and te_schemas.aoi functionality
+- Both dependencies are mandatory for proper operation
+
 ### Reused te_schemas Components
 
 1. **`te_schemas.jobs.Job`** - Base job fields (`task_name`, `task_notes`) are reused in `BaseJobSchema`
-2. **`te_schemas.land_cover.LCTransitionDefinitionDeg`** - Used for land cover matrix validation in:
+2. **`te_schemas.aoi.AOI`** - Used for AOI geometry validation and processing
+3. **`te_schemas.land_cover.LCTransitionDefinitionDeg`** - Used for land cover matrix validation in:
    - `LandCoverSchema`
    - `SubIndicatorsSchema`
-3. **`te_schemas.productivity.ProductivityMode`** - Used for productivity mode validation in:
+4. **`te_schemas.productivity.ProductivityMode`** - Used for productivity mode validation in:
    - `ProductivitySchema` 
    - `SubIndicatorsSchema`
-
-### Fallback Handling
-
-All schemas include graceful fallback handling when `te_schemas` modules are not available, ensuring compatibility across different environments.
 
 ## Schema Structure
 
 ### Base Schemas (`schemas/base.py`)
 
 - **`BaseJobSchema`**: Common parameters with `te_schemas.jobs.Job` field reuse
-- **`AOISchema`**: Area of Interest parameters with JSON validation
+- **`AOISchema`**: Area of Interest parameters using `te_schemas.aoi.AOI`
 - **`TaskInfoSchema`**: Task metadata using `te_schemas.jobs.Job` fields
 - **`DateRangeSchema`**: Year range validation with cross-field checks
 
