@@ -24,7 +24,7 @@ def test_land_cover_te_schemas_integration():
         }
 
         # This should use te_schemas validation internally
-        validated = schema_registry.validate_parameters("land-cover", test_params)
+        schema_registry.validate_parameters("land-cover", test_params)
 
         print("✓ Land cover schema successfully integrated with te_schemas")
         return True
@@ -105,7 +105,7 @@ def test_sub_indicators_te_schemas_integration():
             "prod_mode": 2,  # Should map to JRC_5_CLASS_LPD
         }
 
-        validated = schema_registry.validate_parameters(
+        schema_registry.validate_parameters(
             "sdg-15-3-1-sub-indicators", test_params
         )
 
@@ -127,7 +127,7 @@ def test_fallback_when_te_schemas_unavailable():
         from schemas.land_cover import LandCoverSchema
 
         # The schema should have been created successfully even if there were import issues
-        schema = LandCoverSchema()
+        LandCoverSchema()
 
         print("✓ Schemas handle te_schemas import gracefully")
         return True

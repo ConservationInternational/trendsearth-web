@@ -92,7 +92,7 @@ def test_all_schema_validations():
         for script_name, test_data in test_cases.items():
             # Test valid parameters
             try:
-                validated = schema_registry.validate_parameters(
+                schema_registry.validate_parameters(
                     script_name, test_data["valid"]
                 )
                 print(f"✓ {script_name}: Valid parameters accepted")
